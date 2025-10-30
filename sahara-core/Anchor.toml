@@ -7,10 +7,10 @@ skip-lint = false
 seeds = true
 
 [programs.localnet]
-saharasol_core = "7N9du5CpvUWZPqqwhX7gx5c117cKx4qZ7gcuzBzvsQxy"
+saharasol_core = "YOUR_PROGRAM_ID_HERE"
 
 [programs.devnet]
-saharasol_core = "7N9du5CpvUWZPqqwhX7gx5c117cKx4qZ7gcuzBzvsQxy"
+saharasol_core = "YOUR_PROGRAM_ID_HERE"
 
 [registry]
 url = "https://api.apr.dev"
