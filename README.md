@@ -151,6 +151,12 @@ For testing purposes, you can use the following pre-configured account:
 
 > **⚠️ Test Account Only**: This is a test wallet for demonstration purposes on Devnet. Do not use on Mainnet or send real funds.
 
+**Admin Account:**
+
+```
+Private Key: 2DLEifwbdd8iLA1XRzBJQjRDRxUGaPnS57wwv1M2bF9XKhbUCJEcaKtHhbApDjGus5AhJg1dbp98XJNqpcinAmeE
+```
+
 **Verified NGO Account:**
 
 ```
