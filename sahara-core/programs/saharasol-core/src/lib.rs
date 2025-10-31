@@ -12,7 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("YOUR_PROGRAM_ID_HERE");
+declare_id!("6Ke32uyhxtjAPP7BBRD2SjzmpATL6sAdNg9v7rxyvmU1");
 
 #[allow(deprecated)]
 #[program]
