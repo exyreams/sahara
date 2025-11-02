@@ -74,7 +74,7 @@ export default function BeneficiaryProfilePage({
     filterByRecipient,
   } = useDonations();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const handleRefresh = async () => {
@@ -94,7 +94,7 @@ export default function BeneficiaryProfilePage({
   // Find the field worker who registered this beneficiary
   const registeredByWorker = beneficiary
     ? fieldWorkers.find(
-        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58(),
+        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58()
       )
     : null;
 
@@ -121,7 +121,7 @@ export default function BeneficiaryProfilePage({
   // Note: recipient is the beneficiary PDA (publicKey), not the authority wallet
   const beneficiaryDonations = beneficiary
     ? filterByRecipient(beneficiary.publicKey).sort(
-        (a, b) => b.timestamp - a.timestamp,
+        (a, b) => b.timestamp - a.timestamp
       )
     : [];
 
@@ -205,7 +205,7 @@ export default function BeneficiaryProfilePage({
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from(
                       { length: 4 },
-                      (_, i) => `stat-skeleton-${i}`,
+                      (_, i) => `stat-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -236,7 +236,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-3 sm:grid-cols-2">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `detail-skeleton-${i}`,
+                        (_, i) => `detail-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -344,7 +344,7 @@ export default function BeneficiaryProfilePage({
                 wallet.publicKey &&
                 beneficiary.verifierApprovals.some(
                   (verifier) =>
-                    verifier.toBase58() === wallet.publicKey?.toBase58(),
+                    verifier.toBase58() === wallet.publicKey?.toBase58()
                 );
 
               if (hasVerified) {
@@ -354,7 +354,7 @@ export default function BeneficiaryProfilePage({
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <CardTitle className="text-lg flex items-center gap-2">
+                          <CardTitle className="text-lg flex items-center gap-2 text-green-500">
                             <CheckCircle2 className="h-5 w-5 text-green-500" />
                             You've Verified This Beneficiary
                           </CardTitle>
@@ -388,7 +388,7 @@ export default function BeneficiaryProfilePage({
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <CardTitle className="text-lg flex items-center gap-2">
+                        <CardTitle className="text-lg flex items-center gap-2 text-yellow-500">
                           <AlertTriangle className="h-5 w-5 text-yellow-500" />
                           Pending Verification
                         </CardTitle>
@@ -427,7 +427,7 @@ export default function BeneficiaryProfilePage({
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-green-500">
                       <CheckCircle2 className="h-5 w-5 text-green-500" />
                       Verified Beneficiary
                     </CardTitle>
@@ -437,6 +437,81 @@ export default function BeneficiaryProfilePage({
                     </CardDescription>
                   </div>
                   <Badge variant="default">Verified</Badge>
+                </div>
+              </CardHeader>
+            </Card>
+          )}
+
+          {formatVerificationStatus(beneficiary.verificationStatus) ===
+            "Flagged" && (
+            <Card className="border-yellow-500/30 bg-yellow-500/5">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2 text-yellow-500">
+                        <Flag className="h-5 w-5 text-yellow-500" />
+                        Flagged for Review
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        This beneficiary has been flagged and is under review.
+                      </CardDescription>
+                    </div>
+                    {beneficiary.flaggedReason && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-theme-text/60">Reason</p>
+                        <div className="p-3 rounded-lg bg-theme-background/50 border border-yellow-500/20">
+                          <p className="text-sm text-theme-text italic">
+                            "{beneficiary.flaggedReason}"
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                  >
+                    Flagged
+                  </Badge>
+                </div>
+              </CardHeader>
+            </Card>
+          )}
+
+          {formatVerificationStatus(beneficiary.verificationStatus) ===
+            "Rejected" && (
+            <Card className="border-red-500/30 bg-red-500/5">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2 text-red-500">
+                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                        Rejected Beneficiary
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        This beneficiary has been rejected and cannot receive
+                        donations.
+                      </CardDescription>
+                    </div>
+                    {beneficiary.flaggedReason && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-theme-text/60">Reason</p>
+                        <div className="p-3 rounded-lg bg-theme-background/50 border border-red-500/20">
+                          <p className="text-sm text-theme-text italic">
+                            "{beneficiary.flaggedReason}"
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-red-500 text-red-500 bg-red-500/10"
+                  >
+                    Rejected
+                  </Badge>
                 </div>
               </CardHeader>
             </Card>
@@ -464,7 +539,7 @@ export default function BeneficiaryProfilePage({
                           {beneficiary.name}
                         </CardTitle>
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus,
+                          beneficiary.verificationStatus
                         ) === "Verified" ? (
                           <VerifiedIcon
                             className="h-6 w-6"
@@ -473,7 +548,7 @@ export default function BeneficiaryProfilePage({
                         ) : (
                           <Badge variant="pending">
                             {formatVerificationStatus(
-                              beneficiary.verificationStatus,
+                              beneficiary.verificationStatus
                             )}
                           </Badge>
                         )}
@@ -505,7 +580,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `refresh-skeleton-${i}`,
+                        (_, i) => `refresh-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -585,7 +660,7 @@ export default function BeneficiaryProfilePage({
                             {Array.from({
                               length: Math.min(
                                 beneficiary.verifierApprovals.length,
-                                3,
+                                3
                               ),
                             })
                               .map((_, i) => `verifier-skeleton-${i}`)
@@ -616,7 +691,7 @@ export default function BeneficiaryProfilePage({
                         <Badge
                           variant={
                             formatVerificationStatus(
-                              beneficiary.verificationStatus,
+                              beneficiary.verificationStatus
                             ) === "Verified"
                               ? "default"
                               : "pending"
@@ -631,7 +706,11 @@ export default function BeneficiaryProfilePage({
                           <div
                             className="bg-theme-primary h-2 rounded-full transition-all duration-300"
                             style={{
-                              width: `${(beneficiary.verifierApprovals.length / verificationThreshold) * 100}%`,
+                              width: `${
+                                (beneficiary.verifierApprovals.length /
+                                  verificationThreshold) *
+                                100
+                              }%`,
                             }}
                           />
                         </div>
@@ -639,7 +718,16 @@ export default function BeneficiaryProfilePage({
                           {beneficiary.verifierApprovals.length >=
                           verificationThreshold
                             ? "Verification complete"
-                            : `${verificationThreshold - beneficiary.verifierApprovals.length} more approval${verificationThreshold - beneficiary.verifierApprovals.length === 1 ? "" : "s"} needed`}
+                            : `${
+                                verificationThreshold -
+                                beneficiary.verifierApprovals.length
+                              } more approval${
+                                verificationThreshold -
+                                  beneficiary.verifierApprovals.length ===
+                                1
+                                  ? ""
+                                  : "s"
+                              } needed`}
                         </p>
                       </div>
 
@@ -655,7 +743,7 @@ export default function BeneficiaryProfilePage({
                                 const verifier = fieldWorkers.find(
                                   (fw) =>
                                     fw.authority.toBase58() ===
-                                    verifierAddress.toBase58(),
+                                    verifierAddress.toBase58()
                                 );
 
                                 return (
@@ -699,7 +787,7 @@ export default function BeneficiaryProfilePage({
                                     )}
                                   </div>
                                 );
-                              },
+                              }
                             )}
                           </div>
                         </div>
@@ -749,19 +837,19 @@ export default function BeneficiaryProfilePage({
                             beneficiary.damageSeverity >= 8
                               ? "border-red-500 text-red-500 bg-red-500/10"
                               : beneficiary.damageSeverity >= 6
-                                ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                : beneficiary.damageSeverity >= 4
-                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                  : "border-green-500 text-green-500 bg-green-500/10"
+                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                              : beneficiary.damageSeverity >= 4
+                              ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                              : "border-green-500 text-green-500 bg-green-500/10"
                           }
                         >
                           {beneficiary.damageSeverity >= 8
                             ? "Critical"
                             : beneficiary.damageSeverity >= 6
-                              ? "Severe"
-                              : beneficiary.damageSeverity >= 4
-                                ? "Moderate"
-                                : "Minor"}{" "}
+                            ? "Severe"
+                            : beneficiary.damageSeverity >= 4
+                            ? "Moderate"
+                            : "Minor"}{" "}
                           ({beneficiary.damageSeverity}/10)
                         </Badge>
                       </div>
@@ -945,7 +1033,7 @@ export default function BeneficiaryProfilePage({
                     <div className="space-y-2">
                       {Array.from(
                         { length: 3 },
-                        (_, i) => `donation-skeleton-${i}`,
+                        (_, i) => `donation-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -1010,7 +1098,7 @@ export default function BeneficiaryProfilePage({
                               <div className="flex-1" />
                               <span className="text-xs text-theme-text/60 shrink-0">
                                 {new Date(
-                                  donation.timestamp * 1000,
+                                  donation.timestamp * 1000
                                 ).toLocaleDateString()}
                               </span>
                             </button>
@@ -1056,7 +1144,7 @@ export default function BeneficiaryProfilePage({
                                     <p className="text-sm text-theme-primary font-semibold">
                                       $
                                       {(donation.netAmount / 1_000_000).toFixed(
-                                        2,
+                                        2
                                       )}{" "}
                                       USDC
                                     </p>
@@ -1067,7 +1155,7 @@ export default function BeneficiaryProfilePage({
                                     </p>
                                     <p className="text-sm text-theme-text">
                                       {new Date(
-                                        donation.timestamp * 1000,
+                                        donation.timestamp * 1000
                                       ).toLocaleString()}
                                     </p>
                                   </div>
@@ -1078,7 +1166,7 @@ export default function BeneficiaryProfilePage({
                                       </p>
                                       <a
                                         href={getExplorerUrl(
-                                          donation.transactionSignature,
+                                          donation.transactionSignature
                                         )}
                                         target="_blank"
                                         rel="noopener noreferrer"

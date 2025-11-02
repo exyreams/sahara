@@ -244,9 +244,27 @@ export default function BeneficiariesPage() {
                                   beneficiary.verificationStatus
                                 ) === "Verified"
                                   ? "default"
+                                  : formatVerificationStatus(
+                                      beneficiary.verificationStatus
+                                    ) === "Flagged"
+                                  ? "outline"
+                                  : formatVerificationStatus(
+                                      beneficiary.verificationStatus
+                                    ) === "Rejected"
+                                  ? "outline"
                                   : "pending"
                               }
-                              className="shrink-0"
+                              className={`shrink-0 ${
+                                formatVerificationStatus(
+                                  beneficiary.verificationStatus
+                                ) === "Flagged"
+                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                  : formatVerificationStatus(
+                                      beneficiary.verificationStatus
+                                    ) === "Rejected"
+                                  ? "border-red-500 text-red-500 bg-red-500/10"
+                                  : ""
+                              }`}
                             >
                               {formatVerificationStatus(
                                 beneficiary.verificationStatus
@@ -517,9 +535,27 @@ export default function BeneficiariesPage() {
                             beneficiary.verificationStatus
                           ) === "Verified"
                             ? "default"
+                            : formatVerificationStatus(
+                                beneficiary.verificationStatus
+                              ) === "Flagged"
+                            ? "outline"
+                            : formatVerificationStatus(
+                                beneficiary.verificationStatus
+                              ) === "Rejected"
+                            ? "outline"
                             : "pending"
                         }
-                        className="shrink-0"
+                        className={`shrink-0 ${
+                          formatVerificationStatus(
+                            beneficiary.verificationStatus
+                          ) === "Flagged"
+                            ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                            : formatVerificationStatus(
+                                beneficiary.verificationStatus
+                              ) === "Rejected"
+                            ? "border-red-500 text-red-500 bg-red-500/10"
+                            : ""
+                        }`}
                       >
                         {formatVerificationStatus(
                           beneficiary.verificationStatus
