@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
     refetch: refetchLogs,
   } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
@@ -171,7 +171,7 @@ export default function AdminDashboardPage() {
                     <div className="h-3 w-40 bg-theme-border rounded animate-pulse" />
                   </CardContent>
                 </Card>
-              )
+              ),
             )}
           </div>
 
@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-3">
                   {Array.from(
                     { length: 5 },
-                    (_, i) => `activity-skeleton-${i}`
+                    (_, i) => `activity-skeleton-${i}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
                       <div className="h-10 w-full bg-theme-border rounded animate-pulse" />
                     </CardContent>
                   </Card>
-                )
+                ),
               )}
             </div>
           </div>
@@ -434,7 +434,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 10 },
-                    (_, i) => `log-skeleton-${i}`
+                    (_, i) => `log-skeleton-${i}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -508,7 +508,7 @@ export default function AdminDashboardPage() {
                                       </p>
                                       <a
                                         href={getExplorerUrl(
-                                          activity.actor.toString()
+                                          activity.actor.toString(),
                                         )}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -529,7 +529,7 @@ export default function AdminDashboardPage() {
                                       </p>
                                       <a
                                         href={getExplorerUrl(
-                                          activity.target.toString()
+                                          activity.target.toString(),
                                         )}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -546,7 +546,7 @@ export default function AdminDashboardPage() {
                                     </p>
                                     <p className="text-sm text-theme-text">
                                       {new Date(
-                                        activity.timestamp * 1000
+                                        activity.timestamp * 1000,
                                       ).toLocaleString()}
                                     </p>
                                   </div>
@@ -558,7 +558,7 @@ export default function AdminDashboardPage() {
                                       <p className="text-sm text-theme-primary font-semibold">
                                         $
                                         {(activity.amount / 1_000_000).toFixed(
-                                          2
+                                          2,
                                         )}{" "}
                                         USDC
                                       </p>
@@ -608,7 +608,7 @@ export default function AdminDashboardPage() {
                                                 {(
                                                   Number.parseInt(
                                                     parsedData.Amount,
-                                                    10
+                                                    10,
                                                   ) / 1_000_000
                                                 ).toFixed(2)}{" "}
                                                 USDC
@@ -625,7 +625,7 @@ export default function AdminDashboardPage() {
                                                 {(
                                                   Number.parseInt(
                                                     parsedData.Fee,
-                                                    10
+                                                    10,
                                                   ) / 1_000_000
                                                 ).toFixed(2)}{" "}
                                                 USDC
@@ -665,7 +665,7 @@ export default function AdminDashboardPage() {
                                                 );
                                               }
                                               return null;
-                                            }
+                                            },
                                           )}
                                         </div>
                                       </div>

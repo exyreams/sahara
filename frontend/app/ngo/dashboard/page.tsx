@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   Building2,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
 import { NGORegistrationModal } from "@/components/ngo/ngo-registration-modal";
@@ -50,7 +50,7 @@ export default function NGODashboardPage() {
     refetch: refetchLogs,
   } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -106,8 +106,8 @@ export default function NGODashboardPage() {
           // Actions performed by any of the NGO's field workers
           fieldWorkers.some(
             (fw) =>
-              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority)
-          )
+              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority),
+          ),
       )
     : [];
 
@@ -128,7 +128,7 @@ export default function NGODashboardPage() {
 
   // Combine and sort all activities
   const allActivities = [...ngoLogs, ...fieldWorkerLogs].sort(
-    (a, b) => b.timestamp - a.timestamp
+    (a, b) => b.timestamp - a.timestamp,
   );
 
   // Get recent 5 NGO-specific activities
@@ -230,7 +230,7 @@ export default function NGODashboardPage() {
                   <div className="h-3 w-20 bg-theme-border rounded animate-pulse" />
                 </CardContent>
               </Card>
-            )
+            ),
           )}
         </div>
 
@@ -245,7 +245,7 @@ export default function NGODashboardPage() {
               {/* Contact info rows */}
               {Array.from(
                 { length: 6 },
-                (_, j) => `contact-row-skeleton-${j}`
+                (_, j) => `contact-row-skeleton-${j}`,
               ).map((key) => (
                 <div key={key} className="flex justify-between">
                   <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
@@ -259,7 +259,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 6 },
-                      (_, j) => `disaster-type-skeleton-${j}`
+                      (_, j) => `disaster-type-skeleton-${j}`,
                     ).map((key) => (
                       <div
                         key={key}
@@ -273,7 +273,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 5 },
-                      (_, j) => `service-type-skeleton-${j}`
+                      (_, j) => `service-type-skeleton-${j}`,
                     ).map((key) => (
                       <div
                         key={key}
@@ -302,7 +302,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-worker-skeleton-${j}`
+                    (_, j) => `team-worker-skeleton-${j}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -326,7 +326,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-beneficiary-skeleton-${j}`
+                    (_, j) => `team-beneficiary-skeleton-${j}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -360,7 +360,7 @@ export default function NGODashboardPage() {
             <div className="space-y-2">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-skeleton-${i}`
+                (_, i) => `activity-skeleton-${i}`,
               ).map((key) => (
                 <div
                   key={key}
@@ -568,12 +568,12 @@ export default function NGODashboardPage() {
   }
 
   const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey)
+    fw.ngo?.equals(ngo.publicKey),
   );
 
   // Count beneficiaries registered by this NGO's field workers
   const ngoBeneficiaries = beneficiaries.filter((b) =>
-    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy))
+    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
   );
   const ngoBeneficiariesCount = ngoBeneficiaries.length;
 
@@ -927,7 +927,7 @@ export default function NGODashboardPage() {
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`
+                (_, i) => `activity-log-skeleton-${i}`,
               ).map((key) => (
                 <div
                   key={key}
@@ -1001,7 +1001,7 @@ export default function NGODashboardPage() {
                                   </p>
                                   <a
                                     href={getExplorerUrl(
-                                      activity.actor.toString()
+                                      activity.actor.toString(),
                                     )}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -1022,7 +1022,7 @@ export default function NGODashboardPage() {
                                   </p>
                                   <a
                                     href={getExplorerUrl(
-                                      activity.target.toString()
+                                      activity.target.toString(),
                                     )}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -1039,7 +1039,7 @@ export default function NGODashboardPage() {
                                 </p>
                                 <p className="text-sm text-theme-text">
                                   {new Date(
-                                    activity.timestamp * 1000
+                                    activity.timestamp * 1000,
                                   ).toLocaleString()}
                                 </p>
                               </div>
@@ -1114,7 +1114,7 @@ export default function NGODashboardPage() {
                                             {(
                                               Number.parseInt(
                                                 parsedData.Amount,
-                                                10
+                                                10,
                                               ) / 1_000_000
                                             ).toFixed(2)}{" "}
                                             USDC
@@ -1131,7 +1131,7 @@ export default function NGODashboardPage() {
                                             {(
                                               Number.parseInt(
                                                 parsedData.Fee,
-                                                10
+                                                10,
                                               ) / 1_000_000
                                             ).toFixed(2)}{" "}
                                             USDC
@@ -1182,7 +1182,7 @@ export default function NGODashboardPage() {
                                             );
                                           }
                                           return null;
-                                        }
+                                        },
                                       )}
                                     </div>
                                   </div>

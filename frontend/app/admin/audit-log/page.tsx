@@ -1,6 +1,7 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   Calendar,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,7 +69,7 @@ export default function AuditLogPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1280
+    typeof window !== "undefined" ? window.innerWidth : 1280,
   );
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const itemsPerPage = 20;
@@ -117,7 +117,7 @@ export default function AuditLogPage() {
 
     // Combine and sort by timestamp (newest first)
     return [...adminEntries, ...activityEntries].sort(
-      (a, b) => b.timestamp - a.timestamp
+      (a, b) => b.timestamp - a.timestamp,
     );
   }, [actions, activityLogs]);
 
@@ -212,7 +212,7 @@ export default function AuditLogPage() {
   // Format address with dynamic truncation based on screen size
   const formatAddress = (
     address: string,
-    mode: "collapsed" | "full" = "collapsed"
+    mode: "collapsed" | "full" = "collapsed",
   ): string => {
     if (mode === "full") return address;
 
@@ -234,7 +234,7 @@ export default function AuditLogPage() {
 
   // Parse metadata string to extract pool info
   const parseMetadata = (
-    metadata: string
+    metadata: string,
   ): { pool?: string; amount?: number; fee?: number } | null => {
     // Format: "Pool: Name | Amount: 500000000 | Fee: 10000000"
     const poolMatch = metadata.match(/Pool:\s*([^|]+)/);
@@ -299,7 +299,7 @@ export default function AuditLogPage() {
 
   // Expanded state for actions
   const [expandedActions, setExpandedActions] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const toggleExpanded = (actionKey: string) => {
@@ -373,7 +373,7 @@ export default function AuditLogPage() {
                       </div>
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </CardContent>
@@ -657,7 +657,7 @@ export default function AuditLogPage() {
                                   <span className="text-theme-primary font-semibold">
                                     {formatActionType(
                                       log.actionType,
-                                      log.category
+                                      log.category,
                                     )}
                                   </span>{" "}
                                   of{" "}
@@ -711,7 +711,7 @@ export default function AuditLogPage() {
                                                 <div className="text-base font-semibold text-theme-primary">
                                                   $
                                                   {(parsed.fee / 1e6).toFixed(
-                                                    2
+                                                    2,
                                                   )}{" "}
                                                   USDC
                                                 </div>
@@ -773,7 +773,7 @@ export default function AuditLogPage() {
                                           e.stopPropagation();
                                           window.open(
                                             `https://explorer.solana.com/address/${log.target.toString()}?cluster=devnet`,
-                                            "_blank"
+                                            "_blank",
                                           );
                                         }}
                                       >
@@ -799,7 +799,7 @@ export default function AuditLogPage() {
                                           e.stopPropagation();
                                           window.open(
                                             `https://explorer.solana.com/address/${log.actor.toString()}?cluster=devnet`,
-                                            "_blank"
+                                            "_blank",
                                           );
                                         }}
                                       >
@@ -849,7 +849,7 @@ export default function AuditLogPage() {
                                         e.stopPropagation();
                                         window.open(
                                           `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=devnet`,
-                                          "_blank"
+                                          "_blank",
                                         );
                                       }}
                                     >

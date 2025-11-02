@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
   ChevronDown,
@@ -14,7 +15,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { DonationIcon } from "@/components/icons/donation-icon";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
@@ -78,7 +78,7 @@ export default function WalletProfilePage() {
   useEffect(() => {
     if (wallet.publicKey && beneficiaries.length > 0) {
       const found = beneficiaries.find(
-        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58()
+        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58(),
       );
       setBeneficiary(found || null);
     } else {
@@ -99,10 +99,10 @@ export default function WalletProfilePage() {
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           wallet.publicKey,
           {
-            programId: new (
-              await import("@solana/web3.js")
-            ).PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-          }
+            programId: new (await import("@solana/web3.js")).PublicKey(
+              "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            ),
+          },
         );
 
         let totalBalance = 0;
@@ -126,25 +126,25 @@ export default function WalletProfilePage() {
   // Get donations for this beneficiary
   const beneficiaryDonations = beneficiary
     ? filterByRecipient(beneficiary.publicKey).sort(
-        (a, b) => b.timestamp - a.timestamp
+        (a, b) => b.timestamp - a.timestamp,
       )
     : [];
 
   // Get distributions for this beneficiary
   const beneficiaryDistributions = beneficiary
     ? filterByBeneficiary(beneficiary.publicKey).sort(
-        (a, b) => b.createdAt - a.createdAt
+        (a, b) => b.createdAt - a.createdAt,
       )
     : [];
 
   // Calculate pending claims
   const pendingDistributions = beneficiaryDistributions.filter(
-    (d) => !d.isFullyClaimed
+    (d) => !d.isFullyClaimed,
   );
   const totalPendingAmount =
     pendingDistributions.reduce(
       (sum, d) => sum + (d.amountAllocated - d.amountClaimed),
-      0
+      0,
     ) / 1_000_000;
 
   // Claim distribution function
@@ -164,7 +164,7 @@ export default function WalletProfilePage() {
 
         // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
         const poolAccount = await (program.account as any).fundPool.fetch(
-          distribution.pool
+          distribution.pool,
         );
 
         const disasterId = poolAccount.disasterId;
@@ -174,22 +174,22 @@ export default function WalletProfilePage() {
 
         const beneficiaryTokenAccount = await getAssociatedTokenAddress(
           tokenMint,
-          walletPublicKey
+          walletPublicKey,
         );
 
         // Check if token account exists
         const accountInfo = await connection.getAccountInfo(
-          beneficiaryTokenAccount
+          beneficiaryTokenAccount,
         );
 
         const [poolPDA] = deriveFundPoolPDA(disasterId, poolId);
         const [distributionPDA] = deriveDistributionPDA(
           walletPublicKey,
-          poolPDA
+          poolPDA,
         );
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           walletPublicKey,
-          disasterId
+          disasterId,
         );
 
         // Build the transaction
@@ -215,7 +215,7 @@ export default function WalletProfilePage() {
               walletPublicKey, // owner
               tokenMint, // mint
               TOKEN_PROGRAM_ID,
-              ASSOCIATED_TOKEN_PROGRAM_ID
+              ASSOCIATED_TOKEN_PROGRAM_ID,
             ),
           ]);
         }
@@ -229,7 +229,7 @@ export default function WalletProfilePage() {
         onSuccess: () => {
           refetchDistributions();
         },
-      }
+      },
     );
   };
 
@@ -278,7 +278,7 @@ export default function WalletProfilePage() {
                     <div className="h-10 w-32 bg-theme-border rounded animate-pulse" />
                   </CardContent>
                 </Card>
-              )
+              ),
             )}
           </div>
 
@@ -291,7 +291,7 @@ export default function WalletProfilePage() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {Array.from(
                     { length: 4 },
-                    (_, i) => `beneficiary-detail-skeleton-${i}`
+                    (_, i) => `beneficiary-detail-skeleton-${i}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -317,7 +317,7 @@ export default function WalletProfilePage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `distribution-skeleton-${i}`
+                    (_, i) => `distribution-skeleton-${i}`,
                   ).map((key) => (
                     <div
                       key={key}
@@ -480,7 +480,7 @@ export default function WalletProfilePage() {
                           <span className="text-theme-text/60">allocated</span>
                           <span className="text-xs text-theme-text/60">
                             {new Date(
-                              distribution.createdAt * 1000
+                              distribution.createdAt * 1000,
                             ).toLocaleDateString()}
                           </span>
                         </div>
@@ -577,7 +577,7 @@ export default function WalletProfilePage() {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `donation-skeleton-${i}`
+                      (_, i) => `donation-skeleton-${i}`,
                     ).map((key) => (
                       <div
                         key={key}
@@ -638,7 +638,7 @@ export default function WalletProfilePage() {
                               <div className="flex-1" />
                               <span className="text-xs text-theme-text/60 shrink-0">
                                 {new Date(
-                                  distribution.createdAt * 1000
+                                  distribution.createdAt * 1000,
                                 ).toLocaleDateString()}
                               </span>
                             </button>
@@ -715,7 +715,7 @@ export default function WalletProfilePage() {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                donation.timestamp * 1000
+                                donation.timestamp * 1000,
                               ).toLocaleDateString()}
                             </span>
                           </button>
@@ -751,7 +751,7 @@ export default function WalletProfilePage() {
                                       <p className="text-sm text-theme-text">
                                         $
                                         {(donation.amount / 1_000_000).toFixed(
-                                          2
+                                          2,
                                         )}{" "}
                                         USDC
                                       </p>
@@ -783,7 +783,7 @@ export default function WalletProfilePage() {
                                         </p>
                                         <a
                                           href={getExplorerUrl(
-                                            donation.transactionSignature
+                                            donation.transactionSignature,
                                           )}
                                           target="_blank"
                                           rel="noopener noreferrer"
