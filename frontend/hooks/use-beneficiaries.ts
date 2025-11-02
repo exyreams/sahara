@@ -81,6 +81,7 @@ export function useBeneficiaries(): UseBeneficiariesReturn {
       return formattedBeneficiaries;
     },
     enabled: !!program,
+    staleTime: 20 * 1000, // 20 seconds - beneficiary data changes frequently
   });
 
   const refetchBeneficiaries = useCallback(async () => {

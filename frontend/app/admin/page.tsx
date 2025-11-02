@@ -7,11 +7,12 @@ import {
   ExternalLink,
   FileText,
   Heart,
+  RefreshCw,
   Shield,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,18 +29,45 @@ import { useProgram } from "@/hooks/use-program";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
 
 export default function AdminDashboardPage() {
-  const { config, loading, error } = usePlatformConfig();
+  const {
+    config,
+    loading,
+    error,
+    refetch: refetchConfig,
+  } = usePlatformConfig();
   const { wallet } = useProgram();
-  const { logs, loading: logsLoading } = useActivityLogs();
+  const {
+    logs,
+    loading: logsLoading,
+    refetch: refetchLogs,
+  } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   const isAdmin =
     config && wallet.publicKey && config.admin.equals(wallet.publicKey);
 
   // Get recent 10 activities from all logs to fill more space
   const recentActivities = logs.slice(0, 10);
+
+  // Track when initial load is complete
+  useEffect(() => {
+    if (!loading && !logsLoading && config) {
+      setHasInitiallyLoaded(true);
+    }
+  }, [loading, logsLoading, config]);
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refetchConfig(), refetchLogs()]);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  };
 
   const toggleExpanded = (activityKey: string) => {
     setExpandedActivities((prev) => {
@@ -114,7 +142,7 @@ export default function AdminDashboardPage() {
     return `${days}d ago`;
   };
 
-  if (loading) {
+  if (loading && !hasInitiallyLoaded) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -142,7 +170,7 @@ export default function AdminDashboardPage() {
                     <div className="h-3 w-40 bg-theme-border rounded animate-pulse" />
                   </CardContent>
                 </Card>
-              ),
+              )
             )}
           </div>
 
@@ -163,7 +191,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-3">
                   {Array.from(
                     { length: 5 },
-                    (_, i) => `activity-skeleton-${i}`,
+                    (_, i) => `activity-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -198,7 +226,7 @@ export default function AdminDashboardPage() {
                       <div className="h-10 w-full bg-theme-border rounded animate-pulse" />
                     </CardContent>
                   </Card>
-                ),
+                )
               )}
             </div>
           </div>
@@ -245,9 +273,22 @@ export default function AdminDashboardPage() {
               Platform administration and configuration
             </p>
           </div>
-          <Badge variant={config.isPaused ? "destructive" : "default"}>
-            {config.isPaused ? "Platform Paused" : "Platform Active"}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+            <Badge variant={config.isPaused ? "destructive" : "default"}>
+              {config.isPaused ? "Platform Paused" : "Platform Active"}
+            </Badge>
+          </div>
         </div>
 
         {config.isPaused && (
@@ -273,12 +314,22 @@ export default function AdminDashboardPage() {
               <Heart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(config.totalAidDistributed)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                From ${(config.totalDonations / 1e6).toFixed(2)} USDC donated
-              </p>
+              {isRefreshing ? (
+                <>
+                  <div className="h-8 w-32 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="h-3 w-40 bg-theme-border rounded animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(config.totalAidDistributed)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    From ${(config.totalDonations / 1e6).toFixed(2)} USDC
+                    donated
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -290,12 +341,21 @@ export default function AdminDashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(config.totalBeneficiaries)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {formatNumber(config.totalVerifiedBeneficiaries)} verified
-              </p>
+              {isRefreshing ? (
+                <>
+                  <div className="h-8 w-16 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatNumber(config.totalBeneficiaries)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatNumber(config.totalVerifiedBeneficiaries)} verified
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -305,12 +365,21 @@ export default function AdminDashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(config.totalNgos)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {formatNumber(config.totalFieldWorkers)} field workers
-              </p>
+              {isRefreshing ? (
+                <>
+                  <div className="h-8 w-16 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatNumber(config.totalNgos)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatNumber(config.totalFieldWorkers)} field workers
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -320,12 +389,21 @@ export default function AdminDashboardPage() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(config.totalDisasters)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {formatNumber(config.totalPools)} pools
-              </p>
+              {isRefreshing ? (
+                <>
+                  <div className="h-8 w-16 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatNumber(config.totalDisasters)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatNumber(config.totalPools)} pools
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -351,11 +429,11 @@ export default function AdminDashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {logsLoading ? (
+              {logsLoading || isRefreshing ? (
                 <div className="space-y-2">
                   {Array.from(
                     { length: 10 },
-                    (_, i) => `log-skeleton-${i}`,
+                    (_, i) => `log-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -421,7 +499,7 @@ export default function AdminDashboardPage() {
                                   </p>
                                   <a
                                     href={getExplorerUrl(
-                                      activity.actor.toString(),
+                                      activity.actor.toString()
                                     )}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -442,7 +520,7 @@ export default function AdminDashboardPage() {
                                   </p>
                                   <a
                                     href={getExplorerUrl(
-                                      activity.target.toString(),
+                                      activity.target.toString()
                                     )}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -459,7 +537,7 @@ export default function AdminDashboardPage() {
                                 </p>
                                 <p className="text-sm text-theme-text">
                                   {new Date(
-                                    activity.timestamp * 1000,
+                                    activity.timestamp * 1000
                                   ).toLocaleString()}
                                 </p>
                               </div>
@@ -517,7 +595,7 @@ export default function AdminDashboardPage() {
                                             {(
                                               Number.parseInt(
                                                 parsedData.Amount,
-                                                10,
+                                                10
                                               ) / 1_000_000
                                             ).toFixed(2)}{" "}
                                             USDC
@@ -534,7 +612,7 @@ export default function AdminDashboardPage() {
                                             {(
                                               Number.parseInt(
                                                 parsedData.Fee,
-                                                10,
+                                                10
                                               ) / 1_000_000
                                             ).toFixed(2)}{" "}
                                             USDC
@@ -574,7 +652,7 @@ export default function AdminDashboardPage() {
                                             );
                                           }
                                           return null;
-                                        },
+                                        }
                                       )}
                                     </div>
                                   </div>

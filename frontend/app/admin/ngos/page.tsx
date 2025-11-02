@@ -82,12 +82,12 @@ export default function NGOManagementPage() {
     for (const ngo of ngos) {
       // Get field workers for this NGO
       const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-        fw.ngo?.equals(ngo.publicKey),
+        fw.ngo?.equals(ngo.publicKey)
       );
 
       // Get beneficiaries registered by this NGO's field workers
       const ngoBeneficiaries = beneficiaries.filter((b) =>
-        ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
+        ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy))
       );
 
       // Count beneficiaries
@@ -96,7 +96,7 @@ export default function NGOManagementPage() {
       // Sum up total aid distributed (totalReceived from all beneficiaries)
       const totalAidDistributed = ngoBeneficiaries.reduce(
         (sum, b) => sum + b.totalReceived,
-        0,
+        0
       );
 
       stats.set(ngo.publicKey.toBase58(), {
@@ -189,7 +189,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToVerify.length} NGO${
         ngosToVerify.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -204,8 +204,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is already verified
@@ -218,8 +218,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Already verified",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -237,7 +237,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         // Execute transaction and wait for confirmation
@@ -254,14 +254,14 @@ export default function NGOManagementPage() {
         // Wait for transaction to be confirmed
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         // Update status to success
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         // Check if error is actually a success (transaction already processed)
@@ -275,8 +275,8 @@ export default function NGOManagementPage() {
           // Mark as success since it's already verified
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           // Actual error - mark as failed
@@ -288,8 +288,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -325,7 +325,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToRevoke.length} NGO${
         ngosToRevoke.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -340,8 +340,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is already unverified
@@ -354,8 +354,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Already unverified",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -373,7 +373,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         // Execute transaction and wait for confirmation
@@ -390,14 +390,14 @@ export default function NGOManagementPage() {
         // Wait for transaction to be confirmed
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         // Update status to success
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         // Check if error is actually a success (transaction already processed)
@@ -411,8 +411,8 @@ export default function NGOManagementPage() {
           // Mark as success since it's already processed
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           // Actual error - mark as failed
@@ -424,8 +424,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -456,7 +456,7 @@ export default function NGOManagementPage() {
     // Pre-generate all action IDs at once
     const actionIds = generateActionIds(
       adminPublicKey,
-      ngosToDeactivate.length,
+      ngosToDeactivate.length
     );
 
     // Initialize progress modal
@@ -468,7 +468,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToDeactivate.length} NGO${
         ngosToDeactivate.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -482,8 +482,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is already inactive
@@ -496,8 +496,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Already deactivated",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -514,7 +514,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const txSignature = await program.methods
@@ -524,7 +524,7 @@ export default function NGOManagementPage() {
               isActive: false,
               reason: "",
             },
-            actionId,
+            actionId
           )
           .accounts({
             ngo: ngo.publicKey,
@@ -536,26 +536,26 @@ export default function NGOManagementPage() {
 
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
+          "already been processed"
         );
 
         if (isAlreadyProcessed) {
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           setVerificationItems((prev) =>
@@ -566,8 +566,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -605,7 +605,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToActivate.length} NGO${
         ngosToActivate.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -619,8 +619,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is already active
@@ -633,8 +633,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Already active",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -651,7 +651,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const txSignature = await program.methods
@@ -661,7 +661,7 @@ export default function NGOManagementPage() {
               isActive: true,
               reason: "",
             },
-            actionId,
+            actionId
           )
           .accounts({
             ngo: ngo.publicKey,
@@ -673,26 +673,26 @@ export default function NGOManagementPage() {
 
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
+          "already been processed"
         );
 
         if (isAlreadyProcessed) {
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           setVerificationItems((prev) =>
@@ -703,8 +703,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -742,7 +742,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToBlacklist.length} NGO${
         ngosToBlacklist.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -756,8 +756,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is already blacklisted
@@ -770,8 +770,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Already blacklisted",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -788,7 +788,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const txSignature = await program.methods
@@ -803,26 +803,26 @@ export default function NGOManagementPage() {
 
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
+          "already been processed"
         );
 
         if (isAlreadyProcessed) {
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           setVerificationItems((prev) =>
@@ -833,8 +833,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -849,7 +849,7 @@ export default function NGOManagementPage() {
 
   // Sequential remove blacklist with progress modal
   const handleSequentialRemoveBlacklist = async (
-    ngosToRemoveBlacklist: NGO[],
+    ngosToRemoveBlacklist: NGO[]
   ) => {
     if (
       !program ||
@@ -865,7 +865,7 @@ export default function NGOManagementPage() {
     // Pre-generate all action IDs at once
     const actionIds = generateActionIds(
       adminPublicKey,
-      ngosToRemoveBlacklist.length,
+      ngosToRemoveBlacklist.length
     );
 
     // Initialize progress modal
@@ -877,7 +877,7 @@ export default function NGOManagementPage() {
     setModalDescription(
       `Processing ${ngosToRemoveBlacklist.length} NGO${
         ngosToRemoveBlacklist.length > 1 ? "s" : ""
-      } sequentially...`,
+      } sequentially...`
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -891,8 +891,8 @@ export default function NGOManagementPage() {
       setCurrentVerificationIndex(i);
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
-        ),
+          idx === i ? { ...item, status: "processing" } : item
+        )
       );
 
       // Check if NGO is not blacklisted
@@ -905,8 +905,8 @@ export default function NGOManagementPage() {
                   status: "success",
                   error: "Not blacklisted",
                 }
-              : item,
-          ),
+              : item
+          )
         );
 
         // Small delay before next item
@@ -923,7 +923,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const txSignature = await program.methods
@@ -938,26 +938,26 @@ export default function NGOManagementPage() {
 
         await program.provider.connection.confirmTransaction(
           txSignature,
-          "confirmed",
+          "confirmed"
         );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
+            idx === i ? { ...item, status: "success" } : item
+          )
         );
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
+          "already been processed"
         );
 
         if (isAlreadyProcessed) {
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
+              idx === i ? { ...item, status: "success" } : item
+            )
           );
         } else {
           setVerificationItems((prev) =>
@@ -968,8 +968,8 @@ export default function NGOManagementPage() {
                     status: "error",
                     error: errorMessage,
                   }
-                : item,
-            ),
+                : item
+            )
           );
         }
       }
@@ -1002,7 +1002,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const txSignature = await program.methods
@@ -1022,7 +1022,7 @@ export default function NGOManagementPage() {
         onSuccess: () => {
           refetch();
         },
-      },
+      }
     );
   };
 
@@ -1045,7 +1045,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const tx = await program.methods
@@ -1063,7 +1063,7 @@ export default function NGOManagementPage() {
       {
         successMessage: `Successfully revoked verification from ${ngo.name}`,
         onSuccess: () => refetch(),
-      },
+      }
     );
   };
 
@@ -1085,7 +1085,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const tx = await program.methods
@@ -1095,7 +1095,7 @@ export default function NGOManagementPage() {
               isActive: true,
               reason: "",
             },
-            actionId,
+            actionId
           )
           .accounts({
             ngo: ngo.publicKey,
@@ -1110,7 +1110,7 @@ export default function NGOManagementPage() {
       {
         successMessage: `Successfully activated ${ngo.name}`,
         onSuccess: () => refetch(),
-      },
+      }
     );
   };
 
@@ -1132,7 +1132,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const tx = await program.methods
@@ -1142,7 +1142,7 @@ export default function NGOManagementPage() {
               isActive: false,
               reason: "",
             },
-            actionId,
+            actionId
           )
           .accounts({
             ngo: ngo.publicKey,
@@ -1157,7 +1157,7 @@ export default function NGOManagementPage() {
       {
         successMessage: `Successfully deactivated ${ngo.name}`,
         onSuccess: () => refetch(),
-      },
+      }
     );
   };
 
@@ -1179,7 +1179,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const tx = await program.methods
@@ -1197,7 +1197,7 @@ export default function NGOManagementPage() {
       {
         successMessage: `Successfully blacklisted ${ngo.name}`,
         onSuccess: () => refetch(),
-      },
+      }
     );
   };
 
@@ -1219,7 +1219,7 @@ export default function NGOManagementPage() {
             adminPublicKey.toBuffer(),
             actionId.toArrayLike(Buffer, "le", 8),
           ],
-          program.programId,
+          program.programId
         );
 
         const tx = await program.methods
@@ -1237,7 +1237,7 @@ export default function NGOManagementPage() {
       {
         successMessage: `Successfully removed blacklist from ${ngo.name}`,
         onSuccess: () => refetch(),
-      },
+      }
     );
   };
 
@@ -1247,7 +1247,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToVerify = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential verification with progress modal
@@ -1262,7 +1262,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToRevoke = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential revoke verification with progress modal
@@ -1277,7 +1277,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToDeactivate = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential deactivation with progress modal
@@ -1292,7 +1292,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToActivate = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential activation with progress modal
@@ -1307,7 +1307,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToBlacklist = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential blacklist with progress modal
@@ -1322,7 +1322,7 @@ export default function NGOManagementPage() {
 
     // Get the full NGO objects for selected authorities
     const ngosToRemoveBlacklist = ngos.filter((ngo) =>
-      selectedNGOs.some((selected) => selected.equals(ngo.authority)),
+      selectedNGOs.some((selected) => selected.equals(ngo.authority))
     );
 
     // Use sequential remove blacklist with progress modal
@@ -1427,7 +1427,7 @@ export default function NGOManagementPage() {
                       </div>
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           </CardContent>
@@ -1533,7 +1533,7 @@ export default function NGOManagementPage() {
                     !(
                       selectedNGOs.length === filteredNGOs.length &&
                       filteredNGOs.length > 0
-                    ),
+                    )
                   )
                 }
               >
@@ -1594,7 +1594,56 @@ export default function NGOManagementPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredNGOs.length === 0 ? (
+          {isRefreshing ? (
+            <div className="space-y-3">
+              {/* NGO Card Skeletons */}
+              {Array.from(
+                { length: 5 },
+                (_, i) => `refresh-ngo-skeleton-${i}`
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="border border-theme-border rounded-lg p-4"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Checkbox */}
+                    <div className="h-4 w-4 bg-theme-border rounded mt-1 animate-pulse" />
+
+                    <div className="flex-1 space-y-3">
+                      {/* Title and Badges */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
+                          <div className="h-6 w-6 bg-theme-border rounded-full animate-pulse" />
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
+                          <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                        </div>
+                      </div>
+
+                      {/* Registration */}
+                      <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
+
+                      {/* Stats */}
+                      <div className="flex gap-4">
+                        <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
+                        <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
+                        <div className="h-9 w-28 bg-theme-border rounded animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredNGOs.length === 0 ? (
             <div className="text-center py-12">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No NGOs found</p>
@@ -1611,14 +1660,14 @@ export default function NGOManagementPage() {
                     className={cn(
                       "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
                       "hover:border-theme-primary/50",
-                      !ngo.isActive && "opacity-60",
+                      !ngo.isActive && "opacity-60"
                     )}
                   >
                     <div className="p-4">
                       <div className="flex items-start gap-4">
                         <Checkbox
                           checked={selectedNGOs.some((a) =>
-                            a.equals(ngo.authority),
+                            a.equals(ngo.authority)
                           )}
                           onCheckedChange={(checked) =>
                             handleSelectNGO(ngo.authority, checked as boolean)
@@ -1882,7 +1931,7 @@ export default function NGOManagementPage() {
                                     </span>
                                     <p className="text-theme-text">
                                       {new Date(
-                                        ngo.registeredAt * 1000,
+                                        ngo.registeredAt * 1000
                                       ).toLocaleString()}
                                     </p>
                                   </div>
@@ -1893,7 +1942,7 @@ export default function NGOManagementPage() {
                                       </span>
                                       <p className="text-theme-text">
                                         {new Date(
-                                          ngo.verifiedAt * 1000,
+                                          ngo.verifiedAt * 1000
                                         ).toLocaleString()}
                                       </p>
                                     </div>
@@ -1914,7 +1963,7 @@ export default function NGOManagementPage() {
                                     </span>
                                     <p className="text-theme-text">
                                       {new Date(
-                                        ngo.lastActivityAt * 1000,
+                                        ngo.lastActivityAt * 1000
                                       ).toLocaleString()}
                                     </p>
                                   </div>

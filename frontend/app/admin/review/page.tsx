@@ -9,7 +9,7 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,12 +43,20 @@ export default function AdminReviewPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   const loading = ngosLoading || beneficiariesLoading;
 
+  // Track when initial load is complete
+  useEffect(() => {
+    if (!loading) {
+      setHasInitiallyLoaded(true);
+    }
+  }, [loading]);
+
   // Get flagged beneficiaries
   const flaggedBeneficiaries = beneficiaries.filter(
-    (b) => b.verificationStatus === "Flagged" && b.flaggedBy,
+    (b) => b.verificationStatus === "Flagged" && b.flaggedBy
   );
 
   // Get NGOs that need review (not verified or pending re-verification after update)
@@ -114,7 +122,9 @@ export default function AdminReviewPage() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([refetchNGOs(), refetchBeneficiaries()]);
-    setIsRefreshing(false);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
   };
 
   const handleApproveBeneficiary = async (beneficiary: Beneficiary) => {
@@ -126,7 +136,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId,
+          beneficiary.disasterId
         );
 
         // Approve and clear flag
@@ -137,7 +147,7 @@ export default function AdminReviewPage() {
             {
               approve: true,
               notes: null,
-            },
+            }
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -152,7 +162,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      },
+      }
     );
   };
 
@@ -165,7 +175,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId,
+          beneficiary.disasterId
         );
 
         // Reject and keep flag
@@ -176,7 +186,7 @@ export default function AdminReviewPage() {
             {
               approve: false,
               notes: null,
-            },
+            }
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -191,7 +201,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      },
+      }
     );
   };
 
@@ -217,11 +227,11 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchNGOs();
         },
-      },
+      }
     );
   };
 
-  if (loading) {
+  if (loading && !hasInitiallyLoaded) {
     return (
       <div className="space-y-6">
         {/* Header Skeleton */}
@@ -257,7 +267,7 @@ export default function AdminReviewPage() {
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `skeleton-item-${Date.now()}-${i}`,
+                (_, i) => `skeleton-item-${Date.now()}-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -366,7 +376,48 @@ export default function AdminReviewPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredItems.length === 0 ? (
+          {isRefreshing ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }, (_, i) => `refresh-skeleton-${i}`).map(
+                (key) => (
+                  <div
+                    key={key}
+                    className="border border-theme-border rounded-lg p-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1 space-y-3">
+                        {/* Title row */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
+                            <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
+                          </div>
+                        </div>
+                        {/* Details row */}
+                        <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
+                        {/* Stats row */}
+                        <div className="flex gap-4">
+                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                        </div>
+                        {/* Buttons row */}
+                        <div className="flex gap-2">
+                          <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
+                          <div className="h-8 w-28 bg-theme-border rounded animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div className="text-center py-12">
               <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No items to review</p>
@@ -382,7 +433,7 @@ export default function AdminReviewPage() {
                     key={item.id}
                     className={cn(
                       "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
-                      "hover:border-theme-primary/50",
+                      "hover:border-theme-primary/50"
                     )}
                   >
                     <div className="p-4">
@@ -408,8 +459,8 @@ export default function AdminReviewPage() {
                                 {isFlagged
                                   ? "Flagged"
                                   : !isFlagged && isNGOUpdate(item.data as NGO)
-                                    ? "NGO Update"
-                                    : "New NGO"}
+                                  ? "NGO Update"
+                                  : "New NGO"}
                               </Badge>
                               <button
                                 type="button"
@@ -460,7 +511,7 @@ export default function AdminReviewPage() {
                                   {(item.data as Beneficiary).flaggedAt
                                     ? formatDate(
                                         (item.data as Beneficiary)
-                                          .flaggedAt as number,
+                                          .flaggedAt as number
                                       )
                                     : "N/A"}
                                 </span>
@@ -485,7 +536,7 @@ export default function AdminReviewPage() {
                                     <span>
                                       Last Updated:{" "}
                                       {formatDate(
-                                        (item.data as NGO).lastActivityAt,
+                                        (item.data as NGO).lastActivityAt
                                       )}
                                     </span>
                                     <span className="text-orange-600 font-medium">
@@ -496,7 +547,7 @@ export default function AdminReviewPage() {
                                   <span>
                                     Registered:{" "}
                                     {formatDate(
-                                      (item.data as NGO).registeredAt,
+                                      (item.data as NGO).registeredAt
                                     )}
                                   </span>
                                 )}
@@ -512,7 +563,7 @@ export default function AdminReviewPage() {
                                   variant="default"
                                   onClick={() =>
                                     handleApproveBeneficiary(
-                                      item.data as Beneficiary,
+                                      item.data as Beneficiary
                                     )
                                   }
                                   disabled={txLoading}
@@ -524,7 +575,7 @@ export default function AdminReviewPage() {
                                   variant="destructive"
                                   onClick={() =>
                                     handleRejectBeneficiary(
-                                      item.data as Beneficiary,
+                                      item.data as Beneficiary
                                     )
                                   }
                                   disabled={txLoading}
@@ -533,7 +584,9 @@ export default function AdminReviewPage() {
                                 </Button>
                                 <Button size="sm" variant="outline" asChild>
                                   <Link
-                                    href={`/beneficiaries/${(item.data as Beneficiary).authority.toBase58()}`}
+                                    href={`/beneficiaries/${(
+                                      item.data as Beneficiary
+                                    ).authority.toBase58()}`}
                                   >
                                     View Details
                                   </Link>
@@ -600,11 +653,11 @@ export default function AdminReviewPage() {
                                             {(item.data as NGO).verifiedAt &&
                                               formatDate(
                                                 (item.data as NGO)
-                                                  .verifiedAt as number,
+                                                  .verifiedAt as number
                                               )}
                                             . They updated their information on{" "}
                                             {formatDate(
-                                              (item.data as NGO).lastActivityAt,
+                                              (item.data as NGO).lastActivityAt
                                             )}{" "}
                                             and require re-verification. Please
                                             review all details carefully before

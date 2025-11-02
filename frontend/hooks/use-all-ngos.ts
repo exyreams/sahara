@@ -120,6 +120,7 @@ export function useAllNGOs(): UseAllNGOsReturn {
       return mappedNGOs;
     },
     enabled: !!program,
+    staleTime: 30 * 1000, // 30 seconds - NGO data changes moderately
   });
 
   const refetchNGOs = useCallback(async () => {
