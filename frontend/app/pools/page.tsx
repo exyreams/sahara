@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { ParticleSystem } from "@/components/ui/particle-system";
 import { WalletButton } from "@/components/wallet/wallet-button";
+import { useAdmin } from "@/hooks/use-admin";
 import { useNGO } from "@/hooks/use-ngo";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
 import { usePools } from "@/hooks/use-pools";
@@ -27,6 +28,7 @@ export default function PoolsPage() {
   const { pools, loading } = usePools();
   const { config } = usePlatformConfig();
   const { ngo } = useNGO();
+  const { isAdmin } = useAdmin();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -285,24 +287,26 @@ export default function PoolsPage() {
             className="flex-1"
           />
 
-          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
-            <Button
-              variant={ownerFilter === "all" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setOwnerFilter("all")}
-              className="px-4"
-            >
-              All
-            </Button>
-            <Button
-              variant={ownerFilter === "mine" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setOwnerFilter("mine")}
-              className="px-4"
-            >
-              Mine
-            </Button>
-          </div>
+          {(isAdmin || ngo) && (
+            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+              <Button
+                variant={ownerFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("all")}
+                className="px-4"
+              >
+                All
+              </Button>
+              <Button
+                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("mine")}
+                className="px-4"
+              >
+                Mine
+              </Button>
+            </div>
+          )}
 
           <FilterDropdown
             label="Status"
@@ -442,8 +446,8 @@ export default function PoolsPage() {
                 {ownerFilter === "mine"
                   ? "Create your first pool to get started"
                   : searchQuery || statusFilters.length > 0
-                    ? "Try adjusting your filters"
-                    : "Create the first fund pool"}
+                  ? "Try adjusting your filters"
+                  : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
                 <div className="flex justify-center mt-6">

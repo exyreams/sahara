@@ -342,24 +342,26 @@ export default function DisastersPage() {
             className="flex-1"
           />
 
-          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
-            <Button
-              variant={ownerFilter === "all" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setOwnerFilter("all")}
-              className="px-4"
-            >
-              All
-            </Button>
-            <Button
-              variant={ownerFilter === "mine" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setOwnerFilter("mine")}
-              className="px-4"
-            >
-              Mine
-            </Button>
-          </div>
+          {(isAdmin || ngo) && (
+            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+              <Button
+                variant={ownerFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("all")}
+                className="px-4"
+              >
+                All
+              </Button>
+              <Button
+                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("mine")}
+                className="px-4"
+              >
+                Mine
+              </Button>
+            </div>
+          )}
 
           <FilterDropdown
             label="Status"
@@ -501,10 +503,10 @@ export default function DisastersPage() {
                 {ownerFilter === "mine"
                   ? "Create your first disaster event to get started"
                   : searchQuery ||
-                      statusFilters.length > 0 ||
-                      typeFilters.length > 0
-                    ? "Try adjusting your filters"
-                    : "No disaster events have been created yet"}
+                    statusFilters.length > 0 ||
+                    typeFilters.length > 0
+                  ? "Try adjusting your filters"
+                  : "No disaster events have been created yet"}
               </CardDescription>
               {canCreateDisaster && (
                 <div className="flex justify-center mt-4">
