@@ -157,45 +157,42 @@ export default function NGODashboardPage() {
 
   if (loading) {
     return (
-      <>
-        <div className="space-y-8">
-          {/* Header Skeleton */}
-          <div className="flex items-start justify-between">
-            <div className="space-y-3">
-              <div className="h-10 w-64 bg-theme-border rounded animate-pulse" />
-              <div className="flex gap-2">
-                <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
-                <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
-              <div className="h-9 w-20 bg-theme-border rounded animate-pulse" />
-              <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
-              <div className="h-9 w-36 bg-theme-border rounded animate-pulse" />
-              <div className="h-9 w-44 bg-theme-border rounded animate-pulse" />
+      <div className="space-y-8">
+        {/* Header Skeleton */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-3">
+            <div className="h-10 w-64 bg-theme-border rounded animate-pulse" />
+            <div className="flex gap-2">
+              <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
+              <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
             </div>
           </div>
+          <div className="flex gap-2 flex-wrap">
+            <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
+            <div className="h-9 w-20 bg-theme-border rounded animate-pulse" />
+            <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
+            <div className="h-9 w-36 bg-theme-border rounded animate-pulse" />
+            <div className="h-9 w-44 bg-theme-border rounded animate-pulse" />
+          </div>
+        </div>
 
-          {/* Stats Cards Skeleton */}
-          <div className="grid gap-4 md:grid-cols-4">
-            {/* Aid Distributed Card - Special styling */}
-            <Card className="border-theme-primary/20 bg-linear-to-br from-theme-primary/5 to-transparent">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-9 w-24 bg-theme-border rounded animate-pulse mb-2" />
-                <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
-              </CardContent>
-            </Card>
+        {/* Stats Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-4">
+          {/* Aid Distributed Card - Special styling */}
+          <Card className="border-theme-primary/20 bg-linear-to-br from-theme-primary/5 to-transparent">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+              <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-9 w-24 bg-theme-border rounded animate-pulse mb-2" />
+              <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
+            </CardContent>
+          </Card>
 
-            {/* Other Cards */}
-            {Array.from(
-              { length: 3 },
-              (_, i) => `stats-card-skeleton-${i}`,
-            ).map((key) => (
+          {/* Other Cards */}
+          {Array.from({ length: 3 }, (_, i) => `stats-card-skeleton-${i}`).map(
+            (key) => (
               <Card key={key}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
@@ -206,155 +203,155 @@ export default function NGODashboardPage() {
                   <div className="h-3 w-20 bg-theme-border rounded animate-pulse" />
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            ),
+          )}
+        </div>
 
-          {/* Organization Info & Team Overview Skeleton */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Organization Details with Operating Areas */}
-            <Card className="bg-theme-card-bg border-theme-border">
-              <CardHeader>
-                <div className="h-6 w-40 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Contact info rows */}
-                {Array.from(
-                  { length: 6 },
-                  (_, j) => `contact-row-skeleton-${j}`,
-                ).map((key) => (
-                  <div key={key} className="flex justify-between">
-                    <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                    <div className="h-4 w-40 bg-theme-border rounded animate-pulse" />
-                  </div>
-                ))}
-                {/* Operating Areas section */}
-                <div className="pt-4 border-t border-theme-border space-y-3">
-                  <div>
-                    <div className="h-4 w-32 bg-theme-border rounded animate-pulse mb-2" />
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from(
-                        { length: 6 },
-                        (_, j) => `disaster-type-skeleton-${j}`,
-                      ).map((key) => (
-                        <div
-                          key={key}
-                          className="h-6 w-20 bg-theme-border rounded animate-pulse"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse mb-2" />
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from(
-                        { length: 5 },
-                        (_, j) => `service-type-skeleton-${j}`,
-                      ).map((key) => (
-                        <div
-                          key={key}
-                          className="h-6 w-24 bg-theme-border rounded animate-pulse"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Team Overview */}
-            <Card className="bg-theme-card-bg border-theme-border">
-              <CardHeader>
-                <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
-                <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Field Workers Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                    <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
-                  </div>
-                  <div className="space-y-2">
-                    {Array.from(
-                      { length: 3 },
-                      (_, j) => `team-worker-skeleton-${j}`,
-                    ).map((key) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                        </div>
-                        <div className="h-5 w-12 bg-theme-border rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {/* Beneficiaries Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                    <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
-                  </div>
-                  <div className="space-y-2">
-                    {Array.from(
-                      { length: 3 },
-                      (_, j) => `team-beneficiary-skeleton-${j}`,
-                    ).map((key) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                        </div>
-                        <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity Skeleton */}
+        {/* Organization Info & Team Overview Skeleton */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Organization Details with Operating Areas */}
           <Card className="bg-theme-card-bg border-theme-border">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
-                  <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
-                </div>
-                <div className="h-9 w-20 bg-theme-border rounded animate-pulse" />
-              </div>
+              <div className="h-6 w-40 bg-theme-border rounded animate-pulse" />
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {Array.from(
-                  { length: 5 },
-                  (_, i) => `activity-skeleton-${i}`,
-                ).map((key) => (
-                  <div
-                    key={key}
-                    className="border border-theme-border rounded-lg overflow-hidden"
-                  >
-                    <div className="flex items-center gap-3 p-3 animate-pulse">
-                      <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                      <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                      <div className="h-6 w-36 bg-theme-border rounded shrink-0" />
-                      <div className="flex-1" />
-                      <div className="h-4 w-16 bg-theme-border rounded shrink-0" />
-                    </div>
+            <CardContent className="space-y-3">
+              {/* Contact info rows */}
+              {Array.from(
+                { length: 6 },
+                (_, j) => `contact-row-skeleton-${j}`,
+              ).map((key) => (
+                <div key={key} className="flex justify-between">
+                  <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                  <div className="h-4 w-40 bg-theme-border rounded animate-pulse" />
+                </div>
+              ))}
+              {/* Operating Areas section */}
+              <div className="pt-4 border-t border-theme-border space-y-3">
+                <div>
+                  <div className="h-4 w-32 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="flex flex-wrap gap-1">
+                    {Array.from(
+                      { length: 6 },
+                      (_, j) => `disaster-type-skeleton-${j}`,
+                    ).map((key) => (
+                      <div
+                        key={key}
+                        className="h-6 w-20 bg-theme-border rounded animate-pulse"
+                      />
+                    ))}
                   </div>
-                ))}
+                </div>
+                <div>
+                  <div className="h-4 w-24 bg-theme-border rounded animate-pulse mb-2" />
+                  <div className="flex flex-wrap gap-1">
+                    {Array.from(
+                      { length: 5 },
+                      (_, j) => `service-type-skeleton-${j}`,
+                    ).map((key) => (
+                      <div
+                        key={key}
+                        className="h-6 w-24 bg-theme-border rounded animate-pulse"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Team Overview */}
+          <Card className="bg-theme-card-bg border-theme-border">
+            <CardHeader>
+              <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
+              <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Field Workers Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                  {Array.from(
+                    { length: 3 },
+                    (_, j) => `team-worker-skeleton-${j}`,
+                  ).map((key) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                      </div>
+                      <div className="h-5 w-12 bg-theme-border rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Beneficiaries Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                  {Array.from(
+                    { length: 3 },
+                    (_, j) => `team-beneficiary-skeleton-${j}`,
+                  ).map((key) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                      </div>
+                      <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      </>
+
+        {/* Recent Activity Skeleton */}
+        <Card className="bg-theme-card-bg border-theme-border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
+                <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
+              </div>
+              <div className="h-9 w-20 bg-theme-border rounded animate-pulse" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {Array.from(
+                { length: 5 },
+                (_, i) => `activity-skeleton-${i}`,
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="border border-theme-border rounded-lg overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 p-3 animate-pulse">
+                    <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
+                    <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
+                    <div className="h-6 w-36 bg-theme-border rounded shrink-0" />
+                    <div className="flex-1" />
+                    <div className="h-4 w-16 bg-theme-border rounded shrink-0" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

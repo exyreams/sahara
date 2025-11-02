@@ -15,7 +15,6 @@ import { BatchOperationsToolbar } from "@/components/admin/batch-operations-tool
 import { NGOActionButtons } from "@/components/admin/ngo-action-buttons";
 import { VerificationProgressModal } from "@/components/admin/verification-progress-modal";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
-import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

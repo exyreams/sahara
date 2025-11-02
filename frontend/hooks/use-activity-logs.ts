@@ -1,7 +1,7 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useProgram } from "./use-program";
 
 export interface ActivityLog {
@@ -19,7 +19,7 @@ export function useActivityLogs() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchActivityLogs = async () => {
+  const fetchActivityLogs = useCallback(async () => {
     if (!program) {
       setLoading(false);
       return;
@@ -60,12 +60,11 @@ export function useActivityLogs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [program]);
 
   useEffect(() => {
     fetchActivityLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [program]);
+  }, [fetchActivityLogs]);
 
   return { logs, loading, refetch: fetchActivityLogs };
 }

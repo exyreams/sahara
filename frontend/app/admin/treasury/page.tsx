@@ -138,33 +138,29 @@ export default function TreasuryPage() {
 
   if (!config) {
     return (
-      <>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold mb-2">Platform Not Initialized</h2>
-          <p className="text-muted-foreground mb-4">
-            Please initialize the platform first.
-          </p>
-          <Button asChild>
-            <Link href="/admin/initialize">Initialize Platform</Link>
-          </Button>
-        </div>
-      </>
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold mb-2">Platform Not Initialized</h2>
+        <p className="text-muted-foreground mb-4">
+          Please initialize the platform first.
+        </p>
+        <Button asChild>
+          <Link href="/admin/initialize">Initialize Platform</Link>
+        </Button>
+      </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-          <p className="text-muted-foreground mb-4">
-            Only platform administrators can access this page.
-          </p>
-          <Button asChild>
-            <Link href="/">Go Home</Link>
-          </Button>
-        </div>
-      </>
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground mb-4">
+          Only platform administrators can access this page.
+        </p>
+        <Button asChild>
+          <Link href="/">Go Home</Link>
+        </Button>
+      </div>
     );
   }
 

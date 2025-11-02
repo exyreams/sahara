@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { FieldWorkerCard } from "@/components/field-workers/field-worker-card";
 import { FieldWorkerCreationModal } from "@/components/field-workers/field-worker-creation-modal";
-import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
 import { Badge } from "@/components/ui/badge";
@@ -42,66 +41,64 @@ export default function FieldWorkersPage() {
 
   if (loading || isRefreshing) {
     return (
-      <>
-        <div className="space-y-6">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
-              <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-            </div>
-            <div className="flex gap-2">
-              <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
-              <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
-            </div>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
+            <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
           </div>
-
-          {/* Search and Filters Skeleton */}
-          <div className="flex gap-4">
-            <div className="flex-1 h-10 bg-theme-border rounded animate-pulse" />
-            <div className="h-10 w-32 bg-theme-border rounded animate-pulse" />
+          <div className="flex gap-2">
             <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
-          </div>
-
-          {/* Cards Skeleton */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from(
-              { length: 6 },
-              (_, i) => `field-worker-card-skeleton-${i}`,
-            ).map((key) => (
-              <Card key={key} className="bg-theme-card-bg border-theme-border">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-2">
-                      <div className="h-5 w-32 bg-theme-border rounded animate-pulse" />
-                      <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
-                    </div>
-                    <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-3/4 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-3/4 bg-theme-border rounded animate-pulse" />
-                  <div className="pt-2 border-t border-theme-border">
-                    <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
-                  </div>
-                  <div className="pt-2">
-                    <div className="h-3 w-16 bg-theme-border rounded animate-pulse mb-1" />
-                    <div className="flex gap-1">
-                      <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
-                      <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
-                      <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
           </div>
         </div>
-      </>
+
+        {/* Search and Filters Skeleton */}
+        <div className="flex gap-4">
+          <div className="flex-1 h-10 bg-theme-border rounded animate-pulse" />
+          <div className="h-10 w-32 bg-theme-border rounded animate-pulse" />
+          <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
+        </div>
+
+        {/* Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from(
+            { length: 6 },
+            (_, i) => `field-worker-card-skeleton-${i}`,
+          ).map((key) => (
+            <Card key={key} className="bg-theme-card-bg border-theme-border">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 w-32 bg-theme-border rounded animate-pulse" />
+                    <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
+                  </div>
+                  <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-3/4 bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-3/4 bg-theme-border rounded animate-pulse" />
+                <div className="pt-2 border-t border-theme-border">
+                  <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
+                </div>
+                <div className="pt-2">
+                  <div className="h-3 w-16 bg-theme-border rounded animate-pulse mb-1" />
+                  <div className="flex gap-1">
+                    <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
+                    <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
+                    <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 

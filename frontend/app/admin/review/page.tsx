@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -224,83 +223,81 @@ export default function AdminReviewPage() {
 
   if (loading) {
     return (
-      <>
-        <div className="space-y-6">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
-              <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
-            </div>
-            <div className="flex gap-2">
-              <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
-              <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
-            </div>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
+            <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
           </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
+            <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
+          </div>
+        </div>
 
-          {/* Card Skeleton */}
-          <Card>
-            <CardHeader>
-              {/* Title and Description Skeleton */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="space-y-2">
-                  <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-                </div>
+        {/* Card Skeleton */}
+        <Card>
+          <CardHeader>
+            {/* Title and Description Skeleton */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
               </div>
+            </div>
 
-              {/* Filters Skeleton */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
-                <div className="h-9 w-48 bg-theme-border rounded animate-pulse" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {Array.from(
-                  { length: 5 },
-                  (_, i) => `skeleton-item-${Date.now()}-${i}`,
-                ).map((key) => (
-                  <div
-                    key={key}
-                    className="border border-theme-border rounded-lg p-4"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-1 space-y-3">
-                        {/* Title row */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
-                            <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
-                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
-                          </div>
+            {/* Filters Skeleton */}
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
+              <div className="h-9 w-48 bg-theme-border rounded animate-pulse" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from(
+                { length: 5 },
+                (_, i) => `skeleton-item-${Date.now()}-${i}`,
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="border border-theme-border rounded-lg p-4"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1 space-y-3">
+                      {/* Title row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
+                          <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
                         </div>
-                        {/* Details row */}
-                        <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-                        {/* Stats row */}
-                        <div className="flex gap-4">
-                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                          <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
                         </div>
-                        {/* Buttons row */}
-                        <div className="flex gap-2">
-                          <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
-                          <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
-                          <div className="h-8 w-28 bg-theme-border rounded animate-pulse" />
-                        </div>
+                      </div>
+                      {/* Details row */}
+                      <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
+                      {/* Stats row */}
+                      <div className="flex gap-4">
+                        <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                      </div>
+                      {/* Buttons row */}
+                      <div className="flex gap-2">
+                        <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
+                        <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
+                        <div className="h-8 w-28 bg-theme-border rounded animate-pulse" />
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

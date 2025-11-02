@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { EmergencyPauseToggle } from "@/components/admin/emergency-pause-toggle";
 import { PlatformConfigForm } from "@/components/admin/platform-config-form";
-import { Header } from "@/components/layout/header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,7 +70,7 @@ export default function AdminSettingsPage() {
     if (!tab) {
       router.replace(`/admin/settings?tab=administration`, { scroll: false });
     }
-  }, []);
+  }, [router.replace, searchParams.get]);
 
   // Sync tab with URL
   useEffect(() => {
