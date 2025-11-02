@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,7 +69,7 @@ export default function AuditLogPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1280,
+    typeof window !== "undefined" ? window.innerWidth : 1280
   );
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const itemsPerPage = 20;
@@ -116,7 +117,7 @@ export default function AuditLogPage() {
 
     // Combine and sort by timestamp (newest first)
     return [...adminEntries, ...activityEntries].sort(
-      (a, b) => b.timestamp - a.timestamp,
+      (a, b) => b.timestamp - a.timestamp
     );
   }, [actions, activityLogs]);
 
@@ -211,7 +212,7 @@ export default function AuditLogPage() {
   // Format address with dynamic truncation based on screen size
   const formatAddress = (
     address: string,
-    mode: "collapsed" | "full" = "collapsed",
+    mode: "collapsed" | "full" = "collapsed"
   ): string => {
     if (mode === "full") return address;
 
@@ -233,7 +234,7 @@ export default function AuditLogPage() {
 
   // Parse metadata string to extract pool info
   const parseMetadata = (
-    metadata: string,
+    metadata: string
   ): { pool?: string; amount?: number; fee?: number } | null => {
     // Format: "Pool: Name | Amount: 500000000 | Fee: 10000000"
     const poolMatch = metadata.match(/Pool:\s*([^|]+)/);
@@ -298,7 +299,7 @@ export default function AuditLogPage() {
 
   // Expanded state for actions
   const [expandedActions, setExpandedActions] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const toggleExpanded = (actionKey: string) => {
@@ -372,7 +373,7 @@ export default function AuditLogPage() {
                       </div>
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           </CardContent>
@@ -634,217 +635,235 @@ export default function AuditLogPage() {
                     </button>
 
                     {/* Expanded View */}
-                    {isExpanded && (
-                      <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
-                        <div className="bg-theme-background p-4 rounded-md">
-                          {/* Action Summary */}
-                          <div className="text-xs text-muted-foreground mb-1">
-                            {log.category === "admin"
-                              ? "Admin Action:"
-                              : "Activity:"}
-                          </div>
-                          <div className="mb-4 p-4 bg-theme-card-bg border border-theme-border rounded-lg space-y-3">
-                            <div className="text-sm text-theme-text-highlight font-medium">
-                              <span className="text-theme-primary font-semibold">
-                                {formatActionType(log.actionType, log.category)}
-                              </span>{" "}
-                              of{" "}
-                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                {formatAddress(log.target.toString())}
-                              </code>{" "}
-                              by{" "}
-                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                {formatAddress(log.actor.toString())}
-                              </code>
-                            </div>
-                            {log.metadata &&
-                              (() => {
-                                const parsed = parseMetadata(log.metadata);
-                                if (parsed) {
-                                  return (
-                                    <div className="pt-3">
-                                      <div className="text-xs text-muted-foreground mb-2">
-                                        Details:
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
+                            <div className="bg-theme-background p-4 rounded-md">
+                              {/* Action Summary */}
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {log.category === "admin"
+                                  ? "Admin Action:"
+                                  : "Activity:"}
+                              </div>
+                              <div className="mb-4 p-4 bg-theme-card-bg border border-theme-border rounded-lg space-y-3">
+                                <div className="text-sm text-theme-text-highlight font-medium">
+                                  <span className="text-theme-primary font-semibold">
+                                    {formatActionType(
+                                      log.actionType,
+                                      log.category
+                                    )}
+                                  </span>{" "}
+                                  of{" "}
+                                  <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                    {formatAddress(log.target.toString())}
+                                  </code>{" "}
+                                  by{" "}
+                                  <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                    {formatAddress(log.actor.toString())}
+                                  </code>
+                                </div>
+                                {log.metadata &&
+                                  (() => {
+                                    const parsed = parseMetadata(log.metadata);
+                                    if (parsed) {
+                                      return (
+                                        <div className="pt-3">
+                                          <div className="text-xs text-muted-foreground mb-2">
+                                            Details:
+                                          </div>
+                                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            {parsed.pool && (
+                                              <div className="p-3 bg-theme-background rounded-lg">
+                                                <div className="text-xs text-muted-foreground mb-1">
+                                                  Pool:
+                                                </div>
+                                                <div className="text-sm font-semibold text-theme-text-highlight">
+                                                  {parsed.pool}
+                                                </div>
+                                              </div>
+                                            )}
+                                            {parsed.amount !== undefined && (
+                                              <div className="p-3 bg-theme-background rounded-lg">
+                                                <div className="text-xs text-muted-foreground mb-1">
+                                                  Donated Amount:
+                                                </div>
+                                                <div className="text-base font-semibold text-theme-primary">
+                                                  $
+                                                  {(
+                                                    parsed.amount / 1e6
+                                                  ).toFixed(2)}{" "}
+                                                  USDC
+                                                </div>
+                                              </div>
+                                            )}
+                                            {parsed.fee !== undefined && (
+                                              <div className="p-3 bg-theme-background rounded-lg">
+                                                <div className="text-xs text-muted-foreground mb-1">
+                                                  Platform Fee:
+                                                </div>
+                                                <div className="text-base font-semibold text-theme-primary">
+                                                  $
+                                                  {(parsed.fee / 1e6).toFixed(
+                                                    2
+                                                  )}{" "}
+                                                  USDC
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <div className="pt-2">
+                                        <div className="text-xs text-muted-foreground mb-1.5">
+                                          Details:
+                                        </div>
+                                        <div className="text-sm text-theme-text-highlight">
+                                          {log.metadata}
+                                        </div>
                                       </div>
-                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        {parsed.pool && (
-                                          <div className="p-3 bg-theme-background rounded-lg">
-                                            <div className="text-xs text-muted-foreground mb-1">
-                                              Pool:
-                                            </div>
-                                            <div className="text-sm font-semibold text-theme-text-highlight">
-                                              {parsed.pool}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {parsed.amount !== undefined && (
-                                          <div className="p-3 bg-theme-background rounded-lg">
-                                            <div className="text-xs text-muted-foreground mb-1">
-                                              Donated Amount:
-                                            </div>
-                                            <div className="text-base font-semibold text-theme-primary">
-                                              $
-                                              {(parsed.amount / 1e6).toFixed(2)}{" "}
-                                              USDC
-                                            </div>
-                                          </div>
-                                        )}
-                                        {parsed.fee !== undefined && (
-                                          <div className="p-3 bg-theme-background rounded-lg">
-                                            <div className="text-xs text-muted-foreground mb-1">
-                                              Platform Fee:
-                                            </div>
-                                            <div className="text-base font-semibold text-theme-primary">
-                                              ${(parsed.fee / 1e6).toFixed(2)}{" "}
-                                              USDC
-                                            </div>
-                                          </div>
-                                        )}
+                                    );
+                                  })()}
+                                {log.amount !== null &&
+                                  log.amount !== undefined && (
+                                    <div className="pt-2">
+                                      <div className="text-xs text-muted-foreground mb-1.5">
+                                        Amount:
+                                      </div>
+                                      <div className="text-lg font-semibold text-theme-primary">
+                                        ${(log.amount / 1e6).toFixed(2)} USDC
                                       </div>
                                     </div>
-                                  );
-                                }
-                                return (
+                                  )}
+                                {log.reason && (
                                   <div className="pt-2">
                                     <div className="text-xs text-muted-foreground mb-1.5">
-                                      Details:
+                                      Reason:
                                     </div>
                                     <div className="text-sm text-theme-text-highlight">
-                                      {log.metadata}
+                                      {log.reason}
                                     </div>
                                   </div>
-                                );
-                              })()}
-                            {log.amount !== null &&
-                              log.amount !== undefined && (
-                                <div className="pt-2">
-                                  <div className="text-xs text-muted-foreground mb-1.5">
-                                    Amount:
+                                )}
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                {/* Left Column */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Target Address:
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                        {log.target.toString()}
+                                      </code>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="shrink-0 h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(
+                                            `https://explorer.solana.com/address/${log.target.toString()}?cluster=devnet`,
+                                            "_blank"
+                                          );
+                                        }}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <div className="text-lg font-semibold text-theme-primary">
-                                    ${(log.amount / 1e6).toFixed(2)} USDC
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      {log.category === "admin"
+                                        ? "Admin Address:"
+                                        : "Actor Address:"}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                        {log.actor.toString()}
+                                      </code>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="shrink-0 h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(
+                                            `https://explorer.solana.com/address/${log.actor.toString()}?cluster=devnet`,
+                                            "_blank"
+                                          );
+                                        }}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Log Account Address:
+                                    </div>
+                                    <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
+                                      {log.publicKey.toString()}
+                                    </code>
                                   </div>
                                 </div>
-                              )}
-                            {log.reason && (
-                              <div className="pt-2">
-                                <div className="text-xs text-muted-foreground mb-1.5">
-                                  Reason:
-                                </div>
-                                <div className="text-sm text-theme-text-highlight">
-                                  {log.reason}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                            {/* Left Column */}
-                            <div className="space-y-4">
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Target Address:
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                    {log.target.toString()}
-                                  </code>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="shrink-0 h-7 w-7 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(
-                                        `https://explorer.solana.com/address/${log.target.toString()}?cluster=devnet`,
-                                        "_blank",
-                                      );
-                                    }}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  {log.category === "admin"
-                                    ? "Admin Address:"
-                                    : "Actor Address:"}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                    {log.actor.toString()}
-                                  </code>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="shrink-0 h-7 w-7 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(
-                                        `https://explorer.solana.com/address/${log.actor.toString()}?cluster=devnet`,
-                                        "_blank",
-                                      );
-                                    }}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Log Account Address:
-                                </div>
-                                <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
-                                  {log.publicKey.toString()}
-                                </code>
-                              </div>
-                            </div>
-                            {/* Right Column */}
-                            <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Category:
-                                </div>
-                                <div className="text-sm text-theme-text-highlight">
-                                  {log.category === "admin"
-                                    ? "Admin Action"
-                                    : "User Activity"}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Timestamp:
-                                </div>
-                                <div className="text-sm text-theme-text-highlight">
-                                  {formatFullTimestamp(log.timestamp)}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {formatTimestamp(log.timestamp)}
-                                </div>
-                              </div>
+                                {/* Right Column */}
+                                <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Category:
+                                    </div>
+                                    <div className="text-sm text-theme-text-highlight">
+                                      {log.category === "admin"
+                                        ? "Admin Action"
+                                        : "User Activity"}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Timestamp:
+                                    </div>
+                                    <div className="text-sm text-theme-text-highlight">
+                                      {formatFullTimestamp(log.timestamp)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {formatTimestamp(log.timestamp)}
+                                    </div>
+                                  </div>
 
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=devnet`,
-                                      "_blank",
-                                    );
-                                  }}
-                                >
-                                  <ExternalLink className="h-3 w-3 mr-2" />
-                                  View on Explorer
-                                </Button>
+                                  <div className="pt-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(
+                                          `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=devnet`,
+                                          "_blank"
+                                        );
+                                      }}
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-2" />
+                                      View on Explorer
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
 import { NGORegistrationModal } from "@/components/ngo/ngo-registration-modal";
@@ -49,7 +50,7 @@ export default function NGODashboardPage() {
     refetch: refetchLogs,
   } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -105,8 +106,8 @@ export default function NGODashboardPage() {
           // Actions performed by any of the NGO's field workers
           fieldWorkers.some(
             (fw) =>
-              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority),
-          ),
+              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority)
+          )
       )
     : [];
 
@@ -127,7 +128,7 @@ export default function NGODashboardPage() {
 
   // Combine and sort all activities
   const allActivities = [...ngoLogs, ...fieldWorkerLogs].sort(
-    (a, b) => b.timestamp - a.timestamp,
+    (a, b) => b.timestamp - a.timestamp
   );
 
   // Get recent 5 NGO-specific activities
@@ -229,7 +230,7 @@ export default function NGODashboardPage() {
                   <div className="h-3 w-20 bg-theme-border rounded animate-pulse" />
                 </CardContent>
               </Card>
-            ),
+            )
           )}
         </div>
 
@@ -244,7 +245,7 @@ export default function NGODashboardPage() {
               {/* Contact info rows */}
               {Array.from(
                 { length: 6 },
-                (_, j) => `contact-row-skeleton-${j}`,
+                (_, j) => `contact-row-skeleton-${j}`
               ).map((key) => (
                 <div key={key} className="flex justify-between">
                   <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
@@ -258,7 +259,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 6 },
-                      (_, j) => `disaster-type-skeleton-${j}`,
+                      (_, j) => `disaster-type-skeleton-${j}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -272,7 +273,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 5 },
-                      (_, j) => `service-type-skeleton-${j}`,
+                      (_, j) => `service-type-skeleton-${j}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -301,7 +302,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-worker-skeleton-${j}`,
+                    (_, j) => `team-worker-skeleton-${j}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -325,7 +326,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-beneficiary-skeleton-${j}`,
+                    (_, j) => `team-beneficiary-skeleton-${j}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -359,7 +360,7 @@ export default function NGODashboardPage() {
             <div className="space-y-2">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-skeleton-${i}`,
+                (_, i) => `activity-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -382,7 +383,7 @@ export default function NGODashboardPage() {
   }
 
   // Only show "no NGO" screen if we've loaded and there's truly no NGO (not during refresh)
-  if (!ngo && hasInitiallyLoaded && !isRefreshing) {
+  if (!ngo && hasInitiallyLoaded) {
     return (
       <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
         {/* Left Side - Particle Background (40%) */}
@@ -473,18 +474,106 @@ export default function NGODashboardPage() {
     );
   }
 
-  // Safety check - should not happen with placeholderData, but TypeScript needs it
+  // Safety check - if no NGO at this point, show the registration screen
+  // This handles edge cases where hasInitiallyLoaded might not be set correctly
   if (!ngo) {
-    return null;
+    return (
+      <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
+        {/* Left Side - Particle Background (40%) */}
+        <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
+          <div className="absolute inset-0">
+            <ParticleSystem text="Ngo" />
+          </div>
+        </div>
+
+        {/* Right Side - Content (60%) */}
+        <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
+          <div className="max-w-xl w-full space-y-8">
+            {/* Header */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0 w-12 h-12 rounded-full bg-theme-primary/10 flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-theme-primary" />
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-theme-text-highlight">
+                  No NGO Registered
+                </h1>
+              </div>
+              <p className="text-lg text-theme-text">
+                Register your organization to start coordinating relief efforts.
+              </p>
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-theme-text-highlight">
+                Get Started in 3 Steps
+              </h2>
+              <div className="space-y-3">
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-theme-primary text-theme-background flex items-center justify-center text-sm font-bold">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-theme-text">
+                      Register your NGO with official documentation
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-theme-primary text-theme-background flex items-center justify-center text-sm font-bold">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-theme-text">
+                      Wait for platform administrator verification
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-theme-primary text-theme-background flex items-center justify-center text-sm font-bold">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-theme-text">
+                      Access your dashboard to manage field workers and
+                      coordinate relief efforts
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="space-y-4">
+              <Button size="lg" className="w-full text-base" asChild>
+                <Link href="/ngo">Go to NGO Portal</Link>
+              </Button>
+
+              {/* Additional Help */}
+              <p className="text-sm text-center text-theme-text/80">
+                Need help?{" "}
+                <Link
+                  href="/docs"
+                  className="text-theme-primary hover:underline font-medium"
+                >
+                  View Documentation
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey),
+    fw.ngo?.equals(ngo.publicKey)
   );
 
   // Count beneficiaries registered by this NGO's field workers
   const ngoBeneficiaries = beneficiaries.filter((b) =>
-    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
+    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy))
   );
   const ngoBeneficiariesCount = ngoBeneficiaries.length;
 
@@ -838,7 +927,7 @@ export default function NGODashboardPage() {
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`,
+                (_, i) => `activity-log-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -891,202 +980,218 @@ export default function NGODashboardPage() {
                     </button>
 
                     {/* Expanded View */}
-                    {isExpanded && (
-                      <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs text-theme-text/60 mb-1">
-                              Actor
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-mono text-theme-text break-all">
-                                {activity.actor.toString()}
-                              </p>
-                              <a
-                                href={getExplorerUrl(activity.actor.toString())}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-theme-primary hover:underline shrink-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-theme-text/60 mb-1">
-                              Target
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-mono text-theme-text break-all">
-                                {activity.target.toString()}
-                              </p>
-                              <a
-                                href={getExplorerUrl(
-                                  activity.target.toString(),
-                                )}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-theme-primary hover:underline shrink-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-theme-text/60 mb-1">
-                              Date & Time
-                            </p>
-                            <p className="text-sm text-theme-text">
-                              {new Date(
-                                activity.timestamp * 1000,
-                              ).toLocaleString()}
-                            </p>
-                          </div>
-                          {activity.amount !== null && (
-                            <div>
-                              <p className="text-xs text-theme-text/60 mb-1">
-                                Amount
-                              </p>
-                              <p className="text-sm text-theme-primary font-semibold">
-                                ${(activity.amount / 1_000_000).toFixed(2)} USDC
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Parse and display metadata */}
-                        {activity.metadata &&
-                          (() => {
-                            // For field worker registrations, metadata is just the name
-                            if (
-                              activity.actionType === "fieldWorkerRegistered"
-                            ) {
-                              return (
-                                <div className="pt-3 border-t border-theme-border">
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Field Worker Name
-                                  </p>
-                                  <p className="text-sm text-theme-text font-medium">
-                                    {activity.metadata}
-                                  </p>
-                                </div>
-                              );
-                            }
-
-                            // Parse metadata for other activities (format: "Key: Value | Key: Value")
-                            const metadataParts =
-                              activity.metadata.split(" | ");
-                            const parsedData: Record<string, string> = {};
-
-                            metadataParts.forEach((part) => {
-                              const [key, value] = part.split(": ");
-                              if (key && value) {
-                                parsedData[key] = value;
-                              }
-                            });
-
-                            return (
-                              <div className="pt-3 border-t border-theme-border">
-                                <p className="text-xs text-theme-text/60 mb-2">
-                                  Additional Details
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-xs text-theme-text/60 mb-1">
+                                  Actor
                                 </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                  {parsedData.Pool && (
-                                    <div>
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Pool Name
-                                      </p>
-                                      <p className="text-sm text-theme-text">
-                                        {parsedData.Pool}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {parsedData.Amount && (
-                                    <div>
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Donation Amount
-                                      </p>
-                                      <p className="text-sm text-theme-primary font-semibold">
-                                        $
-                                        {(
-                                          Number.parseInt(
-                                            parsedData.Amount,
-                                            10,
-                                          ) / 1_000_000
-                                        ).toFixed(2)}{" "}
-                                        USDC
-                                      </p>
-                                    </div>
-                                  )}
-                                  {parsedData.Fee && (
-                                    <div>
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Platform Fee
-                                      </p>
-                                      <p className="text-sm text-theme-text">
-                                        $
-                                        {(
-                                          Number.parseInt(parsedData.Fee, 10) /
-                                          1_000_000
-                                        ).toFixed(2)}{" "}
-                                        USDC
-                                      </p>
-                                    </div>
-                                  )}
-                                  {parsedData.Disaster && (
-                                    <div>
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Disaster
-                                      </p>
-                                      <p className="text-sm text-theme-text">
-                                        {parsedData.Disaster}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {parsedData.Beneficiary && (
-                                    <div>
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Beneficiary
-                                      </p>
-                                      <p className="text-sm text-theme-text">
-                                        {parsedData.Beneficiary}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {/* Display any other metadata fields */}
-                                  {Object.entries(parsedData).map(
-                                    ([key, value]) => {
-                                      if (
-                                        ![
-                                          "Pool",
-                                          "Amount",
-                                          "Fee",
-                                          "Disaster",
-                                          "Beneficiary",
-                                        ].includes(key)
-                                      ) {
-                                        return (
-                                          <div key={key}>
-                                            <p className="text-xs text-theme-text/60 mb-1">
-                                              {key}
-                                            </p>
-                                            <p className="text-sm text-theme-text">
-                                              {value}
-                                            </p>
-                                          </div>
-                                        );
-                                      }
-                                      return null;
-                                    },
-                                  )}
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-mono text-theme-text break-all">
+                                    {activity.actor.toString()}
+                                  </p>
+                                  <a
+                                    href={getExplorerUrl(
+                                      activity.actor.toString()
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-theme-primary hover:underline shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
                                 </div>
                               </div>
-                            );
-                          })()}
-                      </div>
-                    )}
+                              <div>
+                                <p className="text-xs text-theme-text/60 mb-1">
+                                  Target
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-mono text-theme-text break-all">
+                                    {activity.target.toString()}
+                                  </p>
+                                  <a
+                                    href={getExplorerUrl(
+                                      activity.target.toString()
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-theme-primary hover:underline shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-theme-text/60 mb-1">
+                                  Date & Time
+                                </p>
+                                <p className="text-sm text-theme-text">
+                                  {new Date(
+                                    activity.timestamp * 1000
+                                  ).toLocaleString()}
+                                </p>
+                              </div>
+                              {activity.amount !== null && (
+                                <div>
+                                  <p className="text-xs text-theme-text/60 mb-1">
+                                    Amount
+                                  </p>
+                                  <p className="text-sm text-theme-primary font-semibold">
+                                    ${(activity.amount / 1_000_000).toFixed(2)}{" "}
+                                    USDC
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Parse and display metadata */}
+                            {activity.metadata &&
+                              (() => {
+                                // For field worker registrations, metadata is just the name
+                                if (
+                                  activity.actionType ===
+                                  "fieldWorkerRegistered"
+                                ) {
+                                  return (
+                                    <div className="pt-3 border-t border-theme-border">
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Field Worker Name
+                                      </p>
+                                      <p className="text-sm text-theme-text font-medium">
+                                        {activity.metadata}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+
+                                // Parse metadata for other activities (format: "Key: Value | Key: Value")
+                                const metadataParts =
+                                  activity.metadata.split(" | ");
+                                const parsedData: Record<string, string> = {};
+
+                                metadataParts.forEach((part) => {
+                                  const [key, value] = part.split(": ");
+                                  if (key && value) {
+                                    parsedData[key] = value;
+                                  }
+                                });
+
+                                return (
+                                  <div className="pt-3 border-t border-theme-border">
+                                    <p className="text-xs text-theme-text/60 mb-2">
+                                      Additional Details
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {parsedData.Pool && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Pool Name
+                                          </p>
+                                          <p className="text-sm text-theme-text">
+                                            {parsedData.Pool}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {parsedData.Amount && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Donation Amount
+                                          </p>
+                                          <p className="text-sm text-theme-primary font-semibold">
+                                            $
+                                            {(
+                                              Number.parseInt(
+                                                parsedData.Amount,
+                                                10
+                                              ) / 1_000_000
+                                            ).toFixed(2)}{" "}
+                                            USDC
+                                          </p>
+                                        </div>
+                                      )}
+                                      {parsedData.Fee && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Platform Fee
+                                          </p>
+                                          <p className="text-sm text-theme-text">
+                                            $
+                                            {(
+                                              Number.parseInt(
+                                                parsedData.Fee,
+                                                10
+                                              ) / 1_000_000
+                                            ).toFixed(2)}{" "}
+                                            USDC
+                                          </p>
+                                        </div>
+                                      )}
+                                      {parsedData.Disaster && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Disaster
+                                          </p>
+                                          <p className="text-sm text-theme-text">
+                                            {parsedData.Disaster}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {parsedData.Beneficiary && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Beneficiary
+                                          </p>
+                                          <p className="text-sm text-theme-text">
+                                            {parsedData.Beneficiary}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {/* Display any other metadata fields */}
+                                      {Object.entries(parsedData).map(
+                                        ([key, value]) => {
+                                          if (
+                                            ![
+                                              "Pool",
+                                              "Amount",
+                                              "Fee",
+                                              "Disaster",
+                                              "Beneficiary",
+                                            ].includes(key)
+                                          ) {
+                                            return (
+                                              <div key={key}>
+                                                <p className="text-xs text-theme-text/60 mb-1">
+                                                  {key}
+                                                </p>
+                                                <p className="text-sm text-theme-text">
+                                                  {value}
+                                                </p>
+                                              </div>
+                                            );
+                                          }
+                                          return null;
+                                        }
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}

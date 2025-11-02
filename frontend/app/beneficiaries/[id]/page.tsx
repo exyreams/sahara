@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { BeneficiaryRegistrationModal } from "@/components/beneficiaries/beneficiary-registration-modal";
 import { DonateModal } from "@/components/beneficiaries/donate-modal";
 import { FlagBeneficiaryModal } from "@/components/beneficiaries/flag-beneficiary-modal";
@@ -83,7 +84,7 @@ export default function BeneficiaryProfilePage({
     filterByRecipient,
   } = useDonations();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   // Get active tab from URL or default to overview
@@ -125,7 +126,7 @@ export default function BeneficiaryProfilePage({
   // Find the field worker who registered this beneficiary
   const registeredByWorker = beneficiary
     ? fieldWorkers.find(
-        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58(),
+        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58()
       )
     : null;
 
@@ -152,7 +153,7 @@ export default function BeneficiaryProfilePage({
   // Note: recipient is the beneficiary PDA (publicKey), not the authority wallet
   const beneficiaryDonations = beneficiary
     ? filterByRecipient(beneficiary.publicKey).sort(
-        (a, b) => b.timestamp - a.timestamp,
+        (a, b) => b.timestamp - a.timestamp
       )
     : [];
 
@@ -236,7 +237,7 @@ export default function BeneficiaryProfilePage({
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from(
                       { length: 4 },
-                      (_, i) => `stat-skeleton-${i}`,
+                      (_, i) => `stat-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -267,7 +268,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-3 sm:grid-cols-2">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `detail-skeleton-${i}`,
+                        (_, i) => `detail-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -341,7 +342,7 @@ export default function BeneficiaryProfilePage({
                     <span
                       className={
                         formatVerificationStatus(
-                          beneficiary.verificationStatus,
+                          beneficiary.verificationStatus
                         ) !== "Verified"
                           ? "cursor-not-allowed"
                           : ""
@@ -352,12 +353,12 @@ export default function BeneficiaryProfilePage({
                         size="lg"
                         disabled={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus,
+                            beneficiary.verificationStatus
                           ) !== "Verified"
                         }
                         className={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus,
+                            beneficiary.verificationStatus
                           ) !== "Verified"
                             ? "cursor-not-allowed"
                             : "cursor-pointer"
@@ -375,14 +376,14 @@ export default function BeneficiaryProfilePage({
                     <TooltipContent>
                       <p>
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus,
+                          beneficiary.verificationStatus
                         ) === "Rejected"
                           ? "This beneficiary is rejected and cannot receive donations"
                           : formatVerificationStatus(
-                                beneficiary.verificationStatus,
-                              ) === "Flagged"
-                            ? "This beneficiary is flagged and cannot receive donations"
-                            : "Verification needed before donations can be accepted"}
+                              beneficiary.verificationStatus
+                            ) === "Flagged"
+                          ? "This beneficiary is flagged and cannot receive donations"
+                          : "Verification needed before donations can be accepted"}
                       </p>
                     </TooltipContent>
                   )}
@@ -422,7 +423,7 @@ export default function BeneficiaryProfilePage({
                 wallet.publicKey &&
                 beneficiary.verifierApprovals.some(
                   (verifier) =>
-                    verifier.toBase58() === wallet.publicKey?.toBase58(),
+                    verifier.toBase58() === wallet.publicKey?.toBase58()
                 );
 
               if (hasVerified) {
@@ -627,7 +628,7 @@ export default function BeneficiaryProfilePage({
                           {beneficiary.name}
                         </CardTitle>
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus,
+                          beneficiary.verificationStatus
                         ) === "Verified" ? (
                           <VerifiedIcon
                             className="h-6 w-6"
@@ -636,7 +637,7 @@ export default function BeneficiaryProfilePage({
                         ) : (
                           <Badge variant="pending">
                             {formatVerificationStatus(
-                              beneficiary.verificationStatus,
+                              beneficiary.verificationStatus
                             )}
                           </Badge>
                         )}
@@ -668,7 +669,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `refresh-skeleton-${i}`,
+                        (_, i) => `refresh-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -748,7 +749,7 @@ export default function BeneficiaryProfilePage({
                             {Array.from({
                               length: Math.min(
                                 beneficiary.verifierApprovals.length,
-                                3,
+                                3
                               ),
                             })
                               .map((_, i) => `verifier-skeleton-${i}`)
@@ -779,7 +780,7 @@ export default function BeneficiaryProfilePage({
                         <Badge
                           variant={
                             formatVerificationStatus(
-                              beneficiary.verificationStatus,
+                              beneficiary.verificationStatus
                             ) === "Verified"
                               ? "default"
                               : "pending"
@@ -831,7 +832,7 @@ export default function BeneficiaryProfilePage({
                                 const verifier = fieldWorkers.find(
                                   (fw) =>
                                     fw.authority.toBase58() ===
-                                    verifierAddress.toBase58(),
+                                    verifierAddress.toBase58()
                                 );
 
                                 return (
@@ -875,7 +876,7 @@ export default function BeneficiaryProfilePage({
                                     )}
                                   </div>
                                 );
-                              },
+                              }
                             )}
                           </div>
                         </div>
@@ -925,19 +926,19 @@ export default function BeneficiaryProfilePage({
                             beneficiary.damageSeverity >= 8
                               ? "border-red-500 text-red-500 bg-red-500/10"
                               : beneficiary.damageSeverity >= 6
-                                ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                : beneficiary.damageSeverity >= 4
-                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                  : "border-green-500 text-green-500 bg-green-500/10"
+                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                              : beneficiary.damageSeverity >= 4
+                              ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                              : "border-green-500 text-green-500 bg-green-500/10"
                           }
                         >
                           {beneficiary.damageSeverity >= 8
                             ? "Critical"
                             : beneficiary.damageSeverity >= 6
-                              ? "Severe"
-                              : beneficiary.damageSeverity >= 4
-                                ? "Moderate"
-                                : "Minor"}{" "}
+                            ? "Severe"
+                            : beneficiary.damageSeverity >= 4
+                            ? "Moderate"
+                            : "Minor"}{" "}
                           ({beneficiary.damageSeverity}/10)
                         </Badge>
                       </div>
@@ -1121,7 +1122,7 @@ export default function BeneficiaryProfilePage({
                     <div className="space-y-2">
                       {Array.from(
                         { length: 3 },
-                        (_, i) => `donation-skeleton-${i}`,
+                        (_, i) => `donation-skeleton-${i}`
                       ).map((key) => (
                         <div
                           key={key}
@@ -1186,107 +1187,120 @@ export default function BeneficiaryProfilePage({
                               <div className="flex-1" />
                               <span className="text-xs text-theme-text/60 shrink-0">
                                 {new Date(
-                                  donation.timestamp * 1000,
+                                  donation.timestamp * 1000
                                 ).toLocaleDateString()}
                               </span>
                             </button>
 
                             {/* Expanded View */}
-                            {isExpanded && (
-                              <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Donor
-                                    </p>
-                                    <p className="text-sm font-mono text-theme-text break-all">
-                                      {donation.isAnonymous
-                                        ? "Anonymous (hidden for privacy)"
-                                        : donation.donor.toBase58()}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Amount
-                                    </p>
-                                    <p className="text-sm text-theme-text">
-                                      ${amount.toFixed(2)} USDC
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Platform Fee
-                                    </p>
-                                    <p className="text-sm text-theme-text">
-                                      $
-                                      {(
-                                        donation.platformFee / 1_000_000
-                                      ).toFixed(2)}{" "}
-                                      USDC
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Net Amount
-                                    </p>
-                                    <p className="text-sm text-theme-primary font-semibold">
-                                      $
-                                      {(donation.netAmount / 1_000_000).toFixed(
-                                        2,
-                                      )}{" "}
-                                      USDC
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Date & Time
-                                    </p>
-                                    <p className="text-sm text-theme-text">
-                                      {new Date(
-                                        donation.timestamp * 1000,
-                                      ).toLocaleString()}
-                                    </p>
-                                  </div>
-                                  {donation.transactionSignature && (
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{
+                                    duration: 0.3,
+                                    ease: "easeInOut",
+                                  }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Donor
+                                        </p>
+                                        <p className="text-sm font-mono text-theme-text break-all">
+                                          {donation.isAnonymous
+                                            ? "Anonymous (hidden for privacy)"
+                                            : donation.donor.toBase58()}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Amount
+                                        </p>
+                                        <p className="text-sm text-theme-text">
+                                          ${amount.toFixed(2)} USDC
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Platform Fee
+                                        </p>
+                                        <p className="text-sm text-theme-text">
+                                          $
+                                          {(
+                                            donation.platformFee / 1_000_000
+                                          ).toFixed(2)}{" "}
+                                          USDC
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Net Amount
+                                        </p>
+                                        <p className="text-sm text-theme-primary font-semibold">
+                                          $
+                                          {(
+                                            donation.netAmount / 1_000_000
+                                          ).toFixed(2)}{" "}
+                                          USDC
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Date & Time
+                                        </p>
+                                        <p className="text-sm text-theme-text">
+                                          {new Date(
+                                            donation.timestamp * 1000
+                                          ).toLocaleString()}
+                                        </p>
+                                      </div>
+                                      {donation.transactionSignature && (
+                                        <div>
+                                          <p className="text-xs text-theme-text/60 mb-1">
+                                            Transaction
+                                          </p>
+                                          <a
+                                            href={getExplorerUrl(
+                                              donation.transactionSignature
+                                            )}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-theme-primary hover:underline flex items-center gap-1"
+                                            onClick={(e) => e.stopPropagation()}
+                                          >
+                                            View on Explorer
+                                            <ExternalLink className="h-3 w-3" />
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+
                                     <div>
                                       <p className="text-xs text-theme-text/60 mb-1">
-                                        Transaction
+                                        Message
                                       </p>
-                                      <a
-                                        href={getExplorerUrl(
-                                          donation.transactionSignature,
+                                      <div className="text-sm bg-theme-card-bg p-3 rounded border border-theme-border">
+                                        {donation.message &&
+                                        donation.message.trim() !== "" ? (
+                                          <p className="text-theme-text italic">
+                                            "{donation.message}"
+                                          </p>
+                                        ) : (
+                                          <p className="text-theme-text/60 italic">
+                                            No message attached
+                                          </p>
                                         )}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-sm text-theme-primary hover:underline flex items-center gap-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        View on Explorer
-                                        <ExternalLink className="h-3 w-3" />
-                                      </a>
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Message
-                                  </p>
-                                  <div className="text-sm bg-theme-card-bg p-3 rounded border border-theme-border">
-                                    {donation.message &&
-                                    donation.message.trim() !== "" ? (
-                                      <p className="text-theme-text italic">
-                                        "{donation.message}"
-                                      </p>
-                                    ) : (
-                                      <p className="text-theme-text/60 italic">
-                                        No message attached
-                                      </p>
-                                    )}
                                   </div>
-                                </div>
-                              </div>
-                            )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}

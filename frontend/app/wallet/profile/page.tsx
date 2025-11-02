@@ -14,6 +14,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { DonationIcon } from "@/components/icons/donation-icon";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
@@ -77,7 +78,7 @@ export default function WalletProfilePage() {
   useEffect(() => {
     if (wallet.publicKey && beneficiaries.length > 0) {
       const found = beneficiaries.find(
-        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58(),
+        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58()
       );
       setBeneficiary(found || null);
     } else {
@@ -98,10 +99,10 @@ export default function WalletProfilePage() {
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           wallet.publicKey,
           {
-            programId: new (await import("@solana/web3.js")).PublicKey(
-              "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-            ),
-          },
+            programId: new (
+              await import("@solana/web3.js")
+            ).PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+          }
         );
 
         let totalBalance = 0;
@@ -125,25 +126,25 @@ export default function WalletProfilePage() {
   // Get donations for this beneficiary
   const beneficiaryDonations = beneficiary
     ? filterByRecipient(beneficiary.publicKey).sort(
-        (a, b) => b.timestamp - a.timestamp,
+        (a, b) => b.timestamp - a.timestamp
       )
     : [];
 
   // Get distributions for this beneficiary
   const beneficiaryDistributions = beneficiary
     ? filterByBeneficiary(beneficiary.publicKey).sort(
-        (a, b) => b.createdAt - a.createdAt,
+        (a, b) => b.createdAt - a.createdAt
       )
     : [];
 
   // Calculate pending claims
   const pendingDistributions = beneficiaryDistributions.filter(
-    (d) => !d.isFullyClaimed,
+    (d) => !d.isFullyClaimed
   );
   const totalPendingAmount =
     pendingDistributions.reduce(
       (sum, d) => sum + (d.amountAllocated - d.amountClaimed),
-      0,
+      0
     ) / 1_000_000;
 
   // Claim distribution function
@@ -163,7 +164,7 @@ export default function WalletProfilePage() {
 
         // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
         const poolAccount = await (program.account as any).fundPool.fetch(
-          distribution.pool,
+          distribution.pool
         );
 
         const disasterId = poolAccount.disasterId;
@@ -173,22 +174,22 @@ export default function WalletProfilePage() {
 
         const beneficiaryTokenAccount = await getAssociatedTokenAddress(
           tokenMint,
-          walletPublicKey,
+          walletPublicKey
         );
 
         // Check if token account exists
         const accountInfo = await connection.getAccountInfo(
-          beneficiaryTokenAccount,
+          beneficiaryTokenAccount
         );
 
         const [poolPDA] = deriveFundPoolPDA(disasterId, poolId);
         const [distributionPDA] = deriveDistributionPDA(
           walletPublicKey,
-          poolPDA,
+          poolPDA
         );
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           walletPublicKey,
-          disasterId,
+          disasterId
         );
 
         // Build the transaction
@@ -214,7 +215,7 @@ export default function WalletProfilePage() {
               walletPublicKey, // owner
               tokenMint, // mint
               TOKEN_PROGRAM_ID,
-              ASSOCIATED_TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
             ),
           ]);
         }
@@ -228,7 +229,7 @@ export default function WalletProfilePage() {
         onSuccess: () => {
           refetchDistributions();
         },
-      },
+      }
     );
   };
 
@@ -277,7 +278,7 @@ export default function WalletProfilePage() {
                     <div className="h-10 w-32 bg-theme-border rounded animate-pulse" />
                   </CardContent>
                 </Card>
-              ),
+              )
             )}
           </div>
 
@@ -290,7 +291,7 @@ export default function WalletProfilePage() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {Array.from(
                     { length: 4 },
-                    (_, i) => `beneficiary-detail-skeleton-${i}`,
+                    (_, i) => `beneficiary-detail-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -316,7 +317,7 @@ export default function WalletProfilePage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `distribution-skeleton-${i}`,
+                    (_, i) => `distribution-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -479,7 +480,7 @@ export default function WalletProfilePage() {
                           <span className="text-theme-text/60">allocated</span>
                           <span className="text-xs text-theme-text/60">
                             {new Date(
-                              distribution.createdAt * 1000,
+                              distribution.createdAt * 1000
                             ).toLocaleDateString()}
                           </span>
                         </div>
@@ -576,7 +577,7 @@ export default function WalletProfilePage() {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `donation-skeleton-${i}`,
+                      (_, i) => `donation-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -637,33 +638,46 @@ export default function WalletProfilePage() {
                               <div className="flex-1" />
                               <span className="text-xs text-theme-text/60 shrink-0">
                                 {new Date(
-                                  distribution.createdAt * 1000,
+                                  distribution.createdAt * 1000
                                 ).toLocaleDateString()}
                               </span>
                             </button>
 
-                            {isExpanded && (
-                              <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Amount Allocated
-                                    </p>
-                                    <p className="text-sm text-theme-text">
-                                      ${amount.toFixed(2)} USDC
-                                    </p>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{
+                                    duration: 0.3,
+                                    ease: "easeInOut",
+                                  }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Amount Allocated
+                                        </p>
+                                        <p className="text-sm text-theme-text">
+                                          ${amount.toFixed(2)} USDC
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Status
+                                        </p>
+                                        <Badge variant="default">
+                                          Fully Claimed
+                                        </Badge>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Status
-                                    </p>
-                                    <Badge variant="default">
-                                      Fully Claimed
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}
@@ -701,86 +715,102 @@ export default function WalletProfilePage() {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                donation.timestamp * 1000,
+                                donation.timestamp * 1000
                               ).toLocaleDateString()}
                             </span>
                           </button>
 
-                          {isExpanded && (
-                            <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Donor
-                                  </p>
-                                  <p className="text-sm font-mono text-theme-text break-all">
-                                    {donation.isAnonymous
-                                      ? "Anonymous"
-                                      : donation.donor.toBase58()}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Amount
-                                  </p>
-                                  <p className="text-sm text-theme-text">
-                                    ${(donation.amount / 1_000_000).toFixed(2)}{" "}
-                                    USDC
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Platform Fee
-                                  </p>
-                                  <p className="text-sm text-theme-text">
-                                    $
-                                    {(donation.platformFee / 1_000_000).toFixed(
-                                      2,
-                                    )}{" "}
-                                    USDC
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Net Amount
-                                  </p>
-                                  <p className="text-sm text-theme-primary font-semibold">
-                                    ${netAmount.toFixed(2)} USDC
-                                  </p>
-                                </div>
-                                {donation.transactionSignature && (
-                                  <div className="md:col-span-2">
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Transaction
-                                    </p>
-                                    <a
-                                      href={getExplorerUrl(
-                                        donation.transactionSignature,
-                                      )}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-theme-primary hover:underline flex items-center gap-1"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      View on Explorer
-                                      <ExternalLink className="h-3 w-3" />
-                                    </a>
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{
+                                  duration: 0.3,
+                                  ease: "easeInOut",
+                                }}
+                                className="overflow-hidden"
+                              >
+                                <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Donor
+                                      </p>
+                                      <p className="text-sm font-mono text-theme-text break-all">
+                                        {donation.isAnonymous
+                                          ? "Anonymous"
+                                          : donation.donor.toBase58()}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Amount
+                                      </p>
+                                      <p className="text-sm text-theme-text">
+                                        $
+                                        {(donation.amount / 1_000_000).toFixed(
+                                          2
+                                        )}{" "}
+                                        USDC
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Platform Fee
+                                      </p>
+                                      <p className="text-sm text-theme-text">
+                                        $
+                                        {(
+                                          donation.platformFee / 1_000_000
+                                        ).toFixed(2)}{" "}
+                                        USDC
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Net Amount
+                                      </p>
+                                      <p className="text-sm text-theme-primary font-semibold">
+                                        ${netAmount.toFixed(2)} USDC
+                                      </p>
+                                    </div>
+                                    {donation.transactionSignature && (
+                                      <div className="md:col-span-2">
+                                        <p className="text-xs text-theme-text/60 mb-1">
+                                          Transaction
+                                        </p>
+                                        <a
+                                          href={getExplorerUrl(
+                                            donation.transactionSignature
+                                          )}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-sm text-theme-primary hover:underline flex items-center gap-1"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          View on Explorer
+                                          <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
 
-                              {donation.message && (
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Message
-                                  </p>
-                                  <p className="text-sm text-theme-text italic bg-theme-card-bg p-3 rounded border border-theme-border">
-                                    "{donation.message}"
-                                  </p>
+                                  {donation.message && (
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Message
+                                      </p>
+                                      <p className="text-sm text-theme-text italic bg-theme-card-bg p-3 rounded border border-theme-border">
+                                        "{donation.message}"
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       );
                     })}

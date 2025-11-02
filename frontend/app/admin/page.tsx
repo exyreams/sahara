@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export default function AdminDashboardPage() {
     refetch: refetchLogs,
   } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
@@ -170,7 +171,7 @@ export default function AdminDashboardPage() {
                     <div className="h-3 w-40 bg-theme-border rounded animate-pulse" />
                   </CardContent>
                 </Card>
-              ),
+              )
             )}
           </div>
 
@@ -191,7 +192,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-3">
                   {Array.from(
                     { length: 5 },
-                    (_, i) => `activity-skeleton-${i}`,
+                    (_, i) => `activity-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -226,7 +227,7 @@ export default function AdminDashboardPage() {
                       <div className="h-10 w-full bg-theme-border rounded animate-pulse" />
                     </CardContent>
                   </Card>
-                ),
+                )
               )}
             </div>
           </div>
@@ -433,7 +434,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 10 },
-                    (_, i) => `log-skeleton-${i}`,
+                    (_, i) => `log-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -486,180 +487,194 @@ export default function AdminDashboardPage() {
                         </button>
 
                         {/* Expanded View */}
-                        {isExpanded && (
-                          <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Actor
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-mono text-theme-text break-all">
-                                    {activity.actor.toString()}
-                                  </p>
-                                  <a
-                                    href={getExplorerUrl(
-                                      activity.actor.toString(),
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-theme-primary hover:underline shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Target
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-mono text-theme-text break-all">
-                                    {activity.target.toString()}
-                                  </p>
-                                  <a
-                                    href={getExplorerUrl(
-                                      activity.target.toString(),
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-theme-primary hover:underline shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Date & Time
-                                </p>
-                                <p className="text-sm text-theme-text">
-                                  {new Date(
-                                    activity.timestamp * 1000,
-                                  ).toLocaleString()}
-                                </p>
-                              </div>
-                              {activity.amount !== null && (
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Amount
-                                  </p>
-                                  <p className="text-sm text-theme-primary font-semibold">
-                                    ${(activity.amount / 1_000_000).toFixed(2)}{" "}
-                                    USDC
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Parse and display metadata */}
-                            {activity.metadata &&
-                              (() => {
-                                // Parse metadata (format: "Key: Value | Key: Value")
-                                const metadataParts =
-                                  activity.metadata.split(" | ");
-                                const parsedData: Record<string, string> = {};
-
-                                metadataParts.forEach((part) => {
-                                  const [key, value] = part.split(": ");
-                                  if (key && value) {
-                                    parsedData[key] = value;
-                                  }
-                                });
-
-                                return (
-                                  <div className="pt-3 border-t border-theme-border">
-                                    <p className="text-xs text-theme-text/60 mb-2">
-                                      Additional Details
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="text-xs text-theme-text/60 mb-1">
+                                      Actor
                                     </p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                      {parsedData.Pool && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Pool Name
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            {parsedData.Pool}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Amount && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Donation Amount
-                                          </p>
-                                          <p className="text-sm text-theme-primary font-semibold">
-                                            $
-                                            {(
-                                              Number.parseInt(
-                                                parsedData.Amount,
-                                                10,
-                                              ) / 1_000_000
-                                            ).toFixed(2)}{" "}
-                                            USDC
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Fee && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Platform Fee
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            $
-                                            {(
-                                              Number.parseInt(
-                                                parsedData.Fee,
-                                                10,
-                                              ) / 1_000_000
-                                            ).toFixed(2)}{" "}
-                                            USDC
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Disaster && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Disaster
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            {parsedData.Disaster}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {/* Display any other metadata fields */}
-                                      {Object.entries(parsedData).map(
-                                        ([key, value]) => {
-                                          if (
-                                            ![
-                                              "Pool",
-                                              "Amount",
-                                              "Fee",
-                                              "Disaster",
-                                            ].includes(key)
-                                          ) {
-                                            return (
-                                              <div key={key}>
-                                                <p className="text-xs text-theme-text/60 mb-1">
-                                                  {key}
-                                                </p>
-                                                <p className="text-sm text-theme-text">
-                                                  {value}
-                                                </p>
-                                              </div>
-                                            );
-                                          }
-                                          return null;
-                                        },
-                                      )}
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-mono text-theme-text break-all">
+                                        {activity.actor.toString()}
+                                      </p>
+                                      <a
+                                        href={getExplorerUrl(
+                                          activity.actor.toString()
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-theme-primary hover:underline shrink-0"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
                                     </div>
                                   </div>
-                                );
-                              })()}
-                          </div>
-                        )}
+                                  <div>
+                                    <p className="text-xs text-theme-text/60 mb-1">
+                                      Target
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-mono text-theme-text break-all">
+                                        {activity.target.toString()}
+                                      </p>
+                                      <a
+                                        href={getExplorerUrl(
+                                          activity.target.toString()
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-theme-primary hover:underline shrink-0"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-theme-text/60 mb-1">
+                                      Date & Time
+                                    </p>
+                                    <p className="text-sm text-theme-text">
+                                      {new Date(
+                                        activity.timestamp * 1000
+                                      ).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  {activity.amount !== null && (
+                                    <div>
+                                      <p className="text-xs text-theme-text/60 mb-1">
+                                        Amount
+                                      </p>
+                                      <p className="text-sm text-theme-primary font-semibold">
+                                        $
+                                        {(activity.amount / 1_000_000).toFixed(
+                                          2
+                                        )}{" "}
+                                        USDC
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Parse and display metadata */}
+                                {activity.metadata &&
+                                  (() => {
+                                    // Parse metadata (format: "Key: Value | Key: Value")
+                                    const metadataParts =
+                                      activity.metadata.split(" | ");
+                                    const parsedData: Record<string, string> =
+                                      {};
+
+                                    metadataParts.forEach((part) => {
+                                      const [key, value] = part.split(": ");
+                                      if (key && value) {
+                                        parsedData[key] = value;
+                                      }
+                                    });
+
+                                    return (
+                                      <div className="pt-3 border-t border-theme-border">
+                                        <p className="text-xs text-theme-text/60 mb-2">
+                                          Additional Details
+                                        </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          {parsedData.Pool && (
+                                            <div>
+                                              <p className="text-xs text-theme-text/60 mb-1">
+                                                Pool Name
+                                              </p>
+                                              <p className="text-sm text-theme-text">
+                                                {parsedData.Pool}
+                                              </p>
+                                            </div>
+                                          )}
+                                          {parsedData.Amount && (
+                                            <div>
+                                              <p className="text-xs text-theme-text/60 mb-1">
+                                                Donation Amount
+                                              </p>
+                                              <p className="text-sm text-theme-primary font-semibold">
+                                                $
+                                                {(
+                                                  Number.parseInt(
+                                                    parsedData.Amount,
+                                                    10
+                                                  ) / 1_000_000
+                                                ).toFixed(2)}{" "}
+                                                USDC
+                                              </p>
+                                            </div>
+                                          )}
+                                          {parsedData.Fee && (
+                                            <div>
+                                              <p className="text-xs text-theme-text/60 mb-1">
+                                                Platform Fee
+                                              </p>
+                                              <p className="text-sm text-theme-text">
+                                                $
+                                                {(
+                                                  Number.parseInt(
+                                                    parsedData.Fee,
+                                                    10
+                                                  ) / 1_000_000
+                                                ).toFixed(2)}{" "}
+                                                USDC
+                                              </p>
+                                            </div>
+                                          )}
+                                          {parsedData.Disaster && (
+                                            <div>
+                                              <p className="text-xs text-theme-text/60 mb-1">
+                                                Disaster
+                                              </p>
+                                              <p className="text-sm text-theme-text">
+                                                {parsedData.Disaster}
+                                              </p>
+                                            </div>
+                                          )}
+                                          {/* Display any other metadata fields */}
+                                          {Object.entries(parsedData).map(
+                                            ([key, value]) => {
+                                              if (
+                                                ![
+                                                  "Pool",
+                                                  "Amount",
+                                                  "Fee",
+                                                  "Disaster",
+                                                ].includes(key)
+                                              ) {
+                                                return (
+                                                  <div key={key}>
+                                                    <p className="text-xs text-theme-text/60 mb-1">
+                                                      {key}
+                                                    </p>
+                                                    <p className="text-sm text-theme-text">
+                                                      {value}
+                                                    </p>
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     );
                   })}

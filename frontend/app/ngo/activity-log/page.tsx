@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +53,7 @@ export default function NGOActivityLogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1280,
+    typeof window !== "undefined" ? window.innerWidth : 1280
   );
   const itemsPerPage = 20;
 
@@ -88,8 +89,8 @@ export default function NGOActivityLogPage() {
         // Actions performed by any of the NGO's field workers
         fieldWorkers.some(
           (fw) =>
-            fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority),
-        ),
+            fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority)
+        )
     );
 
     // Create pseudo-logs for field worker registrations
@@ -107,7 +108,7 @@ export default function NGOActivityLogPage() {
 
     // Combine and sort by timestamp (newest first)
     return [...filtered, ...fieldWorkerLogs].sort(
-      (a, b) => b.timestamp - a.timestamp,
+      (a, b) => b.timestamp - a.timestamp
     );
   }, [ngo, logs, fieldWorkers]);
 
@@ -165,7 +166,7 @@ export default function NGOActivityLogPage() {
   // Format address with dynamic truncation based on screen size
   const formatAddress = (
     address: string,
-    mode: "collapsed" | "full" = "collapsed",
+    mode: "collapsed" | "full" = "collapsed"
   ): string => {
     if (mode === "full") return address;
 
@@ -204,7 +205,7 @@ export default function NGOActivityLogPage() {
 
   // Expanded state for actions
   const [expandedActions, setExpandedActions] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const toggleExpanded = (actionKey: string) => {
@@ -254,7 +255,7 @@ export default function NGOActivityLogPage() {
             <div className="space-y-2">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`,
+                (_, i) => `activity-log-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -493,148 +494,162 @@ export default function NGOActivityLogPage() {
                     </button>
 
                     {/* Expanded View */}
-                    {isExpanded && (
-                      <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
-                        <div className="bg-theme-background p-4 rounded-md">
-                          {/* Action Summary */}
-                          <div className="text-xs text-muted-foreground mb-1">
-                            Activity:
-                          </div>
-                          <div className="mb-4 p-3 bg-theme-card-bg border border-theme-border rounded-lg">
-                            <div className="text-sm text-theme-text-highlight font-medium">
-                              <span className="text-theme-primary font-semibold">
-                                {formatActionType(log.actionType)}
-                              </span>{" "}
-                              of{" "}
-                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                {formatAddress(log.target.toString())}
-                              </code>{" "}
-                              by{" "}
-                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                {formatAddress(log.actor.toString())}
-                              </code>
-                            </div>
-                            {log.metadata && (
-                              <div className="mt-2 text-xs text-muted-foreground">
-                                <span className="font-medium">Details:</span>{" "}
-                                {log.metadata}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
+                            <div className="bg-theme-background p-4 rounded-md">
+                              {/* Action Summary */}
+                              <div className="text-xs text-muted-foreground mb-1">
+                                Activity:
                               </div>
-                            )}
-                            {log.amount !== null &&
-                              log.amount !== undefined && (
-                                <div className="mt-2 text-xs text-muted-foreground">
-                                  <span className="font-medium">Amount:</span>{" "}
-                                  {(log.amount / 1e6).toFixed(2)} USDC
-                                </div>
-                              )}
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                            {/* Left Column */}
-                            <div className="space-y-4">
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Target Address:
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                    {log.target.toString()}
+                              <div className="mb-4 p-3 bg-theme-card-bg border border-theme-border rounded-lg">
+                                <div className="text-sm text-theme-text-highlight font-medium">
+                                  <span className="text-theme-primary font-semibold">
+                                    {formatActionType(log.actionType)}
+                                  </span>{" "}
+                                  of{" "}
+                                  <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                    {formatAddress(log.target.toString())}
+                                  </code>{" "}
+                                  by{" "}
+                                  <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                    {formatAddress(log.actor.toString())}
                                   </code>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="shrink-0 h-7 w-7 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(
-                                        `https://explorer.solana.com/address/${log.target.toString()}?cluster=${
-                                          process.env
-                                            .NEXT_PUBLIC_SOLANA_NETWORK ||
-                                          "devnet"
-                                        }`,
-                                        "_blank",
-                                      );
-                                    }}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
                                 </div>
+                                {log.metadata && (
+                                  <div className="mt-2 text-xs text-muted-foreground">
+                                    <span className="font-medium">
+                                      Details:
+                                    </span>{" "}
+                                    {log.metadata}
+                                  </div>
+                                )}
+                                {log.amount !== null &&
+                                  log.amount !== undefined && (
+                                    <div className="mt-2 text-xs text-muted-foreground">
+                                      <span className="font-medium">
+                                        Amount:
+                                      </span>{" "}
+                                      {(log.amount / 1e6).toFixed(2)} USDC
+                                    </div>
+                                  )}
                               </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Actor Address:
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                {/* Left Column */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Target Address:
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                        {log.target.toString()}
+                                      </code>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="shrink-0 h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(
+                                            `https://explorer.solana.com/address/${log.target.toString()}?cluster=${
+                                              process.env
+                                                .NEXT_PUBLIC_SOLANA_NETWORK ||
+                                              "devnet"
+                                            }`,
+                                            "_blank"
+                                          );
+                                        }}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Actor Address:
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                        {log.actor.toString()}
+                                      </code>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="shrink-0 h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(
+                                            `https://explorer.solana.com/address/${log.actor.toString()}?cluster=${
+                                              process.env
+                                                .NEXT_PUBLIC_SOLANA_NETWORK ||
+                                              "devnet"
+                                            }`,
+                                            "_blank"
+                                          );
+                                        }}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Log Account Address:
+                                    </div>
+                                    <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
+                                      {log.publicKey.toString()}
+                                    </code>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                    {log.actor.toString()}
-                                  </code>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="shrink-0 h-7 w-7 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(
-                                        `https://explorer.solana.com/address/${log.actor.toString()}?cluster=${
-                                          process.env
-                                            .NEXT_PUBLIC_SOLANA_NETWORK ||
-                                          "devnet"
-                                        }`,
-                                        "_blank",
-                                      );
-                                    }}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
+                                {/* Right Column */}
+                                <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
+                                  <div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Timestamp:
+                                    </div>
+                                    <div className="text-sm text-theme-text-highlight">
+                                      {formatFullTimestamp(log.timestamp)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {formatTimestamp(log.timestamp)}
+                                    </div>
+                                  </div>
+                                  <div className="pt-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(
+                                          `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=${
+                                            process.env
+                                              .NEXT_PUBLIC_SOLANA_NETWORK ||
+                                            "devnet"
+                                          }`,
+                                          "_blank"
+                                        );
+                                      }}
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-2" />
+                                      View on Explorer
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Log Account Address:
-                                </div>
-                                <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
-                                  {log.publicKey.toString()}
-                                </code>
-                              </div>
-                            </div>
-                            {/* Right Column */}
-                            <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Timestamp:
-                                </div>
-                                <div className="text-sm text-theme-text-highlight">
-                                  {formatFullTimestamp(log.timestamp)}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {formatTimestamp(log.timestamp)}
-                                </div>
-                              </div>
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=${
-                                        process.env
-                                          .NEXT_PUBLIC_SOLANA_NETWORK ||
-                                        "devnet"
-                                      }`,
-                                      "_blank",
-                                    );
-                                  }}
-                                >
-                                  <ExternalLink className="h-3 w-3 mr-2" />
-                                  View on Explorer
-                                </Button>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}
