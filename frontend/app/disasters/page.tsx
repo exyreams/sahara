@@ -35,6 +35,7 @@ export default function DisastersPage() {
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
 
   // Check if user can create disasters (admin or verified NGO)
   const canCreateDisaster =
@@ -57,7 +58,13 @@ export default function DisastersPage() {
     const matchesType =
       typeFilters.length === 0 || typeFilters.includes(disaster.eventType);
 
-    return matchesSearch && matchesStatus && matchesType;
+    const matchesOwner =
+      ownerFilter === "all" ||
+      (ownerFilter === "mine" &&
+        wallet.publicKey &&
+        disaster.authority.equals(wallet.publicKey));
+
+    return matchesSearch && matchesStatus && matchesType && matchesOwner;
   });
 
   // Wallet not connected - Show disasters publicly with particle hero
@@ -335,6 +342,25 @@ export default function DisastersPage() {
             className="flex-1"
           />
 
+          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+            <Button
+              variant={ownerFilter === "all" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setOwnerFilter("all")}
+              className="px-4"
+            >
+              All
+            </Button>
+            <Button
+              variant={ownerFilter === "mine" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setOwnerFilter("mine")}
+              className="px-4"
+            >
+              Mine
+            </Button>
+          </div>
+
           <FilterDropdown
             label="Status"
             options={[
@@ -383,7 +409,8 @@ export default function DisastersPage() {
           </Badge>
           {(searchQuery ||
             statusFilters.length > 0 ||
-            typeFilters.length > 0) && (
+            typeFilters.length > 0 ||
+            ownerFilter === "mine") && (
             <Button
               variant="ghost"
               size="sm"
@@ -391,6 +418,7 @@ export default function DisastersPage() {
                 setSearchQuery("");
                 setStatusFilters([]);
                 setTypeFilters([]);
+                setOwnerFilter("all");
               }}
             >
               Clear filters
@@ -462,19 +490,31 @@ export default function DisastersPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center min-h-64 border border-theme-border rounded-lg bg-theme-card-bg">
-            <h3 className="text-lg font-semibold mb-2">No disasters found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchQuery || statusFilters.length > 0 || typeFilters.length > 0
-                ? "Try adjusting your filters"
-                : "No disaster events have been created yet"}
-            </p>
-            {canCreateDisaster && (
-              <Button onClick={() => setShowCreateModal(true)}>
-                Create First Disaster
-              </Button>
-            )}
-          </div>
+          <Card className="bg-theme-card-bg border-theme-border">
+            <CardHeader className="text-center py-20">
+              <CardTitle className="text-xl font-semibold mb-3 text-theme-text-highlight">
+                {ownerFilter === "mine"
+                  ? "You haven't created any disasters"
+                  : "No disasters found"}
+              </CardTitle>
+              <CardDescription className="text-base text-theme-text/60 mb-4">
+                {ownerFilter === "mine"
+                  ? "Create your first disaster event to get started"
+                  : searchQuery ||
+                    statusFilters.length > 0 ||
+                    typeFilters.length > 0
+                  ? "Try adjusting your filters"
+                  : "No disaster events have been created yet"}
+              </CardDescription>
+              {canCreateDisaster && (
+                <div className="flex justify-center mt-4">
+                  <Button onClick={() => setShowCreateModal(true)}>
+                    Create First Disaster
+                  </Button>
+                </div>
+              )}
+            </CardHeader>
+          </Card>
         )}
       </main>
     </div>

@@ -45,6 +45,7 @@ export default function BeneficiariesPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [isFieldWorker, setIsFieldWorker] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
 
   // Check if user is a field worker
   useEffect(() => {
@@ -82,7 +83,13 @@ export default function BeneficiariesPage() {
       statusFilters.length === 0 ||
       statusFilters.includes(beneficiary.verificationStatus);
 
-    return matchesSearch && matchesStatus;
+    const matchesOwner =
+      ownerFilter === "all" ||
+      (ownerFilter === "mine" &&
+        wallet.publicKey &&
+        beneficiary.registeredBy.equals(wallet.publicKey));
+
+    return matchesSearch && matchesStatus && matchesOwner;
   });
 
   // Wallet not connected - Show particle hero
@@ -139,7 +146,7 @@ export default function BeneficiariesPage() {
                 <Badge variant="secondary" className="text-lg px-4 py-2">
                   {
                     beneficiaries.filter(
-                      (b) => b.verificationStatus === "Verified",
+                      (b) => b.verificationStatus === "Verified"
                     ).length
                   }{" "}
                   Verified
@@ -234,7 +241,7 @@ export default function BeneficiariesPage() {
                             <Badge
                               variant={
                                 formatVerificationStatus(
-                                  beneficiary.verificationStatus,
+                                  beneficiary.verificationStatus
                                 ) === "Verified"
                                   ? "default"
                                   : "pending"
@@ -242,7 +249,7 @@ export default function BeneficiariesPage() {
                               className="shrink-0"
                             >
                               {formatVerificationStatus(
-                                beneficiary.verificationStatus,
+                                beneficiary.verificationStatus
                               )}
                             </Badge>
                           </div>
@@ -281,19 +288,19 @@ export default function BeneficiariesPage() {
                                 beneficiary.damageSeverity >= 8
                                   ? "border-red-500 text-red-500 bg-red-500/10"
                                   : beneficiary.damageSeverity >= 6
-                                    ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                    : beneficiary.damageSeverity >= 4
-                                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                      : "border-green-500 text-green-500 bg-green-500/10"
+                                  ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                  : beneficiary.damageSeverity >= 4
+                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                  : "border-green-500 text-green-500 bg-green-500/10"
                               }
                             >
                               {beneficiary.damageSeverity >= 8
                                 ? "Critical"
                                 : beneficiary.damageSeverity >= 6
-                                  ? "Severe"
-                                  : beneficiary.damageSeverity >= 4
-                                    ? "Moderate"
-                                    : "Minor"}{" "}
+                                ? "Severe"
+                                : beneficiary.damageSeverity >= 4
+                                ? "Moderate"
+                                : "Minor"}{" "}
                               ({beneficiary.damageSeverity}/10)
                             </Badge>
                           </div>
@@ -380,6 +387,27 @@ export default function BeneficiariesPage() {
             className="flex-1"
           />
 
+          {isFieldWorker && (
+            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+              <Button
+                variant={ownerFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("all")}
+                className="px-4"
+              >
+                All
+              </Button>
+              <Button
+                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setOwnerFilter("mine")}
+                className="px-4"
+              >
+                Mine
+              </Button>
+            </div>
+          )}
+
           <FilterDropdown
             label="Status"
             options={VERIFICATION_STATUSES.map((status) => ({
@@ -415,6 +443,21 @@ export default function BeneficiariesPage() {
             {filteredBeneficiaries.length}{" "}
             {filteredBeneficiaries.length === 1 ? "result" : "results"}
           </Badge>
+          {(searchQuery ||
+            statusFilters.length > 0 ||
+            ownerFilter === "mine") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setStatusFilters([]);
+                setOwnerFilter("all");
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
 
         {loading ? (
@@ -471,7 +514,7 @@ export default function BeneficiariesPage() {
                       <Badge
                         variant={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus,
+                            beneficiary.verificationStatus
                           ) === "Verified"
                             ? "default"
                             : "pending"
@@ -479,7 +522,7 @@ export default function BeneficiariesPage() {
                         className="shrink-0"
                       >
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus,
+                          beneficiary.verificationStatus
                         )}
                       </Badge>
                     </div>
@@ -510,19 +553,19 @@ export default function BeneficiariesPage() {
                           beneficiary.damageSeverity >= 8
                             ? "border-red-500 text-red-500 bg-red-500/10"
                             : beneficiary.damageSeverity >= 6
-                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                              : beneficiary.damageSeverity >= 4
-                                ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                : "border-green-500 text-green-500 bg-green-500/10"
+                            ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                            : beneficiary.damageSeverity >= 4
+                            ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                            : "border-green-500 text-green-500 bg-green-500/10"
                         }
                       >
                         {beneficiary.damageSeverity >= 8
                           ? "Critical"
                           : beneficiary.damageSeverity >= 6
-                            ? "Severe"
-                            : beneficiary.damageSeverity >= 4
-                              ? "Moderate"
-                              : "Minor"}{" "}
+                          ? "Severe"
+                          : beneficiary.damageSeverity >= 4
+                          ? "Moderate"
+                          : "Minor"}{" "}
                         ({beneficiary.damageSeverity}/10)
                       </Badge>
                     </div>
@@ -543,17 +586,21 @@ export default function BeneficiariesPage() {
           </div>
         ) : (
           <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader className="text-center py-12">
-              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
-                No beneficiaries found
+            <CardHeader className="text-center py-24">
+              <CardTitle className="text-xl font-semibold mb-3 text-theme-text-highlight">
+                {ownerFilter === "mine"
+                  ? "You haven't registered any beneficiaries"
+                  : "No beneficiaries found"}
               </CardTitle>
-              <CardDescription className="text-theme-text/60 mb-4">
-                {searchQuery || statusFilters.length > 0
+              <CardDescription className="text-base text-theme-text/60 mb-4">
+                {ownerFilter === "mine"
+                  ? "Register your first beneficiary to get started"
+                  : searchQuery || statusFilters.length > 0
                   ? "Try adjusting your filters"
                   : "No beneficiaries have been registered yet"}
               </CardDescription>
               {isFieldWorker && (
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-4">
                   <Button onClick={() => setShowRegisterModal(true)}>
                     Register First Beneficiary
                   </Button>

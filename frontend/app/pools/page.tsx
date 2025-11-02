@@ -31,6 +31,7 @@ export default function PoolsPage() {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
 
   // Only verified, active, non-blacklisted NGOs can create pools
   const canCreatePool = ngo?.isVerified && ngo?.isActive && !ngo?.isBlacklisted;
@@ -47,7 +48,13 @@ export default function PoolsPage() {
       (statusFilters.includes("active") && pool.isActive) ||
       (statusFilters.includes("closed") && !pool.isActive);
 
-    return matchesSearch && matchesStatus;
+    const matchesOwner =
+      ownerFilter === "all" ||
+      (ownerFilter === "mine" &&
+        wallet.publicKey &&
+        pool.authority.equals(wallet.publicKey));
+
+    return matchesSearch && matchesStatus && matchesOwner;
   });
 
   // Wallet not connected - Show pools publicly with particle hero
@@ -278,6 +285,25 @@ export default function PoolsPage() {
             className="flex-1"
           />
 
+          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+            <Button
+              variant={ownerFilter === "all" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setOwnerFilter("all")}
+              className="px-4"
+            >
+              All
+            </Button>
+            <Button
+              variant={ownerFilter === "mine" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setOwnerFilter("mine")}
+              className="px-4"
+            >
+              Mine
+            </Button>
+          </div>
+
           <FilterDropdown
             label="Status"
             options={[
@@ -314,13 +340,16 @@ export default function PoolsPage() {
             {filteredPools.length}{" "}
             {filteredPools.length === 1 ? "result" : "results"}
           </Badge>
-          {(searchQuery || statusFilters.length > 0) && (
+          {(searchQuery ||
+            statusFilters.length > 0 ||
+            ownerFilter === "mine") && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
                 setSearchQuery("");
                 setStatusFilters([]);
+                setOwnerFilter("all");
               }}
             >
               Clear filters
@@ -402,19 +431,23 @@ export default function PoolsPage() {
             ))}
           </div>
         ) : (
-          <Card className="bg-theme-card-bg border-theme-border h-full">
-            <CardHeader className="text-center py-12">
-              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
-                No fund pools found
+          <Card className="bg-theme-card-bg border-theme-border">
+            <CardHeader className="text-center py-32">
+              <CardTitle className="text-2xl font-semibold mb-3 text-theme-text-highlight">
+                {ownerFilter === "mine"
+                  ? "You haven't created any pools"
+                  : "No fund pools found"}
               </CardTitle>
-              <CardDescription className="text-theme-text/60 mb-4">
-                {searchQuery || statusFilters.length > 0
+              <CardDescription className="text-lg text-theme-text/60 mb-6">
+                {ownerFilter === "mine"
+                  ? "Create your first pool to get started"
+                  : searchQuery || statusFilters.length > 0
                   ? "Try adjusting your filters"
                   : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
-                <div className="flex justify-center mt-4">
-                  <Button onClick={() => setShowCreateModal(true)}>
+                <div className="flex justify-center mt-6">
+                  <Button onClick={() => setShowCreateModal(true)} size="lg">
                     Create Pool
                   </Button>
                 </div>
