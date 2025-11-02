@@ -62,7 +62,7 @@ export function PoolCard({ pool }: PoolCardProps) {
                 {pool.name}
               </CardTitle>
               <Badge
-                variant={pool.isActive ? "default" : "secondary"}
+                variant={pool.isActive ? "default" : "log_action"}
                 className="shrink-0"
               >
                 {pool.isActive ? "Active" : "Closed"}
