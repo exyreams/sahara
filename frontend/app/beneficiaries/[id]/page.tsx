@@ -83,7 +83,7 @@ export default function BeneficiaryProfilePage({
     filterByRecipient,
   } = useDonations();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Get active tab from URL or default to overview
@@ -125,7 +125,7 @@ export default function BeneficiaryProfilePage({
   // Find the field worker who registered this beneficiary
   const registeredByWorker = beneficiary
     ? fieldWorkers.find(
-        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58()
+        (fw) => fw.authority.toBase58() === beneficiary.registeredBy.toBase58(),
       )
     : null;
 
@@ -152,7 +152,7 @@ export default function BeneficiaryProfilePage({
   // Note: recipient is the beneficiary PDA (publicKey), not the authority wallet
   const beneficiaryDonations = beneficiary
     ? filterByRecipient(beneficiary.publicKey).sort(
-        (a, b) => b.timestamp - a.timestamp
+        (a, b) => b.timestamp - a.timestamp,
       )
     : [];
 
@@ -236,7 +236,7 @@ export default function BeneficiaryProfilePage({
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from(
                       { length: 4 },
-                      (_, i) => `stat-skeleton-${i}`
+                      (_, i) => `stat-skeleton-${i}`,
                     ).map((key) => (
                       <div
                         key={key}
@@ -267,7 +267,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-3 sm:grid-cols-2">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `detail-skeleton-${i}`
+                        (_, i) => `detail-skeleton-${i}`,
                       ).map((key) => (
                         <div
                           key={key}
@@ -341,7 +341,7 @@ export default function BeneficiaryProfilePage({
                     <span
                       className={
                         formatVerificationStatus(
-                          beneficiary.verificationStatus
+                          beneficiary.verificationStatus,
                         ) !== "Verified"
                           ? "cursor-not-allowed"
                           : ""
@@ -352,12 +352,12 @@ export default function BeneficiaryProfilePage({
                         size="lg"
                         disabled={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus
+                            beneficiary.verificationStatus,
                           ) !== "Verified"
                         }
                         className={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus
+                            beneficiary.verificationStatus,
                           ) !== "Verified"
                             ? "cursor-not-allowed"
                             : "cursor-pointer"
@@ -375,14 +375,14 @@ export default function BeneficiaryProfilePage({
                     <TooltipContent>
                       <p>
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus
+                          beneficiary.verificationStatus,
                         ) === "Rejected"
                           ? "This beneficiary is rejected and cannot receive donations"
                           : formatVerificationStatus(
-                              beneficiary.verificationStatus
-                            ) === "Flagged"
-                          ? "This beneficiary is flagged and cannot receive donations"
-                          : "Verification needed before donations can be accepted"}
+                                beneficiary.verificationStatus,
+                              ) === "Flagged"
+                            ? "This beneficiary is flagged and cannot receive donations"
+                            : "Verification needed before donations can be accepted"}
                       </p>
                     </TooltipContent>
                   )}
@@ -422,7 +422,7 @@ export default function BeneficiaryProfilePage({
                 wallet.publicKey &&
                 beneficiary.verifierApprovals.some(
                   (verifier) =>
-                    verifier.toBase58() === wallet.publicKey?.toBase58()
+                    verifier.toBase58() === wallet.publicKey?.toBase58(),
                 );
 
               if (hasVerified) {
@@ -627,7 +627,7 @@ export default function BeneficiaryProfilePage({
                           {beneficiary.name}
                         </CardTitle>
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus
+                          beneficiary.verificationStatus,
                         ) === "Verified" ? (
                           <VerifiedIcon
                             className="h-6 w-6"
@@ -636,7 +636,7 @@ export default function BeneficiaryProfilePage({
                         ) : (
                           <Badge variant="pending">
                             {formatVerificationStatus(
-                              beneficiary.verificationStatus
+                              beneficiary.verificationStatus,
                             )}
                           </Badge>
                         )}
@@ -668,7 +668,7 @@ export default function BeneficiaryProfilePage({
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       {Array.from(
                         { length: 4 },
-                        (_, i) => `refresh-skeleton-${i}`
+                        (_, i) => `refresh-skeleton-${i}`,
                       ).map((key) => (
                         <div
                           key={key}
@@ -748,7 +748,7 @@ export default function BeneficiaryProfilePage({
                             {Array.from({
                               length: Math.min(
                                 beneficiary.verifierApprovals.length,
-                                3
+                                3,
                               ),
                             })
                               .map((_, i) => `verifier-skeleton-${i}`)
@@ -779,7 +779,7 @@ export default function BeneficiaryProfilePage({
                         <Badge
                           variant={
                             formatVerificationStatus(
-                              beneficiary.verificationStatus
+                              beneficiary.verificationStatus,
                             ) === "Verified"
                               ? "default"
                               : "pending"
@@ -831,7 +831,7 @@ export default function BeneficiaryProfilePage({
                                 const verifier = fieldWorkers.find(
                                   (fw) =>
                                     fw.authority.toBase58() ===
-                                    verifierAddress.toBase58()
+                                    verifierAddress.toBase58(),
                                 );
 
                                 return (
@@ -875,7 +875,7 @@ export default function BeneficiaryProfilePage({
                                     )}
                                   </div>
                                 );
-                              }
+                              },
                             )}
                           </div>
                         </div>
@@ -925,19 +925,19 @@ export default function BeneficiaryProfilePage({
                             beneficiary.damageSeverity >= 8
                               ? "border-red-500 text-red-500 bg-red-500/10"
                               : beneficiary.damageSeverity >= 6
-                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                              : beneficiary.damageSeverity >= 4
-                              ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                              : "border-green-500 text-green-500 bg-green-500/10"
+                                ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                : beneficiary.damageSeverity >= 4
+                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                  : "border-green-500 text-green-500 bg-green-500/10"
                           }
                         >
                           {beneficiary.damageSeverity >= 8
                             ? "Critical"
                             : beneficiary.damageSeverity >= 6
-                            ? "Severe"
-                            : beneficiary.damageSeverity >= 4
-                            ? "Moderate"
-                            : "Minor"}{" "}
+                              ? "Severe"
+                              : beneficiary.damageSeverity >= 4
+                                ? "Moderate"
+                                : "Minor"}{" "}
                           ({beneficiary.damageSeverity}/10)
                         </Badge>
                       </div>
@@ -1121,7 +1121,7 @@ export default function BeneficiaryProfilePage({
                     <div className="space-y-2">
                       {Array.from(
                         { length: 3 },
-                        (_, i) => `donation-skeleton-${i}`
+                        (_, i) => `donation-skeleton-${i}`,
                       ).map((key) => (
                         <div
                           key={key}
@@ -1186,7 +1186,7 @@ export default function BeneficiaryProfilePage({
                               <div className="flex-1" />
                               <span className="text-xs text-theme-text/60 shrink-0">
                                 {new Date(
-                                  donation.timestamp * 1000
+                                  donation.timestamp * 1000,
                                 ).toLocaleDateString()}
                               </span>
                             </button>
@@ -1232,7 +1232,7 @@ export default function BeneficiaryProfilePage({
                                     <p className="text-sm text-theme-primary font-semibold">
                                       $
                                       {(donation.netAmount / 1_000_000).toFixed(
-                                        2
+                                        2,
                                       )}{" "}
                                       USDC
                                     </p>
@@ -1243,7 +1243,7 @@ export default function BeneficiaryProfilePage({
                                     </p>
                                     <p className="text-sm text-theme-text">
                                       {new Date(
-                                        donation.timestamp * 1000
+                                        donation.timestamp * 1000,
                                       ).toLocaleString()}
                                     </p>
                                   </div>
@@ -1254,7 +1254,7 @@ export default function BeneficiaryProfilePage({
                                       </p>
                                       <a
                                         href={getExplorerUrl(
-                                          donation.transactionSignature
+                                          donation.transactionSignature,
                                         )}
                                         target="_blank"
                                         rel="noopener noreferrer"

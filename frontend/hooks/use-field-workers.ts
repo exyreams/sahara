@@ -61,7 +61,7 @@ export function useFieldWorkers(): UseFieldWorkersReturn {
           registeredBy: account.account.registeredBy,
           notes: account.account.notes,
           bump: account.account.bump,
-        })
+        }),
       );
 
       return formattedFieldWorkers;
@@ -78,17 +78,17 @@ export function useFieldWorkers(): UseFieldWorkersReturn {
   const filterByNGO = useCallback(
     (ngoPublicKey: PublicKey) => {
       return fieldWorkers.filter((fw: FieldWorker) =>
-        fw.ngo?.equals(ngoPublicKey)
+        fw.ngo?.equals(ngoPublicKey),
       );
     },
-    [fieldWorkers]
+    [fieldWorkers],
   );
 
   const filterByStatus = useCallback(
     (isActive: boolean) => {
       return fieldWorkers.filter((fw: FieldWorker) => fw.isActive === isActive);
     },
-    [fieldWorkers]
+    [fieldWorkers],
   );
 
   return {

@@ -54,7 +54,7 @@ export function usePools(): UsePoolsReturn {
           tokenMint: account.account.tokenMint,
           tokenAccount: account.account.tokenAccount,
           distributionType: parseDistributionType(
-            account.account.distributionType
+            account.account.distributionType,
           ),
           totalDeposited: account.account.totalDeposited.toNumber(),
           totalDistributed: account.account.totalDistributed.toNumber(),
@@ -85,7 +85,7 @@ export function usePools(): UsePoolsReturn {
             : null,
           description: account.account.description,
           bump: account.account.bump,
-        })
+        }),
       );
 
       return formattedPools;
@@ -101,14 +101,14 @@ export function usePools(): UsePoolsReturn {
     (disasterId: string) => {
       return pools.filter((p: FundPool) => p.disasterId === disasterId);
     },
-    [pools]
+    [pools],
   );
 
   const filterByStatus = useCallback(
     (isActive: boolean) => {
       return pools.filter((p: FundPool) => p.isActive === isActive);
     },
-    [pools]
+    [pools],
   );
 
   return {

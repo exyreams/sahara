@@ -66,7 +66,7 @@ export function useDisasters(): UseDisastersReturn {
             updatedAt: account.account.updatedAt.toNumber(),
             bump: account.account.bump,
           };
-        }
+        },
       );
 
       return formattedDisasters;
@@ -82,14 +82,14 @@ export function useDisasters(): UseDisastersReturn {
     (isActive: boolean) => {
       return disasters.filter((d: DisasterEvent) => d.isActive === isActive);
     },
-    [disasters]
+    [disasters],
   );
 
   const filterByType = useCallback(
     (type: DisasterType) => {
       return disasters.filter((d: DisasterEvent) => d.eventType === type);
     },
-    [disasters]
+    [disasters],
   );
 
   return {

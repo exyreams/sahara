@@ -89,7 +89,7 @@ export default function AdminLayout({
                   <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
                   <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
                 </div>
-              )
+              ),
             )}
           </div>
         </aside>
@@ -115,7 +115,7 @@ export default function AdminLayout({
                     <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
                     <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function AdminLayout({
           <div
             className={cn(
               "flex items-center h-16",
-              sidebarCollapsed ? "justify-center" : "justify-between px-3"
+              sidebarCollapsed ? "justify-center" : "justify-between px-3",
             )}
           >
             <AnimatePresence mode="wait">
@@ -291,7 +291,7 @@ export default function AdminLayout({
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={cn(
                 "flex items-center justify-center shrink-0 p-2 cursor-pointer rounded-lg transition-all duration-200",
-                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
+                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
               )}
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -316,7 +316,7 @@ export default function AdminLayout({
                   sidebarCollapsed && "justify-center",
                   isActive
                     ? "bg-theme-primary text-theme-background"
-                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
+                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
                 )}
                 title={sidebarCollapsed ? item.label : undefined}
               >

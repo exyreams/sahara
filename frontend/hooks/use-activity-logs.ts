@@ -49,7 +49,7 @@ export function useActivityLogs() {
           amount: item.account.amount,
           timestamp: item.account.timestamp.toNumber(),
           metadata: item.account.metadata,
-        })
+        }),
       );
 
       // Sort by timestamp (newest first)

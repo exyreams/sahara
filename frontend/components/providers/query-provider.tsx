@@ -20,7 +20,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             retry: 0, // Don't retry mutations (blockchain transactions)
           },
         },
-      })
+      }),
   );
 
   return (

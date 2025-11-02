@@ -21,7 +21,7 @@ export function useBeneficiaryProfile(): UseBeneficiaryProfileReturn {
     }
     return (
       beneficiaries.find(
-        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58()
+        (b) => b.authority.toBase58() === wallet.publicKey?.toBase58(),
       ) || null
     );
   }, [wallet.publicKey, beneficiaries]);

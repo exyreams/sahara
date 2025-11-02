@@ -75,7 +75,7 @@ export function useBeneficiaries(): UseBeneficiariesReturn {
             ? account.account.flaggedAt.toNumber()
             : null,
           bump: account.account.bump,
-        })
+        }),
       );
 
       return formattedBeneficiaries;
@@ -92,19 +92,19 @@ export function useBeneficiaries(): UseBeneficiariesReturn {
   const filterByDisaster = useCallback(
     (disasterId: string) => {
       return beneficiaries.filter(
-        (b: Beneficiary) => b.disasterId === disasterId
+        (b: Beneficiary) => b.disasterId === disasterId,
       );
     },
-    [beneficiaries]
+    [beneficiaries],
   );
 
   const filterByStatus = useCallback(
     (status: VerificationStatus) => {
       return beneficiaries.filter(
-        (b: Beneficiary) => b.verificationStatus === status
+        (b: Beneficiary) => b.verificationStatus === status,
       );
     },
-    [beneficiaries]
+    [beneficiaries],
   );
 
   return {

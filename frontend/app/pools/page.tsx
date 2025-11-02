@@ -469,8 +469,8 @@ export default function PoolsPage() {
                 {ownerFilter === "mine"
                   ? "Create your first pool to get started"
                   : searchQuery || statusFilters.length > 0
-                  ? "Try adjusting your filters"
-                  : "Create the first fund pool"}
+                    ? "Try adjusting your filters"
+                    : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
                 <div className="flex justify-center mt-6">

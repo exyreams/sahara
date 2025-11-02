@@ -66,7 +66,7 @@ function VerificationActivity({
   // Filter verified beneficiaries
   const verifiedBeneficiaries = useMemo(() => {
     return beneficiaries.filter((b) =>
-      b.verifierApprovals.some((v) => v.equals(fieldWorker.authority))
+      b.verifierApprovals.some((v) => v.equals(fieldWorker.authority)),
     );
   }, [beneficiaries, fieldWorker.authority]);
 
@@ -76,7 +76,10 @@ function VerificationActivity({
       (b) =>
         searchQuery === "" ||
         b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.authority.toBase58().toLowerCase().includes(searchQuery.toLowerCase())
+        b.authority
+          .toBase58()
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()),
     );
   }, [verifiedBeneficiaries, searchQuery]);
 
@@ -265,13 +268,13 @@ function BeneficiariesList({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [expandedBeneficiary, setExpandedBeneficiary] = useState<string | null>(
-    null
+    null,
   );
 
   // Get unique districts
   const districts = useMemo(() => {
     const uniqueDistricts = new Set(
-      beneficiaries.map((b) => b.location.district)
+      beneficiaries.map((b) => b.location.district),
     );
     return Array.from(uniqueDistricts).sort();
   }, [beneficiaries]);
@@ -391,10 +394,10 @@ function BeneficiariesList({
                         beneficiary.verificationStatus === "Verified"
                           ? "default"
                           : beneficiary.verificationStatus === "Pending"
-                          ? "secondary"
-                          : beneficiary.verificationStatus === "Flagged"
-                          ? "destructive"
-                          : "outline"
+                            ? "secondary"
+                            : beneficiary.verificationStatus === "Flagged"
+                              ? "destructive"
+                              : "outline"
                       }
                       className="shrink-0"
                     >
@@ -562,12 +565,12 @@ export default function FieldWorkerDetailPage() {
 
   // Get beneficiaries registered by this field worker
   const registeredBeneficiaries = beneficiaries.filter((b) =>
-    b.registeredBy.equals(fieldWorker?.authority || PublicKey.default)
+    b.registeredBy.equals(fieldWorker?.authority || PublicKey.default),
   );
 
   // Get flagged beneficiaries by this field worker (only visible to NGO and admin)
   const flaggedBeneficiaries = beneficiaries.filter((b) =>
-    b.flaggedBy?.equals(fieldWorker?.authority || PublicKey.default)
+    b.flaggedBy?.equals(fieldWorker?.authority || PublicKey.default),
   );
 
   const canViewFlags =
@@ -609,7 +612,7 @@ export default function FieldWorkerDetailPage() {
           });
           router.refresh();
         },
-      }
+      },
     );
   };
 
@@ -655,7 +658,7 @@ export default function FieldWorkerDetailPage() {
                       <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
                     </CardContent>
                   </Card>
-                )
+                ),
               )}
             </div>
 
@@ -679,14 +682,14 @@ export default function FieldWorkerDetailPage() {
                   {/* Section skeleton */}
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `section-skeleton-${i}`
+                    (_, i) => `section-skeleton-${i}`,
                   ).map((key, index) => (
                     <div key={key} className="space-y-4">
                       <div className="h-5 w-40 bg-theme-border rounded animate-pulse" />
                       <div className="grid gap-4 md:grid-cols-2 pl-7">
                         {Array.from(
                           { length: 4 },
-                          (_, j) => `field-skeleton-${key}-${j}`
+                          (_, j) => `field-skeleton-${key}-${j}`,
                         ).map((fieldKey) => (
                           <div key={fieldKey} className="space-y-2">
                             <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
@@ -798,8 +801,8 @@ export default function FieldWorkerDetailPage() {
                 {isUpdating
                   ? "Updating..."
                   : fieldWorker.isActive
-                  ? "Deactivate"
-                  : "Activate"}
+                    ? "Deactivate"
+                    : "Activate"}
               </Button>
             </div>
           )}
@@ -924,7 +927,7 @@ export default function FieldWorkerDetailPage() {
                       </p>
                       <p className="font-medium">
                         {new Date(
-                          fieldWorker.registeredAt * 1000
+                          fieldWorker.registeredAt * 1000,
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -935,7 +938,7 @@ export default function FieldWorkerDetailPage() {
                         </p>
                         <p className="font-medium">
                           {new Date(
-                            fieldWorker.activatedAt * 1000
+                            fieldWorker.activatedAt * 1000,
                           ).toLocaleString()}
                         </p>
                       </div>
@@ -946,7 +949,7 @@ export default function FieldWorkerDetailPage() {
                       </p>
                       <p className="font-medium">
                         {new Date(
-                          fieldWorker.lastActivityAt * 1000
+                          fieldWorker.lastActivityAt * 1000,
                         ).toLocaleString()}
                       </p>
                     </div>

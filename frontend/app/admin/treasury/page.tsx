@@ -40,7 +40,7 @@ export default function TreasuryPage() {
       const { getAssociatedTokenAddress } = await import("@solana/spl-token");
       const tokenAccount = await getAssociatedTokenAddress(
         config.usdcMint,
-        config.platformFeeRecipient
+        config.platformFeeRecipient,
       );
 
       // Fetch the account info
@@ -253,7 +253,7 @@ export default function TreasuryPage() {
               ) : (
                 <span className="text-sm font-semibold text-theme-text-highlight">
                   {formatCurrency(
-                    config.totalAidDistributed * (feePercentage / 100)
+                    config.totalAidDistributed * (feePercentage / 100),
                   )}
                 </span>
               )}
@@ -288,7 +288,7 @@ export default function TreasuryPage() {
                   variant="outline"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      config.platformFeeRecipient.toBase58()
+                      config.platformFeeRecipient.toBase58(),
                     );
                   }}
                 >
@@ -301,9 +301,9 @@ export default function TreasuryPage() {
                     window.open(
                       getAddressExplorerUrl(
                         config.platformFeeRecipient,
-                        "devnet"
+                        "devnet",
                       ),
-                      "_blank"
+                      "_blank",
                     );
                   }}
                 >
@@ -340,7 +340,7 @@ export default function TreasuryPage() {
                   onClick={() => {
                     window.open(
                       getAddressExplorerUrl(config.usdcMint, "devnet"),
-                      "_blank"
+                      "_blank",
                     );
                   }}
                 >
@@ -373,7 +373,7 @@ export default function TreasuryPage() {
               ) : (
                 <div className="text-lg font-semibold text-theme-primary">
                   {formatCurrency(
-                    config.totalAidDistributed * (feePercentage / 100)
+                    config.totalAidDistributed * (feePercentage / 100),
                   )}
                 </div>
               )}

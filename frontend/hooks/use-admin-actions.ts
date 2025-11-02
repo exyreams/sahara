@@ -56,7 +56,7 @@ export function useAdminActions(): UseAdminActionsReturn {
       const mappedActions: AdminAction[] = actionAccounts.map((account) => ({
         publicKey: account.publicKey,
         actionType: Object.keys(
-          account.account.actionType
+          account.account.actionType,
         )[0] as AdminActionType,
         target: account.account.target,
         admin: account.account.admin,

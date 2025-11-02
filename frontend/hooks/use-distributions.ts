@@ -82,7 +82,7 @@ export function useDistributions(): UseDistributionsReturn {
           allocationWeight: account.account.allocationWeight,
           notes: account.account.notes,
           bump: account.account.bump,
-        })
+        }),
       );
 
       return formattedDistributions;
@@ -97,19 +97,19 @@ export function useDistributions(): UseDistributionsReturn {
   const filterByPool = useCallback(
     (poolAddress: PublicKey) => {
       return distributions.filter((d: Distribution) =>
-        d.pool.equals(poolAddress)
+        d.pool.equals(poolAddress),
       );
     },
-    [distributions]
+    [distributions],
   );
 
   const filterByBeneficiary = useCallback(
     (beneficiaryAddress: PublicKey) => {
       return distributions.filter((d: Distribution) =>
-        d.beneficiary.equals(beneficiaryAddress)
+        d.beneficiary.equals(beneficiaryAddress),
       );
     },
-    [distributions]
+    [distributions],
   );
 
   return {

@@ -52,7 +52,7 @@ export default function NGOActivityLogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1280
+    typeof window !== "undefined" ? window.innerWidth : 1280,
   );
   const itemsPerPage = 20;
 
@@ -88,8 +88,8 @@ export default function NGOActivityLogPage() {
         // Actions performed by any of the NGO's field workers
         fieldWorkers.some(
           (fw) =>
-            fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority)
-        )
+            fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority),
+        ),
     );
 
     // Create pseudo-logs for field worker registrations
@@ -107,7 +107,7 @@ export default function NGOActivityLogPage() {
 
     // Combine and sort by timestamp (newest first)
     return [...filtered, ...fieldWorkerLogs].sort(
-      (a, b) => b.timestamp - a.timestamp
+      (a, b) => b.timestamp - a.timestamp,
     );
   }, [ngo, logs, fieldWorkers]);
 
@@ -165,7 +165,7 @@ export default function NGOActivityLogPage() {
   // Format address with dynamic truncation based on screen size
   const formatAddress = (
     address: string,
-    mode: "collapsed" | "full" = "collapsed"
+    mode: "collapsed" | "full" = "collapsed",
   ): string => {
     if (mode === "full") return address;
 
@@ -204,7 +204,7 @@ export default function NGOActivityLogPage() {
 
   // Expanded state for actions
   const [expandedActions, setExpandedActions] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const toggleExpanded = (actionKey: string) => {
@@ -254,7 +254,7 @@ export default function NGOActivityLogPage() {
             <div className="space-y-2">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`
+                (_, i) => `activity-log-skeleton-${i}`,
               ).map((key) => (
                 <div
                   key={key}
@@ -551,7 +551,7 @@ export default function NGOActivityLogPage() {
                                             .NEXT_PUBLIC_SOLANA_NETWORK ||
                                           "devnet"
                                         }`,
-                                        "_blank"
+                                        "_blank",
                                       );
                                     }}
                                   >
@@ -579,7 +579,7 @@ export default function NGOActivityLogPage() {
                                             .NEXT_PUBLIC_SOLANA_NETWORK ||
                                           "devnet"
                                         }`,
-                                        "_blank"
+                                        "_blank",
                                       );
                                     }}
                                   >
@@ -622,7 +622,7 @@ export default function NGOActivityLogPage() {
                                           .NEXT_PUBLIC_SOLANA_NETWORK ||
                                         "devnet"
                                       }`,
-                                      "_blank"
+                                      "_blank",
                                     );
                                   }}
                                 >

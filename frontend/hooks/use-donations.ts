@@ -75,7 +75,7 @@ export function useDonations(): UseDonationsReturn {
           donorName: account.account.donorName,
           donorEmail: account.account.donorEmail,
           receiptSent: account.account.receiptSent,
-        })
+        }),
       );
 
       return formattedDonations;
@@ -90,28 +90,28 @@ export function useDonations(): UseDonationsReturn {
   const filterByPool = useCallback(
     (poolAddress: PublicKey) => {
       return donations.filter((d: DonationRecord) =>
-        d.pool?.equals(poolAddress)
+        d.pool?.equals(poolAddress),
       );
     },
-    [donations]
+    [donations],
   );
 
   const filterByDisaster = useCallback(
     (disasterId: string) => {
       return donations.filter(
-        (d: DonationRecord) => d.disasterId === disasterId
+        (d: DonationRecord) => d.disasterId === disasterId,
       );
     },
-    [donations]
+    [donations],
   );
 
   const filterByRecipient = useCallback(
     (recipientAddress: PublicKey) => {
       return donations.filter((d: DonationRecord) =>
-        d.recipient.equals(recipientAddress)
+        d.recipient.equals(recipientAddress),
       );
     },
-    [donations]
+    [donations],
   );
 
   return {

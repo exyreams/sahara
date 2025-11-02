@@ -56,7 +56,7 @@ export default function AdminReviewPage() {
 
   // Get flagged beneficiaries
   const flaggedBeneficiaries = beneficiaries.filter(
-    (b) => b.verificationStatus === "Flagged" && b.flaggedBy
+    (b) => b.verificationStatus === "Flagged" && b.flaggedBy,
   );
 
   // Get NGOs that need review (not verified or pending re-verification after update)
@@ -136,7 +136,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId
+          beneficiary.disasterId,
         );
 
         // Approve and clear flag
@@ -147,7 +147,7 @@ export default function AdminReviewPage() {
             {
               approve: true,
               notes: null,
-            }
+            },
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -162,7 +162,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      }
+      },
     );
   };
 
@@ -175,7 +175,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId
+          beneficiary.disasterId,
         );
 
         // Reject and keep flag
@@ -186,7 +186,7 @@ export default function AdminReviewPage() {
             {
               approve: false,
               notes: null,
-            }
+            },
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -201,7 +201,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      }
+      },
     );
   };
 
@@ -227,7 +227,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchNGOs();
         },
-      }
+      },
     );
   };
 
@@ -267,7 +267,7 @@ export default function AdminReviewPage() {
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `skeleton-item-${Date.now()}-${i}`
+                (_, i) => `skeleton-item-${Date.now()}-${i}`,
               ).map((key) => (
                 <div
                   key={key}
@@ -414,7 +414,7 @@ export default function AdminReviewPage() {
                       </div>
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           ) : filteredItems.length === 0 ? (
@@ -433,7 +433,7 @@ export default function AdminReviewPage() {
                     key={item.id}
                     className={cn(
                       "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
-                      "hover:border-theme-primary/50"
+                      "hover:border-theme-primary/50",
                     )}
                   >
                     <div className="p-4">
@@ -459,8 +459,8 @@ export default function AdminReviewPage() {
                                 {isFlagged
                                   ? "Flagged"
                                   : !isFlagged && isNGOUpdate(item.data as NGO)
-                                  ? "NGO Update"
-                                  : "New NGO"}
+                                    ? "NGO Update"
+                                    : "New NGO"}
                               </Badge>
                               <button
                                 type="button"
@@ -511,7 +511,7 @@ export default function AdminReviewPage() {
                                   {(item.data as Beneficiary).flaggedAt
                                     ? formatDate(
                                         (item.data as Beneficiary)
-                                          .flaggedAt as number
+                                          .flaggedAt as number,
                                       )
                                     : "N/A"}
                                 </span>
@@ -536,7 +536,7 @@ export default function AdminReviewPage() {
                                     <span>
                                       Last Updated:{" "}
                                       {formatDate(
-                                        (item.data as NGO).lastActivityAt
+                                        (item.data as NGO).lastActivityAt,
                                       )}
                                     </span>
                                     <span className="text-orange-600 font-medium">
@@ -547,7 +547,7 @@ export default function AdminReviewPage() {
                                   <span>
                                     Registered:{" "}
                                     {formatDate(
-                                      (item.data as NGO).registeredAt
+                                      (item.data as NGO).registeredAt,
                                     )}
                                   </span>
                                 )}
@@ -563,7 +563,7 @@ export default function AdminReviewPage() {
                                   variant="default"
                                   onClick={() =>
                                     handleApproveBeneficiary(
-                                      item.data as Beneficiary
+                                      item.data as Beneficiary,
                                     )
                                   }
                                   disabled={txLoading}
@@ -575,7 +575,7 @@ export default function AdminReviewPage() {
                                   variant="destructive"
                                   onClick={() =>
                                     handleRejectBeneficiary(
-                                      item.data as Beneficiary
+                                      item.data as Beneficiary,
                                     )
                                   }
                                   disabled={txLoading}
@@ -584,9 +584,7 @@ export default function AdminReviewPage() {
                                 </Button>
                                 <Button size="sm" variant="outline" asChild>
                                   <Link
-                                    href={`/beneficiaries/${(
-                                      item.data as Beneficiary
-                                    ).authority.toBase58()}`}
+                                    href={`/beneficiaries/${(item.data as Beneficiary).authority.toBase58()}`}
                                   >
                                     View Details
                                   </Link>
@@ -653,11 +651,11 @@ export default function AdminReviewPage() {
                                             {(item.data as NGO).verifiedAt &&
                                               formatDate(
                                                 (item.data as NGO)
-                                                  .verifiedAt as number
+                                                  .verifiedAt as number,
                                               )}
                                             . They updated their information on{" "}
                                             {formatDate(
-                                              (item.data as NGO).lastActivityAt
+                                              (item.data as NGO).lastActivityAt,
                                             )}{" "}
                                             and require re-verification. Please
                                             review all details carefully before

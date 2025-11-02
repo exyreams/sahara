@@ -145,7 +145,7 @@ export default function BeneficiariesPage() {
                 <Badge variant="secondary" className="text-lg px-4 py-2">
                   {
                     beneficiaries.filter(
-                      (b) => b.verificationStatus === "Verified"
+                      (b) => b.verificationStatus === "Verified",
                     ).length
                   }{" "}
                   Verified
@@ -240,33 +240,33 @@ export default function BeneficiariesPage() {
                             <Badge
                               variant={
                                 formatVerificationStatus(
-                                  beneficiary.verificationStatus
+                                  beneficiary.verificationStatus,
                                 ) === "Verified"
                                   ? "default"
                                   : formatVerificationStatus(
-                                      beneficiary.verificationStatus
-                                    ) === "Flagged"
-                                  ? "outline"
-                                  : formatVerificationStatus(
-                                      beneficiary.verificationStatus
-                                    ) === "Rejected"
-                                  ? "outline"
-                                  : "pending"
+                                        beneficiary.verificationStatus,
+                                      ) === "Flagged"
+                                    ? "outline"
+                                    : formatVerificationStatus(
+                                          beneficiary.verificationStatus,
+                                        ) === "Rejected"
+                                      ? "outline"
+                                      : "pending"
                               }
                               className={`shrink-0 ${
                                 formatVerificationStatus(
-                                  beneficiary.verificationStatus
+                                  beneficiary.verificationStatus,
                                 ) === "Flagged"
                                   ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
                                   : formatVerificationStatus(
-                                      beneficiary.verificationStatus
-                                    ) === "Rejected"
-                                  ? "border-red-500 text-red-500 bg-red-500/10"
-                                  : ""
+                                        beneficiary.verificationStatus,
+                                      ) === "Rejected"
+                                    ? "border-red-500 text-red-500 bg-red-500/10"
+                                    : ""
                               }`}
                             >
                               {formatVerificationStatus(
-                                beneficiary.verificationStatus
+                                beneficiary.verificationStatus,
                               )}
                             </Badge>
                           </div>
@@ -305,19 +305,19 @@ export default function BeneficiariesPage() {
                                 beneficiary.damageSeverity >= 8
                                   ? "border-red-500 text-red-500 bg-red-500/10"
                                   : beneficiary.damageSeverity >= 6
-                                  ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                  : beneficiary.damageSeverity >= 4
-                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                  : "border-green-500 text-green-500 bg-green-500/10"
+                                    ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                    : beneficiary.damageSeverity >= 4
+                                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                      : "border-green-500 text-green-500 bg-green-500/10"
                               }
                             >
                               {beneficiary.damageSeverity >= 8
                                 ? "Critical"
                                 : beneficiary.damageSeverity >= 6
-                                ? "Severe"
-                                : beneficiary.damageSeverity >= 4
-                                ? "Moderate"
-                                : "Minor"}{" "}
+                                  ? "Severe"
+                                  : beneficiary.damageSeverity >= 4
+                                    ? "Moderate"
+                                    : "Minor"}{" "}
                               ({beneficiary.damageSeverity}/10)
                             </Badge>
                           </div>
@@ -543,33 +543,33 @@ export default function BeneficiariesPage() {
                       <Badge
                         variant={
                           formatVerificationStatus(
-                            beneficiary.verificationStatus
+                            beneficiary.verificationStatus,
                           ) === "Verified"
                             ? "default"
                             : formatVerificationStatus(
-                                beneficiary.verificationStatus
-                              ) === "Flagged"
-                            ? "outline"
-                            : formatVerificationStatus(
-                                beneficiary.verificationStatus
-                              ) === "Rejected"
-                            ? "outline"
-                            : "pending"
+                                  beneficiary.verificationStatus,
+                                ) === "Flagged"
+                              ? "outline"
+                              : formatVerificationStatus(
+                                    beneficiary.verificationStatus,
+                                  ) === "Rejected"
+                                ? "outline"
+                                : "pending"
                         }
                         className={`shrink-0 ${
                           formatVerificationStatus(
-                            beneficiary.verificationStatus
+                            beneficiary.verificationStatus,
                           ) === "Flagged"
                             ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
                             : formatVerificationStatus(
-                                beneficiary.verificationStatus
-                              ) === "Rejected"
-                            ? "border-red-500 text-red-500 bg-red-500/10"
-                            : ""
+                                  beneficiary.verificationStatus,
+                                ) === "Rejected"
+                              ? "border-red-500 text-red-500 bg-red-500/10"
+                              : ""
                         }`}
                       >
                         {formatVerificationStatus(
-                          beneficiary.verificationStatus
+                          beneficiary.verificationStatus,
                         )}
                       </Badge>
                     </div>
@@ -600,19 +600,19 @@ export default function BeneficiariesPage() {
                           beneficiary.damageSeverity >= 8
                             ? "border-red-500 text-red-500 bg-red-500/10"
                             : beneficiary.damageSeverity >= 6
-                            ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                            : beneficiary.damageSeverity >= 4
-                            ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                            : "border-green-500 text-green-500 bg-green-500/10"
+                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                              : beneficiary.damageSeverity >= 4
+                                ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                : "border-green-500 text-green-500 bg-green-500/10"
                         }
                       >
                         {beneficiary.damageSeverity >= 8
                           ? "Critical"
                           : beneficiary.damageSeverity >= 6
-                          ? "Severe"
-                          : beneficiary.damageSeverity >= 4
-                          ? "Moderate"
-                          : "Minor"}{" "}
+                            ? "Severe"
+                            : beneficiary.damageSeverity >= 4
+                              ? "Moderate"
+                              : "Minor"}{" "}
                         ({beneficiary.damageSeverity}/10)
                       </Badge>
                     </div>
@@ -643,8 +643,8 @@ export default function BeneficiariesPage() {
                 {ownerFilter === "mine"
                   ? "Register your first beneficiary to get started"
                   : searchQuery || statusFilters.length > 0
-                  ? "Try adjusting your filters"
-                  : "No beneficiaries have been registered yet"}
+                    ? "Try adjusting your filters"
+                    : "No beneficiaries have been registered yet"}
               </CardDescription>
               {isFieldWorker && (
                 <div className="flex justify-center mt-4">
