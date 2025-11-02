@@ -22,7 +22,7 @@ export default function Home() {
   const activeDisasters = disasters.filter((d) => d.isActive).slice(0, 6);
   const verifiedBeneficiaries = beneficiaries
     .filter(
-      (b) => formatVerificationStatus(b.verificationStatus) === "Verified",
+      (b) => formatVerificationStatus(b.verificationStatus) === "Verified"
     )
     .slice(0, 6);
   const activePools = pools.filter((p) => p.isActive).slice(0, 6);
@@ -30,8 +30,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1">
-        {/* Hero Section with Particle System */}
-        <HeroSection text="Sahara" height="100vh" />
+        {/* Hero Section with Particle System - Full Width */}
+        <div className="-mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+          <HeroSection text="Sahara" height="100vh" />
+        </div>
 
         {/* Platform Statistics */}
         <section className="container mx-auto px-4 py-12">
@@ -162,7 +164,7 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from(
                 { length: 6 },
-                (_, i) => `beneficiary-skeleton-${i}`,
+                (_, i) => `beneficiary-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -276,7 +278,7 @@ export default function Home() {
                       <div className="h-4 bg-theme-border rounded w-full" />
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           ) : activePools.length > 0 ? (

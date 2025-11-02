@@ -51,42 +51,44 @@ export default function NGOPage() {
     return (
       <div className="min-h-screen flex flex-col bg-theme-background">
         <main className="flex-1">
-          {/* Hero Section with Particle System */}
-          <section
-            className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
-            style={{ height: "100vh" }}
-          >
-            {/* Particle Background */}
-            <div className="absolute inset-0 z-0">
-              <ParticleSystem text="Ngo" />
-            </div>
+          {/* Hero Section with Particle System - Full Width */}
+          <div className="-mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+            <section
+              className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
+              style={{ height: "100vh" }}
+            >
+              {/* Particle Background */}
+              <div className="absolute inset-0 z-0">
+                <ParticleSystem text="Ngo" />
+              </div>
 
-            {/* Content Overlay */}
-            <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
-              {/* Spacer to push content below particles */}
-              <div className="flex-1" />
+              {/* Content Overlay */}
+              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
+                {/* Spacer to push content below particles */}
+                <div className="flex-1" />
 
-              {/* Hero Content */}
-              <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
-                  NGO Portal
-                </h1>
-                <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
-                  Coordinate transparent disaster relief efforts on the
-                  blockchain. Register your organization and manage field
-                  workers to verify beneficiaries.
-                </p>
-                <div className="flex flex-col items-center gap-4 pt-6">
-                  <div className="scale-110">
-                    <WalletButton />
-                  </div>
-                  <p className="text-sm text-theme-text/80">
-                    Connect your wallet to get started
+                {/* Hero Content */}
+                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
+                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                    NGO Portal
+                  </h1>
+                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                    Coordinate transparent disaster relief efforts on the
+                    blockchain. Register your organization and manage field
+                    workers to verify beneficiaries.
                   </p>
+                  <div className="flex flex-col items-center gap-4 pt-6">
+                    <div className="scale-110">
+                      <WalletButton />
+                    </div>
+                    <p className="text-sm text-theme-text/80">
+                      Connect your wallet to get started
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
 
           {/* Features Section */}
           <section id="features" className="container mx-auto px-4 py-16">
@@ -331,14 +333,14 @@ export default function NGOPage() {
   // Wallet connected but not registered - Split-screen hero design
   return (
     <div className="min-h-screen flex flex-col bg-theme-background">
-      <main className="flex-1 flex">
+      <main className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
         {/* Left Side - Particle Background (40%) */}
         <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
           <div className="absolute inset-0">
             <ParticleSystem text="Ngo" />
           </div>
         </div>
-        s{/* Right Side - Content (60%) */}
+        {/* Right Side - Content (60%) */}
         <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
           <div className="max-w-xl w-full space-y-8">
             {/* Header */}

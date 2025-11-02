@@ -95,38 +95,40 @@ export default function BeneficiariesPage() {
       <div className="min-h-screen flex flex-col bg-theme-background">
         <Header />
         <main className="flex-1">
-          {/* Particle Hero Section */}
-          <section
-            className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
-            style={{ height: "100vh" }}
-          >
-            <div className="absolute inset-0 z-0">
-              <ParticleSystem text="Beneficiaries" />
-            </div>
+          {/* Particle Hero Section - Full Width */}
+          <div className="-mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+            <section
+              className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
+              style={{ height: "100vh" }}
+            >
+              <div className="absolute inset-0 z-0">
+                <ParticleSystem text="Beneficiaries" />
+              </div>
 
-            <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
-              <div className="flex-1" />
+              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
+                <div className="flex-1" />
 
-              <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
-                  Beneficiaries
-                </h1>
-                <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
-                  Verified disaster victims receiving direct aid through
-                  blockchain transparency. Every beneficiary is verified by
-                  field workers to ensure aid reaches those who need it most.
-                </p>
-                <div className="flex flex-col items-center gap-4 pt-6">
-                  <div className="scale-110">
-                    <WalletButton />
-                  </div>
-                  <p className="text-sm text-theme-text/80">
-                    Connect your wallet to register or view details
+                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
+                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                    Beneficiaries
+                  </h1>
+                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                    Verified disaster victims receiving direct aid through
+                    blockchain transparency. Every beneficiary is verified by
+                    field workers to ensure aid reaches those who need it most.
                   </p>
+                  <div className="flex flex-col items-center gap-4 pt-6">
+                    <div className="scale-110">
+                      <WalletButton />
+                    </div>
+                    <p className="text-sm text-theme-text/80">
+                      Connect your wallet to register or view details
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
 
           {/* Beneficiaries List Section */}
           <section className="py-16 bg-theme-bg">

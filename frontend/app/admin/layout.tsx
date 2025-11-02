@@ -89,7 +89,7 @@ export default function AdminLayout({
                   <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
                   <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
                 </div>
-              ),
+              )
             )}
           </div>
         </aside>
@@ -115,7 +115,7 @@ export default function AdminLayout({
                     <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
                     <div className="h-4 w-full bg-theme-border rounded animate-pulse" />
                   </div>
-                ),
+                )
               )}
             </div>
           </div>
@@ -138,16 +138,24 @@ export default function AdminLayout({
   // If platform is not initialized, show particle design with initialization content
   if (!isInitialized && !isInitializePage) {
     return (
-      <div className="min-h-screen bg-theme-background flex flex-col">
-        {/* Particle System Section - Top */}
-        <section className="relative w-full bg-theme-background overflow-hidden h-[30vh] min-h-[250px] mt-8">
-          <div className="absolute inset-0 mx-8">
-            <ParticleSystem text={getParticleText()} />
-          </div>
-        </section>
+      <div className="min-h-screen bg-theme-background flex flex-col -mt-22">
+        {/* Particle System Section - Top - Full Width */}
+        <div className="-mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
+          <section
+            className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
+            style={{
+              height: "calc(50vh + 5rem)",
+              minHeight: "calc(250px + 5rem)",
+            }}
+          >
+            <div className="absolute inset-0 top-20">
+              <ParticleSystem text={getParticleText()} />
+            </div>
+          </section>
+        </div>
 
         {/* Initialization Content - Bottom */}
-        <section className="flex-1 flex items-start justify-center px-4 pt-4 pb-8">
+        <section className="flex-1 flex items-center justify-center px-4 py-8">
           <div className="w-full max-w-xl text-center space-y-10">
             {/* Content */}
             <div className="space-y-6">
@@ -262,7 +270,7 @@ export default function AdminLayout({
           <div
             className={cn(
               "flex items-center h-16",
-              sidebarCollapsed ? "justify-center" : "justify-between px-3",
+              sidebarCollapsed ? "justify-center" : "justify-between px-3"
             )}
           >
             <AnimatePresence mode="wait">
@@ -283,7 +291,7 @@ export default function AdminLayout({
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={cn(
                 "flex items-center justify-center shrink-0 p-2 cursor-pointer rounded-lg transition-all duration-200",
-                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
+                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
               )}
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -308,7 +316,7 @@ export default function AdminLayout({
                   sidebarCollapsed && "justify-center",
                   isActive
                     ? "bg-theme-primary text-theme-background"
-                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
+                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
                 )}
                 title={sidebarCollapsed ? item.label : undefined}
               >

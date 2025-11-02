@@ -74,38 +74,40 @@ export default function PoolsPage() {
       <div className="min-h-screen flex flex-col bg-theme-background">
         <Header />
         <main className="flex-1">
-          {/* Particle Hero Section */}
-          <section
-            className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
-            style={{ height: "100vh" }}
-          >
-            <div className="absolute inset-0 z-0">
-              <ParticleSystem text="Pools" />
-            </div>
+          {/* Particle Hero Section - Full Width */}
+          <div className="-mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+            <section
+              className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
+              style={{ height: "100vh" }}
+            >
+              <div className="absolute inset-0 z-0">
+                <ParticleSystem text="Pools" />
+              </div>
 
-            <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
-              <div className="flex-1" />
+              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
+                <div className="flex-1" />
 
-              <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
-                  Fund Pools
-                </h1>
-                <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
-                  Transparent disaster relief fund pools on the blockchain.
-                  Track donations, distributions, and ensure every dollar
-                  reaches those in need.
-                </p>
-                <div className="flex flex-col items-center gap-4 pt-6">
-                  <div className="scale-110">
-                    <WalletButton />
-                  </div>
-                  <p className="text-sm text-theme-text/80">
-                    Connect your wallet to take action
+                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
+                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                    Fund Pools
+                  </h1>
+                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                    Transparent disaster relief fund pools on the blockchain.
+                    Track donations, distributions, and ensure every dollar
+                    reaches those in need.
                   </p>
+                  <div className="flex flex-col items-center gap-4 pt-6">
+                    <div className="scale-110">
+                      <WalletButton />
+                    </div>
+                    <p className="text-sm text-theme-text/80">
+                      Connect your wallet to take action
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
 
           {/* Active Pools Section */}
           <section className="py-16 bg-theme-bg">

@@ -16,7 +16,7 @@ export function HeroSection({
 }: HeroSectionProps) {
   return (
     <section
-      className="relative w-full bg-theme-background overflow-hidden"
+      className="relative w-full bg-theme-background overflow-hidden border-b border-theme-border"
       style={{ height }}
     >
       {/* Particle Background */}
