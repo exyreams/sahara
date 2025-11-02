@@ -16,7 +16,8 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { use, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import { BeneficiaryRegistrationModal } from "@/components/beneficiaries/beneficiary-registration-modal";
 import { DonateModal } from "@/components/beneficiaries/donate-modal";
 import { FlagBeneficiaryModal } from "@/components/beneficiaries/flag-beneficiary-modal";
@@ -34,6 +35,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
 import { useDisasters } from "@/hooks/use-disasters";
 import { useDonations } from "@/hooks/use-donations";
@@ -54,6 +61,8 @@ export default function BeneficiaryProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     beneficiaries,
     loading,
@@ -76,6 +85,25 @@ export default function BeneficiaryProfilePage({
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
     new Set()
   );
+
+  // Get active tab from URL or default to overview
+  const activeTab = searchParams.get("tab") || "overview";
+
+  // Set default tab in URL on initial load
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", "overview");
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -303,14 +331,61 @@ export default function BeneficiaryProfilePage({
               />
               Refresh
             </Button>
-            {formatVerificationStatus(beneficiary.verificationStatus) ===
-              "Verified" &&
-              !isOwnProfile && (
-                <Button onClick={() => setShowDonateModal(true)} size="lg">
-                  <DonationIcon className="mr-2 h-4 w-4" />
-                  {wallet.connected ? "Donate" : "Connect Wallet to Donate"}
-                </Button>
-              )}
+            {!isOwnProfile && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={
+                        formatVerificationStatus(
+                          beneficiary.verificationStatus
+                        ) !== "Verified"
+                          ? "cursor-not-allowed"
+                          : ""
+                      }
+                    >
+                      <Button
+                        onClick={() => setShowDonateModal(true)}
+                        size="lg"
+                        disabled={
+                          formatVerificationStatus(
+                            beneficiary.verificationStatus
+                          ) !== "Verified"
+                        }
+                        className={
+                          formatVerificationStatus(
+                            beneficiary.verificationStatus
+                          ) !== "Verified"
+                            ? "cursor-not-allowed"
+                            : "cursor-pointer"
+                        }
+                      >
+                        <DonationIcon className="mr-2 h-4 w-4" />
+                        {wallet.connected
+                          ? "Donate"
+                          : "Connect Wallet to Donate"}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {formatVerificationStatus(beneficiary.verificationStatus) !==
+                    "Verified" && (
+                    <TooltipContent>
+                      <p>
+                        {formatVerificationStatus(
+                          beneficiary.verificationStatus
+                        ) === "Rejected"
+                          ? "This beneficiary is rejected and cannot receive donations"
+                          : formatVerificationStatus(
+                              beneficiary.verificationStatus
+                            ) === "Flagged"
+                          ? "This beneficiary is flagged and cannot receive donations"
+                          : "Verification needed before donations can be accepted"}
+                      </p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            )}
             {canEdit && (
               <Button
                 onClick={() => setShowEditModal(true)}
@@ -518,12 +593,22 @@ export default function BeneficiaryProfilePage({
           )}
 
           {/* Main Content Tabs */}
-          <Tabs defaultValue="overview" className="space-y-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="space-y-4"
+          >
             <TabsList className="h-12 p-1">
-              <TabsTrigger value="overview" className="text-base px-6">
+              <TabsTrigger
+                value="overview"
+                className="text-base px-6 cursor-pointer"
+              >
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="activity" className="text-base px-6">
+              <TabsTrigger
+                value="activity"
+                className="text-base px-6 cursor-pointer"
+              >
                 Activity
               </TabsTrigger>
             </TabsList>
@@ -1180,16 +1265,23 @@ export default function BeneficiaryProfilePage({
                                   )}
                                 </div>
 
-                                {donation.message && (
-                                  <div>
-                                    <p className="text-xs text-theme-text/60 mb-1">
-                                      Message
-                                    </p>
-                                    <p className="text-sm text-theme-text italic bg-theme-card-bg p-3 rounded border border-theme-border">
-                                      "{donation.message}"
-                                    </p>
+                                <div>
+                                  <p className="text-xs text-theme-text/60 mb-1">
+                                    Message
+                                  </p>
+                                  <div className="text-sm bg-theme-card-bg p-3 rounded border border-theme-border">
+                                    {donation.message &&
+                                    donation.message.trim() !== "" ? (
+                                      <p className="text-theme-text italic">
+                                        "{donation.message}"
+                                      </p>
+                                    ) : (
+                                      <p className="text-theme-text/60 italic">
+                                        No message attached
+                                      </p>
+                                    )}
                                   </div>
-                                )}
+                                </div>
                               </div>
                             )}
                           </div>
