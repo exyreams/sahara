@@ -90,12 +90,12 @@ export function DisasterCard({ disaster }: DisasterCardProps) {
           {disaster.affectedAreas.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {disaster.affectedAreas.slice(0, 3).map((area) => (
-                <Badge key={area} variant="secondary" className="text-xs">
+                <Badge key={area} variant="outline" className="text-xs">
                   {area}
                 </Badge>
               ))}
               {disaster.affectedAreas.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="outline" className="text-xs">
                   +{disaster.affectedAreas.length - 3} more
                 </Badge>
               )}

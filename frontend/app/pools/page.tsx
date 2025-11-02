@@ -121,7 +121,7 @@ export default function PoolsPage() {
                     View ongoing disaster relief fund pools
                   </p>
                 </div>
-                <Badge variant="secondary" className="text-lg px-4 py-2">
+                <Badge variant="secondary" className="text-sm px-3 py-1">
                   {pools.filter((p) => p.isActive).length} Active
                 </Badge>
               </div>
