@@ -89,7 +89,7 @@ export default function DisasterDetailPage({
   } = useDistributions();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const toggleActivityExpanded = (activityKey: string) => {
@@ -111,7 +111,7 @@ export default function DisasterDetailPage({
 
   // Check if current wallet is a field worker
   const currentFieldWorker = fieldWorkers.find(
-    (fw) => fw.authority.toBase58() === wallet.publicKey?.toBase58(),
+    (fw) => fw.authority.toBase58() === wallet.publicKey?.toBase58()
   );
 
   // Check if user can register beneficiaries (admin, verified NGO, or active field worker)
@@ -120,7 +120,7 @@ export default function DisasterDetailPage({
 
   const disaster = disasters.find((d) => d.eventId === id);
   const disasterBeneficiaries = beneficiaries.filter(
-    (b) => b.disasterId === id,
+    (b) => b.disasterId === id
   );
   const disasterPools = pools.filter((p) => p.disasterId === id);
 
@@ -192,7 +192,7 @@ export default function DisasterDetailPage({
         const [_configPDA] = derivePlatformConfigPDA();
         const [activityLogPDA] = deriveActivityLogPDA(
           wallet.publicKey as PublicKey,
-          timestamp,
+          timestamp
         );
 
         const tx = disaster.isActive
@@ -222,7 +222,7 @@ export default function DisasterDetailPage({
         onSuccess: () => {
           window.location.reload();
         },
-      },
+      }
     );
   };
 
@@ -380,7 +380,7 @@ export default function DisasterDetailPage({
 
   const severity = formatSeverity(disaster.severity);
   const verifiedBeneficiaries = disasterBeneficiaries.filter(
-    (b) => b.verificationStatus === "Verified",
+    (b) => b.verificationStatus === "Verified"
   );
 
   return (
@@ -412,10 +412,10 @@ export default function DisasterDetailPage({
                     severity.color === "red"
                       ? "border-red-500 text-red-500 bg-red-500/10"
                       : severity.color === "orange"
-                        ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                        : severity.color === "yellow"
-                          ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                          : "border-green-500 text-green-500 bg-green-500/10"
+                      ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                      : severity.color === "yellow"
+                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                      : "border-green-500 text-green-500 bg-green-500/10"
                   }
                 >
                   {severity.label} Severity
@@ -681,7 +681,7 @@ export default function DisasterDetailPage({
                           <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
                         </div>
                       </div>
-                    ),
+                    )
                   )}
                 </div>
               ) : disasterBeneficiaries.length === 0 ? (
@@ -768,7 +768,7 @@ export default function DisasterDetailPage({
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `beneficiary-refresh-${i}`,
+                    (_, i) => `beneficiary-refresh-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -861,7 +861,7 @@ export default function DisasterDetailPage({
               <div className="space-y-3">
                 {Array.from(
                   { length: 5 },
-                  (_, i) => `distribution-skeleton-${i}`,
+                  (_, i) => `distribution-skeleton-${i}`
                 ).map((key) => (
                   <div
                     key={key}
@@ -896,10 +896,10 @@ export default function DisasterDetailPage({
                     const donation = activity.data;
                     const amount = donation.amount / 1_000_000;
                     const beneficiary = beneficiaries.find((b) =>
-                      b.publicKey.equals(donation.recipient),
+                      b.publicKey.equals(donation.recipient)
                     );
                     const pool = pools.find(
-                      (p) => donation.pool && p.publicKey.equals(donation.pool),
+                      (p) => donation.pool && p.publicKey.equals(donation.pool)
                     );
 
                     return (
@@ -957,7 +957,7 @@ export default function DisasterDetailPage({
                           <div className="flex-1" />
                           <span className="text-xs text-theme-text/60 shrink-0">
                             {new Date(
-                              donation.timestamp * 1000,
+                              donation.timestamp * 1000
                             ).toLocaleDateString()}
                           </span>
                         </button>
@@ -1012,41 +1012,71 @@ export default function DisasterDetailPage({
                               </div>
                               <div>
                                 <p className="text-xs text-theme-text/60 mb-1">
-                                  Date
-                                </p>
-                                <p className="text-sm text-theme-text">
-                                  {new Date(
-                                    donation.timestamp * 1000,
-                                  ).toLocaleString()}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
                                   Platform Fee
                                 </p>
                                 <p className="text-sm text-theme-text">
                                   $
                                   {(donation.platformFee / 1_000_000).toFixed(
-                                    2,
+                                    2
                                   )}{" "}
                                   USDC
                                 </p>
                               </div>
                               <div>
                                 <p className="text-xs text-theme-text/60 mb-1">
-                                  Transaction
+                                  Net Amount
                                 </p>
-                                <a
-                                  href={getExplorerUrl(
-                                    donation.publicKey.toBase58(),
-                                  )}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-theme-primary hover:underline flex items-center gap-1"
-                                >
-                                  View on Explorer
-                                  <ExternalLink className="h-3 w-3" />
-                                </a>
+                                <p className="text-sm text-theme-primary font-semibold">
+                                  ${(donation.netAmount / 1_000_000).toFixed(2)}{" "}
+                                  USDC
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-theme-text/60 mb-1">
+                                  Date & Time
+                                </p>
+                                <p className="text-sm text-theme-text">
+                                  {new Date(
+                                    donation.timestamp * 1000
+                                  ).toLocaleString()}
+                                </p>
+                              </div>
+                              {donation.transactionSignature && (
+                                <div>
+                                  <p className="text-xs text-theme-text/60 mb-1">
+                                    Transaction
+                                  </p>
+                                  <a
+                                    href={getExplorerUrl(
+                                      donation.transactionSignature
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-theme-primary hover:underline flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    View on Explorer
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-xs text-theme-text/60 mb-1">
+                                Message
+                              </p>
+                              <div className="text-sm bg-theme-card-bg p-3 rounded border border-theme-border">
+                                {donation.message &&
+                                donation.message.trim() !== "" ? (
+                                  <p className="text-theme-text italic">
+                                    "{donation.message}"
+                                  </p>
+                                ) : (
+                                  <p className="text-theme-text/60 italic">
+                                    No message attached
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1057,10 +1087,10 @@ export default function DisasterDetailPage({
                     const distribution = activity.data;
                     const amount = distribution.amountAllocated / 1_000_000;
                     const beneficiary = beneficiaries.find((b) =>
-                      b.publicKey.equals(distribution.beneficiary),
+                      b.publicKey.equals(distribution.beneficiary)
                     );
                     const pool = pools.find((p) =>
-                      p.publicKey.equals(distribution.pool),
+                      p.publicKey.equals(distribution.pool)
                     );
 
                     return (
@@ -1099,7 +1129,7 @@ export default function DisasterDetailPage({
                           <div className="flex-1" />
                           <span className="text-xs text-theme-text/60 shrink-0">
                             {new Date(
-                              distribution.createdAt * 1000,
+                              distribution.createdAt * 1000
                             ).toLocaleDateString()}
                           </span>
                         </button>
@@ -1186,7 +1216,7 @@ export default function DisasterDetailPage({
                                 </p>
                                 <p className="text-sm text-theme-text">
                                   {new Date(
-                                    distribution.createdAt * 1000,
+                                    distribution.createdAt * 1000
                                   ).toLocaleString()}
                                 </p>
                               </div>

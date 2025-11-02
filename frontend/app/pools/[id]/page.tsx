@@ -15,7 +15,7 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { DonationIcon } from "@/components/icons/donation-icon";
 import { FundIcon } from "@/components/icons/fund-icon";
@@ -72,6 +72,7 @@ function formatDistributionType(type: DistributionType): string {
 export default function PoolDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { pools, loading, error, refetch } = usePools();
   const { wallet, program } = useProgram();
   const { ngos } = useAllNGOs();
@@ -91,12 +92,31 @@ export default function PoolDetailPage({ params }: PageProps) {
   } = useDistributions();
   const { beneficiaries } = useBeneficiaries();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [expandedDistributions, setExpandedDistributions] = useState<
     Set<string>
   >(new Set());
   const [showDistributeModal, setShowDistributeModal] = useState(false);
+
+  // Get active tab from URL or default to overview
+  const activeTab = searchParams.get("tab") || "overview";
+
+  // Set default tab in URL on initial load
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", "overview");
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   // Filter donations for this pool
   const poolDonations = pool
@@ -200,7 +220,7 @@ export default function PoolDetailPage({ params }: PageProps) {
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from(
               { length: 4 },
-              (_, i) => `stats-card-skeleton-${i}`,
+              (_, i) => `stats-card-skeleton-${i}`
             ).map((key) => (
               <Card key={key} className="bg-theme-card-bg border-theme-border">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -248,7 +268,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                 <div className="grid gap-3 md:grid-cols-3">
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `key-detail-skeleton-${i}`,
+                    (_, i) => `key-detail-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -266,7 +286,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                     {Array.from(
                       { length: 2 },
-                      (_, i) => `pool-stat-skeleton-${i}`,
+                      (_, i) => `pool-stat-skeleton-${i}`
                     ).map((key) => (
                       <div key={key}>
                         <div className="h-3 w-24 bg-theme-border rounded animate-pulse mb-2" />
@@ -281,7 +301,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `distribution-stat-skeleton-${i}`,
+                      (_, i) => `distribution-stat-skeleton-${i}`
                     ).map((key) => (
                       <div key={key}>
                         <div className="h-3 w-24 bg-theme-border rounded animate-pulse mb-2" />
@@ -296,7 +316,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `beneficiary-skeleton-${i}`,
+                      (_, i) => `beneficiary-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -441,7 +461,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       async () => {
                         const [poolPDA] = deriveFundPoolPDA(
                           pool.disasterId,
-                          pool.poolId,
+                          pool.poolId
                         );
 
                         if (pool.isActive) {
@@ -449,14 +469,14 @@ export default function PoolDetailPage({ params }: PageProps) {
                           const timestamp = Math.floor(Date.now() / 1000);
                           const [activityLogPDA] = deriveActivityLogPDA(
                             walletPublicKey,
-                            timestamp,
+                            timestamp
                           );
 
                           const tx = await program.methods
                             .closePool(
                               pool.disasterId,
                               pool.poolId,
-                              new BN(timestamp),
+                              new BN(timestamp)
                             )
                             .accounts({
                               pool: poolPDA,
@@ -491,7 +511,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                         onSuccess: () => {
                           refetch();
                         },
-                      },
+                      }
                     );
                   }}
                 >
@@ -501,8 +521,8 @@ export default function PoolDetailPage({ params }: PageProps) {
                       ? "Closing..."
                       : "Reopening..."
                     : pool.isActive
-                      ? "Close Pool"
-                      : "Reopen Pool"}
+                    ? "Close Pool"
+                    : "Reopen Pool"}
                 </Button>
               )}
             </div>
@@ -654,15 +674,28 @@ export default function PoolDetailPage({ params }: PageProps) {
         )}
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="space-y-4"
+        >
           <TabsList className="h-12 p-1">
-            <TabsTrigger value="overview" className="text-base px-6">
+            <TabsTrigger
+              value="overview"
+              className="text-base px-6 cursor-pointer"
+            >
               Overview
             </TabsTrigger>
-            <TabsTrigger value="donations" className="text-base px-6">
+            <TabsTrigger
+              value="donations"
+              className="text-base px-6 cursor-pointer"
+            >
               Donations
             </TabsTrigger>
-            <TabsTrigger value="distributions" className="text-base px-6">
+            <TabsTrigger
+              value="distributions"
+              className="text-base px-6 cursor-pointer"
+            >
               Distributions
             </TabsTrigger>
           </TabsList>
@@ -806,7 +839,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       <div className="space-y-2">
                         {Array.from(
                           { length: 3 },
-                          (_, i) => `disaster-skeleton-${i}`,
+                          (_, i) => `disaster-skeleton-${i}`
                         ).map((key) => (
                           <div
                             key={key}
@@ -825,7 +858,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       <div className="space-y-2">
                         {poolDistributions.map((distribution) => {
                           const beneficiary = beneficiaries.find((b) =>
-                            b.publicKey.equals(distribution.beneficiary),
+                            b.publicKey.equals(distribution.beneficiary)
                           );
                           const allocated =
                             distribution.amountAllocated / 1_000_000;
@@ -837,7 +870,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               onClick={(e) => {
                                 e.preventDefault();
                                 router.push(
-                                  `/beneficiaries/${distribution.beneficiary.toBase58()}`,
+                                  `/beneficiaries/${distribution.beneficiary.toBase58()}`
                                 );
                               }}
                               className="flex items-center gap-3 p-3 rounded-lg border border-theme-border hover:border-theme-primary/50 hover:bg-theme-primary/5 transition-all cursor-pointer"
@@ -892,7 +925,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 5 },
-                      (_, i) => `donation-skeleton-${i}`,
+                      (_, i) => `donation-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -954,7 +987,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                donation.timestamp * 1000,
+                                donation.timestamp * 1000
                               ).toLocaleDateString()}
                             </span>
                           </button>
@@ -987,7 +1020,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                   <p className="text-sm text-theme-text">
                                     $
                                     {(donation.platformFee / 1_000_000).toFixed(
-                                      2,
+                                      2
                                     )}{" "}
                                     USDC
                                   </p>
@@ -996,40 +1029,60 @@ export default function PoolDetailPage({ params }: PageProps) {
                                   <p className="text-xs text-theme-text/60 mb-1">
                                     Net Amount
                                   </p>
-                                  <p className="text-sm text-theme-text">
+                                  <p className="text-sm text-theme-primary font-semibold">
                                     $
-                                    {(
-                                      (donation.amount - donation.platformFee) /
-                                      1_000_000
-                                    ).toFixed(2)}{" "}
+                                    {(donation.netAmount / 1_000_000).toFixed(
+                                      2
+                                    )}{" "}
                                     USDC
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-theme-text/60 mb-1">
-                                    Date
+                                    Date & Time
                                   </p>
                                   <p className="text-sm text-theme-text">
                                     {new Date(
-                                      donation.timestamp * 1000,
+                                      donation.timestamp * 1000
                                     ).toLocaleString()}
                                   </p>
                                 </div>
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Transaction
-                                  </p>
-                                  <a
-                                    href={getExplorerUrl(
-                                      donation.publicKey.toBase58(),
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-theme-primary hover:underline flex items-center gap-1"
-                                  >
-                                    View on Explorer
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
+                                {donation.transactionSignature && (
+                                  <div>
+                                    <p className="text-xs text-theme-text/60 mb-1">
+                                      Transaction
+                                    </p>
+                                    <a
+                                      href={getExplorerUrl(
+                                        donation.transactionSignature
+                                      )}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-theme-primary hover:underline flex items-center gap-1"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      View on Explorer
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div>
+                                <p className="text-xs text-theme-text/60 mb-1">
+                                  Message
+                                </p>
+                                <div className="text-sm bg-theme-card-bg p-3 rounded border border-theme-border">
+                                  {donation.message &&
+                                  donation.message.trim() !== "" ? (
+                                    <p className="text-theme-text italic">
+                                      "{donation.message}"
+                                    </p>
+                                  ) : (
+                                    <p className="text-theme-text/60 italic">
+                                      No message attached
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -1060,7 +1113,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 2 },
-                      (_, i) => `distribution-skeleton-${i}`,
+                      (_, i) => `distribution-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -1121,7 +1174,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                distribution.createdAt * 1000,
+                                distribution.createdAt * 1000
                               ).toLocaleDateString()}
                             </span>
                           </button>
@@ -1168,7 +1221,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                     </p>
                                     <p className="text-sm text-theme-text">
                                       {new Date(
-                                        distribution.unlockTime * 1000,
+                                        distribution.unlockTime * 1000
                                       ).toLocaleString()}
                                     </p>
                                   </div>
