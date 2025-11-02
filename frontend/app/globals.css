@@ -212,7 +212,7 @@
   /* Firefox - using @-moz-document to target only Firefox */
   @-moz-document url-prefix() {
     * {
-      scrollbar-width: 8px;
+      scrollbar-width: thin;
       scrollbar-color: var(--theme-primary) var(--theme-background);
     }
   }
