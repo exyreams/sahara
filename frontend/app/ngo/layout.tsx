@@ -60,7 +60,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
   if (loading || initialLoading) {
     if (wallet.connected) {
       return (
-        <div className="flex-1 flex min-h-screen">
+        <div className="flex-1 flex min-h-screen -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
           {/* Sidebar Skeleton */}
           <aside className="-mt-2 w-64 border-r border-theme-border bg-theme-card-bg flex flex-col">
             <div className="flex-1 p-4 pt-0 space-y-2">
@@ -83,7 +83,9 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
           </aside>
 
           {/* Main Content - Let children handle their own loading */}
-          <main className="flex-1 flex flex-col min-h-screen">{children}</main>
+          <main className="flex-1 flex flex-col min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-8">
+            {children}
+          </main>
         </div>
       );
     }
@@ -102,7 +104,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex-1 flex min-h-screen">
+    <div className="flex-1 flex min-h-screen -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
       {/* Sidebar Navigation */}
       <motion.aside
         initial={false}
@@ -189,7 +191,9 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen">{children}</main>
+      <main className="flex-1 flex flex-col min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-8">
+        {children}
+      </main>
     </div>
   );
 }

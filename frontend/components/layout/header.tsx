@@ -96,7 +96,7 @@ export function Header() {
                     "text-theme-text no-underline py-2 px-4 text-[0.9rem] rounded transition-all",
                     isActive
                       ? "bg-theme-primary text-theme-background"
-                      : "hover:bg-theme-primary hover:text-theme-background"
+                      : "hover:bg-theme-primary hover:text-theme-background",
                   )}
                 >
                   {item.name}
@@ -170,7 +170,7 @@ export function Header() {
                     "block rounded-md px-3 py-2 text-base font-medium transition-colors",
                     isActive
                       ? "bg-theme-primary text-theme-background"
-                      : "text-theme-text hover:bg-theme-primary hover:text-theme-background"
+                      : "text-theme-text hover:bg-theme-primary hover:text-theme-background",
                   )}
                 >
                   {item.name}

@@ -59,7 +59,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
             (!pool.minimumFamilySize ||
               b.familySize >= pool.minimumFamilySize) &&
             (!pool.minimumDamageSeverity ||
-              b.damageSeverity >= pool.minimumDamageSeverity)
+              b.damageSeverity >= pool.minimumDamageSeverity),
         );
 
         // Check which beneficiaries already have distributions
@@ -68,13 +68,13 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           eligibleBeneficiaries.map(async (b) => {
             const [distributionPDA] = deriveDistributionPDA(
               b.authority,
-              poolPDA
+              poolPDA,
             );
 
             try {
               const accountInfo =
                 await program.provider.connection.getAccountInfo(
-                  distributionPDA
+                  distributionPDA,
                 );
               return {
                 beneficiary: b,
@@ -88,7 +88,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                 hasDistribution: false,
               };
             }
-          })
+          }),
         );
 
         setAllocations(allocationsWithStatus);
@@ -100,7 +100,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
 
   const handleSelectChange = (index: number, checked: boolean) => {
     setAllocations((prev) =>
-      prev.map((a, i) => (i === index ? { ...a, selected: checked } : a))
+      prev.map((a, i) => (i === index ? { ...a, selected: checked } : a)),
     );
   };
 
@@ -109,8 +109,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
     const allSelected = selectableAllocations.every((a) => a.selected);
     setAllocations((prev) =>
       prev.map((a) =>
-        a.hasDistribution ? a : { ...a, selected: !allSelected }
-      )
+        a.hasDistribution ? a : { ...a, selected: !allSelected },
+      ),
     );
   };
 
@@ -139,8 +139,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         `Warning: With ${formatAmount(availableFunds)} USDC available and ${
           selectedAllocations.length
         } beneficiaries selected, each would receive approximately ${formatAmount(
-          estimatedPerBeneficiary
-        )} USDC.\n\nThis may be too small. Do you want to continue?`
+          estimatedPerBeneficiary,
+        )} USDC.\n\nThis may be too small. Do you want to continue?`,
       );
       if (!confirmed) return;
     }
@@ -161,11 +161,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         for (const allocation of selectedAllocations) {
           const [beneficiaryPDA] = deriveBeneficiaryPDA(
             allocation.beneficiary.authority,
-            pool.disasterId
+            pool.disasterId,
           );
           const [distributionPDA] = deriveDistributionPDA(
             allocation.beneficiary.authority,
-            poolPDA
+            poolPDA,
           );
 
           // Check if distribution already exists by trying to fetch account info
@@ -174,7 +174,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
               await program.provider.connection.getAccountInfo(distributionPDA);
             if (accountInfo) {
               console.log(
-                `Distribution already exists for ${allocation.beneficiary.name}`
+                `Distribution already exists for ${allocation.beneficiary.name}`,
               );
               skipped.push(allocation.beneficiary.name);
               continue;
@@ -204,7 +204,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           } catch (err) {
             console.error(
               `Failed to create distribution for ${allocation.beneficiary.name}:`,
-              err
+              err,
             );
             const errorMessage =
               err instanceof Error ? err.message : "Unknown error";
@@ -232,11 +232,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         if (signatures.length === 0) {
           if (skipped.length > 0 && failed.length === 0) {
             throw new Error(
-              `All selected beneficiaries already have distributions for this pool.`
+              `All selected beneficiaries already have distributions for this pool.`,
             );
           } else {
             throw new Error(
-              `Failed to create distributions:\n${failed.join("\n")}`
+              `Failed to create distributions:\n${failed.join("\n")}`,
             );
           }
         }
@@ -257,11 +257,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           // biome-ignore lint/suspicious/noExplicitAny: Cleaning up window temporary storage
           delete (window as any).__distributionResult;
           setAllocations((prev) =>
-            prev.map((a) => ({ ...a, selected: false }))
+            prev.map((a) => ({ ...a, selected: false })),
           );
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -299,7 +299,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         a.beneficiary.authority
           .toBase58()
           .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+          .includes(searchQuery.toLowerCase()),
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -415,7 +415,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
           {filteredAllocations.map((allocation) => {
             const index = allocations.findIndex((a) =>
-              a.beneficiary.publicKey.equals(allocation.beneficiary.publicKey)
+              a.beneficiary.publicKey.equals(allocation.beneficiary.publicKey),
             );
             const isDisabled = allocation.hasDistribution;
 
@@ -438,7 +438,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                   onCheckedChange={(checked) => {
                     if (isDisabled) {
                       alert(
-                        `${allocation.beneficiary.name} has already received a distribution from this pool and cannot receive another one.`
+                        `${allocation.beneficiary.name} has already received a distribution from this pool and cannot receive another one.`,
                       );
                       return;
                     }

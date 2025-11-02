@@ -224,545 +224,530 @@ export default function AdminReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <div className="space-y-6">
-            {/* Header Skeleton */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
-                <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
-              </div>
-              <div className="flex gap-2">
-                <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
-                <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
-              </div>
+      <>
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
+              <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
             </div>
+            <div className="flex gap-2">
+              <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
+              <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
+            </div>
+          </div>
 
-            {/* Card Skeleton */}
-            <Card>
-              <CardHeader>
-                {/* Title and Description Skeleton */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="space-y-2">
-                    <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
-                    <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-                  </div>
+          {/* Card Skeleton */}
+          <Card>
+            <CardHeader>
+              {/* Title and Description Skeleton */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-2">
+                  <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
+                  <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
                 </div>
+              </div>
 
-                {/* Filters Skeleton */}
-                <div className="flex flex-col md:flex-row gap-3">
-                  <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
-                  <div className="h-9 w-48 bg-theme-border rounded animate-pulse" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Array.from(
-                    { length: 5 },
-                    (_, i) => `skeleton-item-${Date.now()}-${i}`,
-                  ).map((key) => (
-                    <div
-                      key={key}
-                      className="border border-theme-border rounded-lg p-4"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-1 space-y-3">
-                          {/* Title row */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
-                              <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
-                              <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
-                            </div>
+              {/* Filters Skeleton */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
+                <div className="h-9 w-48 bg-theme-border rounded animate-pulse" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Array.from(
+                  { length: 5 },
+                  (_, i) => `skeleton-item-${Date.now()}-${i}`,
+                ).map((key) => (
+                  <div
+                    key={key}
+                    className="border border-theme-border rounded-lg p-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1 space-y-3">
+                        {/* Title row */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
+                            <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
                           </div>
-                          {/* Details row */}
-                          <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-                          {/* Stats row */}
-                          <div className="flex gap-4">
-                            <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                            <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                            <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                            <div className="h-5 w-5 bg-theme-border rounded animate-pulse" />
                           </div>
-                          {/* Buttons row */}
-                          <div className="flex gap-2">
-                            <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
-                            <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
-                            <div className="h-8 w-28 bg-theme-border rounded animate-pulse" />
-                          </div>
+                        </div>
+                        {/* Details row */}
+                        <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
+                        {/* Stats row */}
+                        <div className="flex gap-4">
+                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                        </div>
+                        {/* Buttons row */}
+                        <div className="flex gap-2">
+                          <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="h-8 w-20 bg-theme-border rounded animate-pulse" />
+                          <div className="h-8 w-28 bg-theme-border rounded animate-pulse" />
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">Review</h1>
-            <p className="text-muted-foreground mt-2">
-              Review flagged beneficiaries and NGO updates
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/admin">Back to Dashboard</Link>
-            </Button>
-          </div>
+    <>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight">Review</h1>
+          <p className="text-muted-foreground mt-2">
+            Review flagged beneficiaries and NGO updates
+          </p>
         </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin">Back to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <CardTitle className="text-lg">
-                  Review Items ({filteredItems.length})
-                </CardTitle>
-                <CardDescription>
-                  {flaggedBeneficiaries.length} flagged, {ngosForReview.length}{" "}
-                  NGO updates
-                </CardDescription>
-              </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <CardTitle className="text-lg">
+                Review Items ({filteredItems.length})
+              </CardTitle>
+              <CardDescription>
+                {flaggedBeneficiaries.length} flagged, {ngosForReview.length}{" "}
+                NGO updates
+              </CardDescription>
             </div>
+          </div>
 
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9"
-                />
-              </div>
-
-              <Dropdown
-                value={typeFilter}
-                onValueChange={setTypeFilter}
-                placeholder="Type"
-                options={[
-                  { value: "all", label: "All Types" },
-                  { value: "flags", label: "Flagged Beneficiaries" },
-                  { value: "ngos", label: "NGO Updates" },
-                ]}
-                className="w-48"
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
               />
             </div>
-          </CardHeader>
-          <CardContent>
-            {filteredItems.length === 0 ? (
-              <div className="text-center py-12">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No items to review</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredItems.map((item) => {
-                  const isExpanded = expandedItems.has(item.id);
-                  const isFlagged = item.type === "flag";
 
-                  return (
-                    <div
-                      key={item.id}
-                      className={cn(
-                        "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
-                        "hover:border-theme-primary/50",
-                      )}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {isFlagged ? (
-                                  <Flag className="h-5 w-5 text-yellow-500 shrink-0" />
-                                ) : (
-                                  <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
-                                )}
-                                <h3 className="font-semibold text-lg text-theme-text-highlight truncate">
-                                  {item.name}
-                                </h3>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <Badge
-                                  variant={
-                                    isFlagged ? "destructive" : "secondary"
-                                  }
-                                >
-                                  {isFlagged
-                                    ? "Flagged"
-                                    : !isFlagged &&
-                                        isNGOUpdate(item.data as NGO)
-                                      ? "NGO Update"
-                                      : "New NGO"}
-                                </Badge>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setExpandedItems((prev) => {
-                                      const next = new Set(prev);
-                                      if (next.has(item.id)) {
-                                        next.delete(item.id);
-                                      } else {
-                                        next.add(item.id);
-                                      }
-                                      return next;
-                                    });
-                                  }}
-                                  className="shrink-0 hover:bg-theme-primary/10 rounded p-1 transition-colors cursor-pointer"
-                                >
-                                  <motion.div
-                                    animate={{ rotate: isExpanded ? 180 : 0 }}
-                                    transition={{
-                                      duration: 0.3,
-                                      ease: "easeInOut",
-                                    }}
-                                  >
-                                    <ChevronDown className="h-5 w-5 text-theme-text" />
-                                  </motion.div>
-                                </button>
-                              </div>
-                            </div>
+            <Dropdown
+              value={typeFilter}
+              onValueChange={setTypeFilter}
+              placeholder="Type"
+              options={[
+                { value: "all", label: "All Types" },
+                { value: "flags", label: "Flagged Beneficiaries" },
+                { value: "ngos", label: "NGO Updates" },
+              ]}
+              className="w-48"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredItems.length === 0 ? (
+            <div className="text-center py-12">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No items to review</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredItems.map((item) => {
+                const isExpanded = expandedItems.has(item.id);
+                const isFlagged = item.type === "flag";
 
-                            {isFlagged ? (
-                              <>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  {(item.data as Beneficiary).location.district}
-                                  , Ward{" "}
-                                  {(item.data as Beneficiary).location.ward}
-                                </p>
-                                <div className="flex gap-4 text-sm text-muted-foreground mb-3">
-                                  <span>
-                                    Family:{" "}
-                                    {(item.data as Beneficiary).familySize}
-                                  </span>
-                                  <span>
-                                    Damage:{" "}
-                                    {(item.data as Beneficiary).damageSeverity}
-                                    /10
-                                  </span>
-                                  <span>
-                                    Flagged:{" "}
-                                    {(item.data as Beneficiary).flaggedAt
-                                      ? formatDate(
-                                          (item.data as Beneficiary)
-                                            .flaggedAt as number,
-                                        )
-                                      : "N/A"}
-                                  </span>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  {(item.data as NGO).email} •{" "}
-                                  {(item.data as NGO).phoneNumber}
-                                </p>
-                                <div className="flex gap-4 text-sm text-muted-foreground mb-3">
-                                  <span>
-                                    Reg: {(item.data as NGO).registrationNumber}
-                                  </span>
-                                  <span>
-                                    Districts:{" "}
-                                    {
-                                      (item.data as NGO).operatingDistricts
-                                        .length
-                                    }
-                                  </span>
-                                  {isNGOUpdate(item.data as NGO) ? (
-                                    <>
-                                      <span>
-                                        Last Updated:{" "}
-                                        {formatDate(
-                                          (item.data as NGO).lastActivityAt,
-                                        )}
-                                      </span>
-                                      <span className="text-orange-600 font-medium">
-                                        Needs Re-verification
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <span>
-                                      Registered:{" "}
-                                      {formatDate(
-                                        (item.data as NGO).registeredAt,
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              </>
-                            )}
-
-                            <div className="flex gap-2">
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
+                      "hover:border-theme-primary/50",
+                    )}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
                               {isFlagged ? (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="default"
-                                    onClick={() =>
-                                      handleApproveBeneficiary(
-                                        item.data as Beneficiary,
-                                      )
-                                    }
-                                    disabled={txLoading}
-                                  >
-                                    Approve & Verify
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() =>
-                                      handleRejectBeneficiary(
-                                        item.data as Beneficiary,
-                                      )
-                                    }
-                                    disabled={txLoading}
-                                  >
-                                    Reject
-                                  </Button>
-                                  <Button size="sm" variant="outline" asChild>
-                                    <Link
-                                      href={`/beneficiaries/${(item.data as Beneficiary).authority.toBase58()}`}
-                                    >
-                                      View Details
-                                    </Link>
-                                  </Button>
-                                </>
+                                <Flag className="h-5 w-5 text-yellow-500 shrink-0" />
                               ) : (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="default"
-                                    onClick={() =>
-                                      handleApproveNGO(item.data as NGO)
-                                    }
-                                    disabled={txLoading}
-                                  >
-                                    Verify NGO
-                                  </Button>
-                                  <Button size="sm" variant="outline" asChild>
-                                    <Link href={`/admin/ngos`}>
-                                      View All NGOs
-                                    </Link>
-                                  </Button>
-                                </>
+                                <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
                               )}
+                              <h3 className="font-semibold text-lg text-theme-text-highlight truncate">
+                                {item.name}
+                              </h3>
                             </div>
-
-                            <AnimatePresence initial={false}>
-                              {isExpanded && (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge
+                                variant={
+                                  isFlagged ? "destructive" : "secondary"
+                                }
+                              >
+                                {isFlagged
+                                  ? "Flagged"
+                                  : !isFlagged && isNGOUpdate(item.data as NGO)
+                                    ? "NGO Update"
+                                    : "New NGO"}
+                              </Badge>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setExpandedItems((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(item.id)) {
+                                      next.delete(item.id);
+                                    } else {
+                                      next.add(item.id);
+                                    }
+                                    return next;
+                                  });
+                                }}
+                                className="shrink-0 hover:bg-theme-primary/10 rounded p-1 transition-colors cursor-pointer"
+                              >
                                 <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
+                                  animate={{ rotate: isExpanded ? 180 : 0 }}
                                   transition={{
                                     duration: 0.3,
                                     ease: "easeInOut",
                                   }}
-                                  className="overflow-hidden"
                                 >
-                                  <div className="mt-4 pt-4 border-t border-theme-border space-y-4">
-                                    {isFlagged ? (
-                                      (item.data as Beneficiary)
-                                        .flaggedReason && (
-                                        <div className="space-y-2">
-                                          <p className="text-sm font-medium">
-                                            Flag Reason:
+                                  <ChevronDown className="h-5 w-5 text-theme-text" />
+                                </motion.div>
+                              </button>
+                            </div>
+                          </div>
+
+                          {isFlagged ? (
+                            <>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {(item.data as Beneficiary).location.district},
+                                Ward {(item.data as Beneficiary).location.ward}
+                              </p>
+                              <div className="flex gap-4 text-sm text-muted-foreground mb-3">
+                                <span>
+                                  Family:{" "}
+                                  {(item.data as Beneficiary).familySize}
+                                </span>
+                                <span>
+                                  Damage:{" "}
+                                  {(item.data as Beneficiary).damageSeverity}
+                                  /10
+                                </span>
+                                <span>
+                                  Flagged:{" "}
+                                  {(item.data as Beneficiary).flaggedAt
+                                    ? formatDate(
+                                        (item.data as Beneficiary)
+                                          .flaggedAt as number,
+                                      )
+                                    : "N/A"}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {(item.data as NGO).email} •{" "}
+                                {(item.data as NGO).phoneNumber}
+                              </p>
+                              <div className="flex gap-4 text-sm text-muted-foreground mb-3">
+                                <span>
+                                  Reg: {(item.data as NGO).registrationNumber}
+                                </span>
+                                <span>
+                                  Districts:{" "}
+                                  {(item.data as NGO).operatingDistricts.length}
+                                </span>
+                                {isNGOUpdate(item.data as NGO) ? (
+                                  <>
+                                    <span>
+                                      Last Updated:{" "}
+                                      {formatDate(
+                                        (item.data as NGO).lastActivityAt,
+                                      )}
+                                    </span>
+                                    <span className="text-orange-600 font-medium">
+                                      Needs Re-verification
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span>
+                                    Registered:{" "}
+                                    {formatDate(
+                                      (item.data as NGO).registeredAt,
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                          <div className="flex gap-2">
+                            {isFlagged ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() =>
+                                    handleApproveBeneficiary(
+                                      item.data as Beneficiary,
+                                    )
+                                  }
+                                  disabled={txLoading}
+                                >
+                                  Approve & Verify
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() =>
+                                    handleRejectBeneficiary(
+                                      item.data as Beneficiary,
+                                    )
+                                  }
+                                  disabled={txLoading}
+                                >
+                                  Reject
+                                </Button>
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link
+                                    href={`/beneficiaries/${(item.data as Beneficiary).authority.toBase58()}`}
+                                  >
+                                    View Details
+                                  </Link>
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() =>
+                                    handleApproveNGO(item.data as NGO)
+                                  }
+                                  disabled={txLoading}
+                                >
+                                  Verify NGO
+                                </Button>
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link href={`/admin/ngos`}>
+                                    View All NGOs
+                                  </Link>
+                                </Button>
+                              </>
+                            )}
+                          </div>
+
+                          <AnimatePresence initial={false}>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{
+                                  duration: 0.3,
+                                  ease: "easeInOut",
+                                }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-4 pt-4 border-t border-theme-border space-y-4">
+                                  {isFlagged ? (
+                                    (item.data as Beneficiary)
+                                      .flaggedReason && (
+                                      <div className="space-y-2">
+                                        <p className="text-sm font-medium">
+                                          Flag Reason:
+                                        </p>
+                                        <p className="text-sm text-yellow-600">
+                                          {
+                                            (item.data as Beneficiary)
+                                              .flaggedReason
+                                          }
+                                        </p>
+                                      </div>
+                                    )
+                                  ) : (
+                                    <div className="space-y-4">
+                                      {isNGOUpdate(item.data as NGO) && (
+                                        <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                                          <p className="text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
+                                            ⚠️ NGO Information Updated
                                           </p>
-                                          <p className="text-sm text-yellow-600">
+                                          <p className="text-xs text-orange-700 dark:text-orange-300">
+                                            This NGO was previously verified on{" "}
+                                            {(item.data as NGO).verifiedAt &&
+                                              formatDate(
+                                                (item.data as NGO)
+                                                  .verifiedAt as number,
+                                              )}
+                                            . They updated their information on{" "}
+                                            {formatDate(
+                                              (item.data as NGO).lastActivityAt,
+                                            )}{" "}
+                                            and require re-verification. Please
+                                            review all details carefully before
+                                            approving.
+                                          </p>
+                                        </div>
+                                      )}
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <p className="text-sm font-medium mb-1">
+                                            Contact Person
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">
                                             {
-                                              (item.data as Beneficiary)
-                                                .flaggedReason
+                                              (item.data as NGO)
+                                                .contactPersonName
+                                            }{" "}
+                                            -{" "}
+                                            {
+                                              (item.data as NGO)
+                                                .contactPersonRole
                                             }
                                           </p>
                                         </div>
-                                      )
-                                    ) : (
-                                      <div className="space-y-4">
-                                        {isNGOUpdate(item.data as NGO) && (
-                                          <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
-                                            <p className="text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
-                                              ⚠️ NGO Information Updated
+                                        <div>
+                                          <p className="text-sm font-medium mb-1">
+                                            Address
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">
+                                            {(item.data as NGO).address}
+                                          </p>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium mb-1">
+                                            Operating Districts
+                                          </p>
+                                          <div className="flex flex-wrap gap-1">
+                                            {(
+                                              item.data as NGO
+                                            ).operatingDistricts
+                                              .slice(0, 5)
+                                              .map((district: string) => (
+                                                <Badge
+                                                  key={district}
+                                                  variant="outline"
+                                                  className="text-xs"
+                                                >
+                                                  {district}
+                                                </Badge>
+                                              ))}
+                                            {(item.data as NGO)
+                                              .operatingDistricts.length >
+                                              5 && (
+                                              <Badge
+                                                variant="outline"
+                                                className="text-xs"
+                                              >
+                                                +
+                                                {(item.data as NGO)
+                                                  .operatingDistricts.length -
+                                                  5}{" "}
+                                                more
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium mb-1">
+                                            Focus Areas
+                                          </p>
+                                          <div className="flex flex-wrap gap-1">
+                                            {(item.data as NGO).focusAreas
+                                              .slice(0, 3)
+                                              .map((area: string) => (
+                                                <Badge
+                                                  key={area}
+                                                  variant="outline"
+                                                  className="text-xs"
+                                                >
+                                                  {area}
+                                                </Badge>
+                                              ))}
+                                            {(item.data as NGO).focusAreas
+                                              .length > 3 && (
+                                              <Badge
+                                                variant="outline"
+                                                className="text-xs"
+                                              >
+                                                +
+                                                {(item.data as NGO).focusAreas
+                                                  .length - 3}{" "}
+                                                more
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                        {(item.data as NGO).description && (
+                                          <div className="col-span-2">
+                                            <p className="text-sm font-medium mb-1">
+                                              Description
                                             </p>
-                                            <p className="text-xs text-orange-700 dark:text-orange-300">
-                                              This NGO was previously verified
-                                              on{" "}
-                                              {(item.data as NGO).verifiedAt &&
-                                                formatDate(
-                                                  (item.data as NGO)
-                                                    .verifiedAt as number,
-                                                )}
-                                              . They updated their information
-                                              on{" "}
-                                              {formatDate(
-                                                (item.data as NGO)
-                                                  .lastActivityAt,
-                                              )}{" "}
-                                              and require re-verification.
-                                              Please review all details
-                                              carefully before approving.
+                                            <p className="text-sm text-muted-foreground">
+                                              {(item.data as NGO).description}
                                             </p>
                                           </div>
                                         )}
-                                        <div className="grid grid-cols-2 gap-4">
-                                          <div>
+                                        {(item.data as NGO).website && (
+                                          <div className="col-span-2">
                                             <p className="text-sm font-medium mb-1">
-                                              Contact Person
+                                              Website
                                             </p>
-                                            <p className="text-sm text-muted-foreground">
-                                              {
-                                                (item.data as NGO)
-                                                  .contactPersonName
-                                              }{" "}
-                                              -{" "}
-                                              {
-                                                (item.data as NGO)
-                                                  .contactPersonRole
+                                            <a
+                                              href={
+                                                (item.data as NGO).website || ""
                                               }
-                                            </p>
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-sm text-theme-primary hover:underline"
+                                            >
+                                              {(item.data as NGO).website}
+                                            </a>
                                           </div>
-                                          <div>
-                                            <p className="text-sm font-medium mb-1">
-                                              Address
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                              {(item.data as NGO).address}
-                                            </p>
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium mb-1">
-                                              Operating Districts
-                                            </p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {(
-                                                item.data as NGO
-                                              ).operatingDistricts
-                                                .slice(0, 5)
-                                                .map((district: string) => (
-                                                  <Badge
-                                                    key={district}
-                                                    variant="outline"
-                                                    className="text-xs"
-                                                  >
-                                                    {district}
-                                                  </Badge>
-                                                ))}
-                                              {(item.data as NGO)
-                                                .operatingDistricts.length >
-                                                5 && (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="text-xs"
-                                                >
-                                                  +
-                                                  {(item.data as NGO)
-                                                    .operatingDistricts.length -
-                                                    5}{" "}
-                                                  more
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium mb-1">
-                                              Focus Areas
-                                            </p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {(item.data as NGO).focusAreas
-                                                .slice(0, 3)
-                                                .map((area: string) => (
-                                                  <Badge
-                                                    key={area}
-                                                    variant="outline"
-                                                    className="text-xs"
-                                                  >
-                                                    {area}
-                                                  </Badge>
-                                                ))}
-                                              {(item.data as NGO).focusAreas
-                                                .length > 3 && (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="text-xs"
-                                                >
-                                                  +
-                                                  {(item.data as NGO).focusAreas
-                                                    .length - 3}{" "}
-                                                  more
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                          {(item.data as NGO).description && (
-                                            <div className="col-span-2">
-                                              <p className="text-sm font-medium mb-1">
-                                                Description
-                                              </p>
-                                              <p className="text-sm text-muted-foreground">
-                                                {(item.data as NGO).description}
-                                              </p>
-                                            </div>
-                                          )}
-                                          {(item.data as NGO).website && (
-                                            <div className="col-span-2">
-                                              <p className="text-sm font-medium mb-1">
-                                                Website
-                                              </p>
-                                              <a
-                                                href={
-                                                  (item.data as NGO).website ||
-                                                  ""
-                                                }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-theme-primary hover:underline"
-                                              >
-                                                {(item.data as NGO).website}
-                                              </a>
-                                            </div>
-                                          )}
-                                        </div>
+                                        )}
                                       </div>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }

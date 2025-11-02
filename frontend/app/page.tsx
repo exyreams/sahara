@@ -22,7 +22,7 @@ export default function Home() {
   const activeDisasters = disasters.filter((d) => d.isActive).slice(0, 6);
   const verifiedBeneficiaries = beneficiaries
     .filter(
-      (b) => formatVerificationStatus(b.verificationStatus) === "Verified"
+      (b) => formatVerificationStatus(b.verificationStatus) === "Verified",
     )
     .slice(0, 6);
   const activePools = pools.filter((p) => p.isActive).slice(0, 6);
@@ -162,7 +162,7 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from(
                 { length: 6 },
-                (_, i) => `beneficiary-skeleton-${i}`
+                (_, i) => `beneficiary-skeleton-${i}`,
               ).map((key) => (
                 <div
                   key={key}
@@ -276,7 +276,7 @@ export default function Home() {
                       <div className="h-4 bg-theme-border rounded w-full" />
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           ) : activePools.length > 0 ? (

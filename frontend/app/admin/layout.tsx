@@ -69,7 +69,7 @@ export default function AdminLayout({
   // Show loading state while checking
   if (loading || configLoading) {
     return (
-      <div className="flex-1 flex min-h-screen">
+      <div className="flex-1 flex min-h-screen -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
         {/* Sidebar Skeleton */}
         <aside className="-mt-2 w-64 border-r border-theme-border bg-theme-card-bg flex flex-col">
           <div className="flex-1 p-4 pt-0 space-y-2">
@@ -95,7 +95,7 @@ export default function AdminLayout({
         </aside>
 
         {/* Main Content Skeleton */}
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-1 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-8">
           <div className="space-y-6">
             {/* Header Skeleton */}
             <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex-1 flex min-h-screen">
+    <div className="flex-1 flex min-h-screen -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
       {/* Sidebar Navigation */}
       <motion.aside
         initial={false}
@@ -333,7 +333,9 @@ export default function AdminLayout({
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen">{children}</main>
+      <main className="flex-1 flex flex-col min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-8">
+        {children}
+      </main>
     </div>
   );
 }

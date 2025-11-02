@@ -188,7 +188,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Verifying NGOs");
     setModalDescription(
-      `Processing ${ngosToVerify.length} NGO${ngosToVerify.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToVerify.length} NGO${
+        ngosToVerify.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -322,7 +324,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Revoking Verification");
     setModalDescription(
-      `Processing ${ngosToRevoke.length} NGO${ngosToRevoke.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToRevoke.length} NGO${
+        ngosToRevoke.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -463,7 +467,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Deactivating NGOs");
     setModalDescription(
-      `Processing ${ngosToDeactivate.length} NGO${ngosToDeactivate.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToDeactivate.length} NGO${
+        ngosToDeactivate.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -598,7 +604,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Activating NGOs");
     setModalDescription(
-      `Processing ${ngosToActivate.length} NGO${ngosToActivate.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToActivate.length} NGO${
+        ngosToActivate.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -733,7 +741,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Blacklisting NGOs");
     setModalDescription(
-      `Processing ${ngosToBlacklist.length} NGO${ngosToBlacklist.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToBlacklist.length} NGO${
+        ngosToBlacklist.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -866,7 +876,9 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Removing Blacklist");
     setModalDescription(
-      `Processing ${ngosToRemoveBlacklist.length} NGO${ngosToRemoveBlacklist.length > 1 ? "s" : ""} sequentially...`,
+      `Processing ${ngosToRemoveBlacklist.length} NGO${
+        ngosToRemoveBlacklist.length > 1 ? "s" : ""
+      } sequentially...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
@@ -1337,101 +1349,96 @@ export default function NGOManagementPage() {
 
   if (loading && !hasInitiallyLoaded) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="space-y-2">
-              <div className="h-10 w-56 bg-theme-border rounded animate-pulse" />
-              <div className="h-4 w-80 bg-theme-border rounded animate-pulse" />
-            </div>
-            <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
+      <>
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <div className="h-10 w-56 bg-theme-border rounded animate-pulse" />
+            <div className="h-4 w-80 bg-theme-border rounded animate-pulse" />
           </div>
+          <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
+        </div>
 
-          {/* Card Skeleton */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between mb-4">
-                <div className="space-y-2">
-                  <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
-                </div>
+        {/* Card Skeleton */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-2">
+                <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
               </div>
-
-              {/* Filters Skeleton */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
-                <div className="flex gap-2">
-                  <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
-                  <div className="h-9 w-36 bg-theme-border rounded animate-pulse" />
-                  <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {/* NGO Card Skeletons */}
-                {Array.from({ length: 5 }, (_, i) => `ngo-skeleton-${i}`).map(
-                  (key) => (
-                    <div
-                      key={key}
-                      className="border border-theme-border rounded-lg p-4"
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Checkbox */}
-                        <div className="h-4 w-4 bg-theme-border rounded mt-1 animate-pulse" />
+            </div>
 
-                        <div className="flex-1 space-y-3">
-                          {/* Title and Badges */}
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                              <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
-                              <div className="h-6 w-6 bg-theme-border rounded-full animate-pulse" />
-                            </div>
-                            <div className="flex gap-2">
-                              <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
-                              <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
-                            </div>
+            {/* Filters Skeleton */}
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
+              <div className="flex gap-2">
+                <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
+                <div className="h-9 w-36 bg-theme-border rounded animate-pulse" />
+                <div className="h-9 w-40 bg-theme-border rounded animate-pulse" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {/* NGO Card Skeletons */}
+              {Array.from({ length: 5 }, (_, i) => `ngo-skeleton-${i}`).map(
+                (key) => (
+                  <div
+                    key={key}
+                    className="border border-theme-border rounded-lg p-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Checkbox */}
+                      <div className="h-4 w-4 bg-theme-border rounded mt-1 animate-pulse" />
+
+                      <div className="flex-1 space-y-3">
+                        {/* Title and Badges */}
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-48 bg-theme-border rounded animate-pulse" />
+                            <div className="h-6 w-6 bg-theme-border rounded-full animate-pulse" />
                           </div>
-
-                          {/* Registration */}
-                          <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
-
-                          {/* Stats */}
-                          <div className="flex gap-4">
-                            <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                            <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                            <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
-                          </div>
-
-                          {/* Action Buttons */}
                           <div className="flex gap-2">
-                            <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
-                            <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
-                            <div className="h-9 w-28 bg-theme-border rounded animate-pulse" />
+                            <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
+                            <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
                           </div>
+                        </div>
+
+                        {/* Registration */}
+                        <div className="h-4 w-64 bg-theme-border rounded animate-pulse" />
+
+                        {/* Stats */}
+                        <div className="flex gap-4">
+                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                          <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-9 w-24 bg-theme-border rounded animate-pulse" />
+                          <div className="h-9 w-28 bg-theme-border rounded animate-pulse" />
                         </div>
                       </div>
                     </div>
-                  ),
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+                  </div>
+                ),
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
+    <>
       {/* Progress Modal */}
       <VerificationProgressModal
         open={showProgressModal}
@@ -1442,539 +1449,527 @@ export default function NGOManagementPage() {
         onClose={() => setShowProgressModal(false)}
       />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {/* Platform Pause Alert */}
-        {config?.isPaused && (
-          <Card className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-red-600 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Platform is Paused
+      {/* Platform Pause Alert */}
+      {config?.isPaused && (
+        <Card className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-red-600 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Platform is Paused
+            </CardTitle>
+            <CardDescription>
+              All transactions are currently disabled. Unpause to resume
+              operations.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight">NGO Management</h1>
+          <p className="text-muted-foreground mt-2">
+            Verify, manage, and monitor NGO organizations
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin">Back to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Batch Operations Toolbar */}
+      {selectedNGOs.length > 0 && (
+        <div className="mb-6 bg-theme-card-bg border border-theme-border rounded-lg p-3">
+          <BatchOperationsToolbar
+            selectedCount={selectedNGOs.length}
+            onBatchVerify={handleBatchVerify}
+            onBatchRevokeVerification={handleBatchRevokeVerification}
+            onBatchActivate={handleBatchActivate}
+            onBatchDeactivate={handleBatchDeactivate}
+            onBatchBlacklist={handleBatchBlacklist}
+            onBatchRemoveBlacklist={handleBatchRemoveBlacklist}
+            onClearSelection={handleClearSelection}
+            disabled={txLoading}
+          />
+        </div>
+      )}
+
+      {/* Combined Filters and NGO List */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <CardTitle className="text-lg">
+                NGOs ({filteredNGOs.length})
               </CardTitle>
               <CardDescription>
-                All transactions are currently disabled. Unpause to resume
-                operations.
+                {selectedNGOs.length > 0 && `${selectedNGOs.length} selected`}
               </CardDescription>
-            </CardHeader>
-          </Card>
-        )}
-
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">
-              NGO Management
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Verify, manage, and monitor NGO organizations
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={
+                  selectedNGOs.length === filteredNGOs.length &&
+                  filteredNGOs.length > 0
+                }
+                onCheckedChange={handleSelectAll}
               />
-              Refresh
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/admin">Back to Dashboard</Link>
-            </Button>
+              <button
+                type="button"
+                className="text-sm text-muted-foreground hover:text-theme-text transition-colors bg-transparent border-0 p-0 cursor-pointer"
+                onClick={() =>
+                  handleSelectAll(
+                    !(
+                      selectedNGOs.length === filteredNGOs.length &&
+                      filteredNGOs.length > 0
+                    ),
+                  )
+                }
+              >
+                Select All
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Batch Operations Toolbar */}
-        {selectedNGOs.length > 0 && (
-          <div className="mb-6 bg-theme-card-bg border border-theme-border rounded-lg p-3">
-            <BatchOperationsToolbar
-              selectedCount={selectedNGOs.length}
-              onBatchVerify={handleBatchVerify}
-              onBatchRevokeVerification={handleBatchRevokeVerification}
-              onBatchActivate={handleBatchActivate}
-              onBatchDeactivate={handleBatchDeactivate}
-              onBatchBlacklist={handleBatchBlacklist}
-              onBatchRemoveBlacklist={handleBatchRemoveBlacklist}
-              onClearSelection={handleClearSelection}
-              disabled={txLoading}
-            />
-          </div>
-        )}
-
-        {/* Combined Filters and NGO List */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <CardTitle className="text-lg">
-                  NGOs ({filteredNGOs.length})
-                </CardTitle>
-                <CardDescription>
-                  {selectedNGOs.length > 0 && `${selectedNGOs.length} selected`}
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={
-                    selectedNGOs.length === filteredNGOs.length &&
-                    filteredNGOs.length > 0
-                  }
-                  onCheckedChange={handleSelectAll}
-                />
-                <button
-                  type="button"
-                  className="text-sm text-muted-foreground hover:text-theme-text transition-colors bg-transparent border-0 p-0 cursor-pointer"
-                  onClick={() =>
-                    handleSelectAll(
-                      !(
-                        selectedNGOs.length === filteredNGOs.length &&
-                        filteredNGOs.length > 0
-                      ),
-                    )
-                  }
-                >
-                  Select All
-                </button>
-              </div>
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or registration..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
+              />
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or registration..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9"
-                />
-              </div>
+            <div className="flex gap-2">
+              <Dropdown
+                value={verifiedFilter}
+                onValueChange={setVerifiedFilter}
+                placeholder="Verification"
+                options={[
+                  { value: "all", label: "All Verification" },
+                  { value: "verified", label: "Verified" },
+                  { value: "unverified", label: "Unverified" },
+                ]}
+                className="w-40"
+              />
 
-              <div className="flex gap-2">
-                <Dropdown
-                  value={verifiedFilter}
-                  onValueChange={setVerifiedFilter}
-                  placeholder="Verification"
-                  options={[
-                    { value: "all", label: "All Verification" },
-                    { value: "verified", label: "Verified" },
-                    { value: "unverified", label: "Unverified" },
-                  ]}
-                  className="w-40"
-                />
+              <Dropdown
+                value={activeFilter}
+                onValueChange={setActiveFilter}
+                placeholder="Status"
+                options={[
+                  { value: "all", label: "All Status" },
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+                className="w-36"
+              />
 
-                <Dropdown
-                  value={activeFilter}
-                  onValueChange={setActiveFilter}
-                  placeholder="Status"
-                  options={[
-                    { value: "all", label: "All Status" },
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ]}
-                  className="w-36"
-                />
-
-                <Dropdown
-                  value={blacklistFilter}
-                  onValueChange={setBlacklistFilter}
-                  placeholder="Blacklist"
-                  options={[
-                    { value: "all", label: "All" },
-                    { value: "not-blacklisted", label: "Not Blacklisted" },
-                    { value: "blacklisted", label: "Blacklisted" },
-                  ]}
-                  className="w-40"
-                />
-              </div>
+              <Dropdown
+                value={blacklistFilter}
+                onValueChange={setBlacklistFilter}
+                placeholder="Blacklist"
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "not-blacklisted", label: "Not Blacklisted" },
+                  { value: "blacklisted", label: "Blacklisted" },
+                ]}
+                className="w-40"
+              />
             </div>
-          </CardHeader>
-          <CardContent>
-            {filteredNGOs.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No NGOs found</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredNGOs.map((ngo) => {
-                  const ngoKey = ngo.publicKey.toString();
-                  const isExpanded = expandedNGOs.has(ngoKey);
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredNGOs.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No NGOs found</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredNGOs.map((ngo) => {
+                const ngoKey = ngo.publicKey.toString();
+                const isExpanded = expandedNGOs.has(ngoKey);
 
-                  return (
-                    <div
-                      key={ngoKey}
-                      className={cn(
-                        "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
-                        "hover:border-theme-primary/50",
-                        !ngo.isActive && "opacity-60",
-                      )}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start gap-4">
-                          <Checkbox
-                            checked={selectedNGOs.some((a) =>
-                              a.equals(ngo.authority),
-                            )}
-                            onCheckedChange={(checked) =>
-                              handleSelectNGO(ngo.authority, checked as boolean)
-                            }
-                            className="mt-1"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <h3 className="font-semibold text-lg text-theme-text-highlight truncate">
-                                  {ngo.name}
-                                </h3>
-                                {ngo.isVerified && (
-                                  <VerifiedIcon
-                                    className="h-6 w-6 shrink-0"
-                                    tooltip="Verified NGO"
-                                  />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <Badge
-                                  variant={
-                                    ngo.isActive ? "default" : "secondary"
-                                  }
-                                >
-                                  {ngo.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                                {ngo.isBlacklisted && (
-                                  <Badge variant="destructive">
-                                    Blacklisted
-                                  </Badge>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setExpandedNGOs((prev) => {
-                                      const next = new Set(prev);
-                                      if (next.has(ngoKey)) {
-                                        next.delete(ngoKey);
-                                      } else {
-                                        next.add(ngoKey);
-                                      }
-                                      return next;
-                                    });
+                return (
+                  <div
+                    key={ngoKey}
+                    className={cn(
+                      "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
+                      "hover:border-theme-primary/50",
+                      !ngo.isActive && "opacity-60",
+                    )}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start gap-4">
+                        <Checkbox
+                          checked={selectedNGOs.some((a) =>
+                            a.equals(ngo.authority),
+                          )}
+                          onCheckedChange={(checked) =>
+                            handleSelectNGO(ngo.authority, checked as boolean)
+                          }
+                          className="mt-1"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg text-theme-text-highlight truncate">
+                                {ngo.name}
+                              </h3>
+                              {ngo.isVerified && (
+                                <VerifiedIcon
+                                  className="h-6 w-6 shrink-0"
+                                  tooltip="Verified NGO"
+                                />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge
+                                variant={ngo.isActive ? "default" : "secondary"}
+                              >
+                                {ngo.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                              {ngo.isBlacklisted && (
+                                <Badge variant="destructive">Blacklisted</Badge>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setExpandedNGOs((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(ngoKey)) {
+                                      next.delete(ngoKey);
+                                    } else {
+                                      next.add(ngoKey);
+                                    }
+                                    return next;
+                                  });
+                                }}
+                                className="shrink-0 hover:bg-theme-primary/10 rounded p-1 transition-colors cursor-pointer"
+                              >
+                                <motion.div
+                                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                                  transition={{
+                                    duration: 0.3,
+                                    ease: "easeInOut",
                                   }}
-                                  className="shrink-0 hover:bg-theme-primary/10 rounded p-1 transition-colors cursor-pointer"
                                 >
-                                  <motion.div
-                                    animate={{ rotate: isExpanded ? 180 : 0 }}
-                                    transition={{
-                                      duration: 0.3,
-                                      ease: "easeInOut",
-                                    }}
-                                  >
-                                    <ChevronDown className="h-5 w-5 text-theme-text" />
-                                  </motion.div>
-                                </button>
-                              </div>
+                                  <ChevronDown className="h-5 w-5 text-theme-text" />
+                                </motion.div>
+                              </button>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Registration: {ngo.registrationNumber}
-                            </p>
-                            <div className="flex gap-4 text-sm text-muted-foreground mb-3">
-                              <span>
-                                <span className="mr-2">
-                                  {ngo.fieldWorkersCount}
-                                </span>
-                                Field Workers
-                              </span>
-                              <span>
-                                <span className="mr-2">
-                                  {ngoStats.get(ngo.publicKey.toBase58())
-                                    ?.beneficiaryCount || 0}
-                                </span>
-                                Beneficiaries
-                              </span>
-                              <span>
-                                <span className="mr-2">{ngo.poolsCreated}</span>
-                                Pools
-                              </span>
-                            </div>
-                            <NGOActionButtons
-                              ngo={ngo}
-                              onVerify={() => handleVerifyNGO(ngo)}
-                              onRevokeVerification={() =>
-                                handleRevokeVerification(ngo)
-                              }
-                              onActivate={() => handleActivateNGO(ngo)}
-                              onDeactivate={() => handleDeactivateNGO(ngo)}
-                              onBlacklist={(reason) =>
-                                handleBlacklistNGO(ngo, reason)
-                              }
-                              onRemoveBlacklist={() =>
-                                handleRemoveBlacklist(ngo)
-                              }
-                              disabled={txLoading}
-                            />
                           </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Registration: {ngo.registrationNumber}
+                          </p>
+                          <div className="flex gap-4 text-sm text-muted-foreground mb-3">
+                            <span>
+                              <span className="mr-2">
+                                {ngo.fieldWorkersCount}
+                              </span>
+                              Field Workers
+                            </span>
+                            <span>
+                              <span className="mr-2">
+                                {ngoStats.get(ngo.publicKey.toBase58())
+                                  ?.beneficiaryCount || 0}
+                              </span>
+                              Beneficiaries
+                            </span>
+                            <span>
+                              <span className="mr-2">{ngo.poolsCreated}</span>
+                              Pools
+                            </span>
+                          </div>
+                          <NGOActionButtons
+                            ngo={ngo}
+                            onVerify={() => handleVerifyNGO(ngo)}
+                            onRevokeVerification={() =>
+                              handleRevokeVerification(ngo)
+                            }
+                            onActivate={() => handleActivateNGO(ngo)}
+                            onDeactivate={() => handleDeactivateNGO(ngo)}
+                            onBlacklist={(reason) =>
+                              handleBlacklistNGO(ngo, reason)
+                            }
+                            onRemoveBlacklist={() => handleRemoveBlacklist(ngo)}
+                            disabled={txLoading}
+                          />
                         </div>
                       </div>
+                    </div>
 
-                      {/* Expanded Details */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="overflow-hidden px-8 py-4 border-t border-theme-border"
-                          >
-                            <div className="bg-theme-background/50 p-4 rounded-md">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Contact Information */}
-                                <div>
-                                  <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
-                                    Contact Information
-                                  </h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Email:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.email || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Phone:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.phoneNumber || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Website:
-                                      </span>
-                                      <p className="text-theme-text break-all">
-                                        {ngo.website || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Address:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.address || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Contact Person:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.contactPersonName ||
-                                          "Not provided"}{" "}
-                                        {ngo.contactPersonRole &&
-                                          `(${ngo.contactPersonRole})`}
-                                      </p>
-                                    </div>
+                    {/* Expanded Details */}
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="overflow-hidden px-8 py-4 border-t border-theme-border"
+                        >
+                          <div className="bg-theme-background/50 p-4 rounded-md">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Contact Information */}
+                              <div>
+                                <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
+                                  Contact Information
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Email:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.email || "Not provided"}
+                                    </p>
                                   </div>
-                                </div>
-
-                                {/* Organization Details */}
-                                <div>
-                                  <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
-                                    Organization Details
-                                  </h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Description:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.description || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Operating Districts:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.operatingDistricts.length > 0
-                                          ? ngo.operatingDistricts.join(", ")
-                                          : "Not specified"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Focus Areas:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.focusAreas.length > 0
-                                          ? ngo.focusAreas.join(", ")
-                                          : "Not specified"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Tax ID:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.taxId || "Not provided"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Bank Account:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {ngo.bankAccountInfo || "Not provided"}
-                                      </p>
-                                    </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Phone:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.phoneNumber || "Not provided"}
+                                    </p>
                                   </div>
-                                </div>
-
-                                {/* Statistics */}
-                                <div>
-                                  <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
-                                    Statistics
-                                  </h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Total Aid Distributed:
-                                      </span>
-                                      <p className="text-theme-primary text-lg font-semibold">
-                                        $
-                                        {(
-                                          (ngoStats.get(
-                                            ngo.publicKey.toBase58(),
-                                          )?.totalAidDistributed || 0) /
-                                          1_000_000
-                                        ).toFixed(2)}{" "}
-                                        USDC
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Field Workers: {ngo.fieldWorkersCount}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Beneficiaries Registered:{" "}
-                                        {ngoStats.get(ngo.publicKey.toBase58())
-                                          ?.beneficiaryCount || 0}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Pools Created: {ngo.poolsCreated}
-                                      </span>
-                                    </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Website:
+                                    </span>
+                                    <p className="text-theme-text break-all">
+                                      {ngo.website || "Not provided"}
+                                    </p>
                                   </div>
-                                </div>
-
-                                {/* Verification & Dates */}
-                                <div>
-                                  <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
-                                    Verification & Timeline
-                                  </h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Registered At:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {new Date(
-                                          ngo.registeredAt * 1000,
-                                        ).toLocaleString()}
-                                      </p>
-                                    </div>
-                                    {ngo.verifiedAt && (
-                                      <div>
-                                        <span className="text-theme-text/60">
-                                          Verified At:
-                                        </span>
-                                        <p className="text-theme-text">
-                                          {new Date(
-                                            ngo.verifiedAt * 1000,
-                                          ).toLocaleString()}
-                                        </p>
-                                      </div>
-                                    )}
-                                    {ngo.verifiedBy && (
-                                      <div>
-                                        <span className="text-theme-text/60">
-                                          Verified By:
-                                        </span>
-                                        <p className="text-theme-text font-mono text-xs break-all">
-                                          {ngo.verifiedBy.toBase58()}
-                                        </p>
-                                      </div>
-                                    )}
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Last Activity:
-                                      </span>
-                                      <p className="text-theme-text">
-                                        {new Date(
-                                          ngo.lastActivityAt * 1000,
-                                        ).toLocaleString()}
-                                      </p>
-                                    </div>
-                                    {ngo.verificationDocuments && (
-                                      <div>
-                                        <span className="text-theme-text/60">
-                                          Verification Documents:
-                                        </span>
-                                        <p className="text-theme-text break-all">
-                                          {ngo.verificationDocuments}
-                                        </p>
-                                      </div>
-                                    )}
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Address:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.address || "Not provided"}
+                                    </p>
                                   </div>
-                                </div>
-
-                                {/* Wallet Address & Notes */}
-                                <div className="md:col-span-2">
-                                  <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
-                                    Additional Information
-                                  </h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div>
-                                      <span className="text-theme-text/60">
-                                        Wallet Address:
-                                      </span>
-                                      <p className="text-theme-text font-mono text-xs break-all">
-                                        {ngo.authority.toBase58()}
-                                      </p>
-                                    </div>
-                                    {ngo.notes && (
-                                      <div>
-                                        <span className="text-theme-text/60">
-                                          Admin Notes:
-                                        </span>
-                                        <p className="text-theme-text">
-                                          {ngo.notes}
-                                        </p>
-                                      </div>
-                                    )}
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Contact Person:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.contactPersonName || "Not provided"}{" "}
+                                      {ngo.contactPersonRole &&
+                                        `(${ngo.contactPersonRole})`}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Organization Details */}
+                              <div>
+                                <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
+                                  Organization Details
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Description:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.description || "Not provided"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Operating Districts:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.operatingDistricts.length > 0
+                                        ? ngo.operatingDistricts.join(", ")
+                                        : "Not specified"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Focus Areas:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.focusAreas.length > 0
+                                        ? ngo.focusAreas.join(", ")
+                                        : "Not specified"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Tax ID:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.taxId || "Not provided"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Bank Account:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {ngo.bankAccountInfo || "Not provided"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Statistics */}
+                              <div>
+                                <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
+                                  Statistics
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Total Aid Distributed:
+                                    </span>
+                                    <p className="text-theme-primary text-lg font-semibold">
+                                      $
+                                      {(
+                                        (ngoStats.get(ngo.publicKey.toBase58())
+                                          ?.totalAidDistributed || 0) /
+                                        1_000_000
+                                      ).toFixed(2)}{" "}
+                                      USDC
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Field Workers: {ngo.fieldWorkersCount}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Beneficiaries Registered:{" "}
+                                      {ngoStats.get(ngo.publicKey.toBase58())
+                                        ?.beneficiaryCount || 0}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Pools Created: {ngo.poolsCreated}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Verification & Dates */}
+                              <div>
+                                <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
+                                  Verification & Timeline
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Registered At:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {new Date(
+                                        ngo.registeredAt * 1000,
+                                      ).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  {ngo.verifiedAt && (
+                                    <div>
+                                      <span className="text-theme-text/60">
+                                        Verified At:
+                                      </span>
+                                      <p className="text-theme-text">
+                                        {new Date(
+                                          ngo.verifiedAt * 1000,
+                                        ).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {ngo.verifiedBy && (
+                                    <div>
+                                      <span className="text-theme-text/60">
+                                        Verified By:
+                                      </span>
+                                      <p className="text-theme-text font-mono text-xs break-all">
+                                        {ngo.verifiedBy.toBase58()}
+                                      </p>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Last Activity:
+                                    </span>
+                                    <p className="text-theme-text">
+                                      {new Date(
+                                        ngo.lastActivityAt * 1000,
+                                      ).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  {ngo.verificationDocuments && (
+                                    <div>
+                                      <span className="text-theme-text/60">
+                                        Verification Documents:
+                                      </span>
+                                      <p className="text-theme-text break-all">
+                                        {ngo.verificationDocuments}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Wallet Address & Notes */}
+                              <div className="md:col-span-2">
+                                <h4 className="text-sm font-semibold text-theme-text-highlight mb-3">
+                                  Additional Information
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="text-theme-text/60">
+                                      Wallet Address:
+                                    </span>
+                                    <p className="text-theme-text font-mono text-xs break-all">
+                                      {ngo.authority.toBase58()}
+                                    </p>
+                                  </div>
+                                  {ngo.notes && (
+                                    <div>
+                                      <span className="text-theme-text/60">
+                                        Admin Notes:
+                                      </span>
+                                      <p className="text-theme-text">
+                                        {ngo.notes}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }

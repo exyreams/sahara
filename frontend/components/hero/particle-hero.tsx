@@ -127,7 +127,7 @@ export function ParticleHero() {
         particleThemes[currentTheme as keyof typeof particleThemes]?.color ||
         particleThemes.sahara.color;
       particlesRef.current = textCoordinates.map(
-        (coord) => new Particle(coord.x, coord.y, color)
+        (coord) => new Particle(coord.x, coord.y, color),
       );
     };
 

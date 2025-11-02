@@ -218,74 +218,70 @@ export default function NGOActivityLogPage() {
 
   if (loading || isRefreshing) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="space-y-2">
-              <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
-              <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
-            </div>
-            <div className="flex gap-2">
-              <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
-              <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
-            </div>
+      <>
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <div className="h-10 w-48 bg-theme-border rounded animate-pulse" />
+            <div className="h-4 w-96 bg-theme-border rounded animate-pulse" />
           </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-theme-border rounded animate-pulse" />
+            <div className="h-10 w-40 bg-theme-border rounded animate-pulse" />
+          </div>
+        </div>
 
-          {/* Card Skeleton */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between mb-4">
-                <div className="space-y-2">
-                  <div className="h-6 w-32 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
-                </div>
-              </div>
-
-              {/* Filters Skeleton */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
-                <div className="h-9 w-full md:w-64 bg-theme-border rounded animate-pulse" />
-              </div>
-            </CardHeader>
-            <CardContent>
+        {/* Card Skeleton */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between mb-4">
               <div className="space-y-2">
-                {Array.from(
-                  { length: 5 },
-                  (_, i) => `activity-log-skeleton-${i}`,
-                ).map((key) => (
-                  <div
-                    key={key}
-                    className="border border-theme-border rounded-lg p-3 animate-pulse"
-                  >
-                    <div className="flex items-center gap-4">
+                <div className="h-6 w-32 bg-theme-border rounded animate-pulse" />
+                <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
+              </div>
+            </div>
+
+            {/* Filters Skeleton */}
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="h-9 flex-1 bg-theme-border rounded animate-pulse" />
+              <div className="h-9 w-full md:w-64 bg-theme-border rounded animate-pulse" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {Array.from(
+                { length: 5 },
+                (_, i) => `activity-log-skeleton-${i}`,
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="border border-theme-border rounded-lg p-3 animate-pulse"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
+                    <div className="h-6 w-36 bg-theme-border rounded shrink-0" />
+                    <div className="flex items-center gap-3 flex-1 min-w-0 justify-center">
+                      <div className="h-6 w-32 bg-theme-border rounded" />
                       <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                      <div className="h-6 w-36 bg-theme-border rounded shrink-0" />
-                      <div className="flex items-center gap-3 flex-1 min-w-0 justify-center">
-                        <div className="h-6 w-32 bg-theme-border rounded" />
-                        <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                        <div className="h-6 w-32 bg-theme-border rounded" />
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="h-4 w-24 bg-theme-border rounded" />
-                      </div>
+                      <div className="h-6 w-32 bg-theme-border rounded" />
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="h-4 w-24 bg-theme-border rounded" />
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
   if (!ngo) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+      <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
+        <div className="flex-1 container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">No NGO Registered</h2>
@@ -296,327 +292,253 @@ export default function NGOActivityLogPage() {
               <Link href="/ngo">Register NGO</Link>
             </Button>
           </div>
-        </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">Activity Log</h1>
-            <p className="text-muted-foreground mt-2">
-              View all activities related to {ngo.name}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/ngo/dashboard">Back to Dashboard</Link>
-            </Button>
-          </div>
+    <>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight">Activity Log</h1>
+          <p className="text-muted-foreground mt-2">
+            View all activities related to {ngo.name}
+          </p>
         </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/ngo/dashboard">Back to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
 
-        {/* Activity Log */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <CardTitle className="text-lg">
-                  All Activities ({filteredLogs.length})
-                </CardTitle>
-                <CardDescription>
-                  Showing {paginatedLogs.length} of {filteredLogs.length}{" "}
-                  entries
-                </CardDescription>
-              </div>
+      {/* Activity Log */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <CardTitle className="text-lg">
+                All Activities ({filteredLogs.length})
+              </CardTitle>
+              <CardDescription>
+                Showing {paginatedLogs.length} of {filteredLogs.length} entries
+              </CardDescription>
             </div>
+          </div>
 
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by address..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-9 h-9"
-                />
-              </div>
-
-              <Dropdown
-                value={actionTypeFilter}
-                onValueChange={(value) => {
-                  setActionTypeFilter(value);
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by address..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Action Type"
-                options={[
-                  { value: "all", label: "All Types" },
-                  {
-                    value: "fieldWorkerRegistered",
-                    label: "Field Worker Registered",
-                  },
-                  { value: "disasterCreated", label: "Disaster Created" },
-                  { value: "disasterUpdated", label: "Disaster Updated" },
-                  { value: "disasterClosed", label: "Disaster Closed" },
-                  { value: "fundPoolCreated", label: "Fund Pool Created" },
-                  { value: "fundPoolClosed", label: "Fund Pool Closed" },
-                  { value: "donationToPool", label: "Donation to Pool" },
-                  {
-                    value: "beneficiaryRegistered",
-                    label: "Beneficiary Registered",
-                  },
-                  {
-                    value: "beneficiaryVerified",
-                    label: "Beneficiary Verified",
-                  },
-                ]}
-                className="w-full md:w-64"
+                className="pl-9 h-9"
               />
             </div>
-          </CardHeader>
-          <CardContent>
-            {paginatedLogs.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
-                  <FileText className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-theme-text-highlight mb-2">
-                  No activities found
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                  {searchQuery || actionTypeFilter !== "all"
-                    ? "Try adjusting your filters to see more results"
-                    : "Activities will appear here once they are performed"}
-                </p>
+
+            <Dropdown
+              value={actionTypeFilter}
+              onValueChange={(value) => {
+                setActionTypeFilter(value);
+                setCurrentPage(1);
+              }}
+              placeholder="Action Type"
+              options={[
+                { value: "all", label: "All Types" },
+                {
+                  value: "fieldWorkerRegistered",
+                  label: "Field Worker Registered",
+                },
+                { value: "disasterCreated", label: "Disaster Created" },
+                { value: "disasterUpdated", label: "Disaster Updated" },
+                { value: "disasterClosed", label: "Disaster Closed" },
+                { value: "fundPoolCreated", label: "Fund Pool Created" },
+                { value: "fundPoolClosed", label: "Fund Pool Closed" },
+                { value: "donationToPool", label: "Donation to Pool" },
+                {
+                  value: "beneficiaryRegistered",
+                  label: "Beneficiary Registered",
+                },
+                {
+                  value: "beneficiaryVerified",
+                  label: "Beneficiary Verified",
+                },
+              ]}
+              className="w-full md:w-64"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {paginatedLogs.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
+                <FileText className="h-8 w-8 text-muted-foreground" />
               </div>
-            ) : (
-              <div className="space-y-2">
-                {paginatedLogs.map((log) => {
-                  const logKey = log.publicKey.toString();
-                  const isExpanded = expandedActions.has(logKey);
+              <h3 className="text-lg font-semibold text-theme-text-highlight mb-2">
+                No activities found
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                {searchQuery || actionTypeFilter !== "all"
+                  ? "Try adjusting your filters to see more results"
+                  : "Activities will appear here once they are performed"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {paginatedLogs.map((log) => {
+                const logKey = log.publicKey.toString();
+                const isExpanded = expandedActions.has(logKey);
 
-                  return (
-                    <div
-                      key={logKey}
-                      className="border border-theme-border rounded-lg overflow-hidden hover:border-theme-primary/50 transition-all duration-200"
+                return (
+                  <div
+                    key={logKey}
+                    className="border border-theme-border rounded-lg overflow-hidden hover:border-theme-primary/50 transition-all duration-200"
+                  >
+                    {/* Collapsed View */}
+                    <button
+                      type="button"
+                      className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 cursor-pointer hover:bg-theme-primary/5 w-full text-left"
+                      onClick={() => toggleExpanded(logKey)}
                     >
-                      {/* Collapsed View */}
-                      <button
-                        type="button"
-                        className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 cursor-pointer hover:bg-theme-primary/5 w-full text-left"
-                        onClick={() => toggleExpanded(logKey)}
-                      >
-                        {/* Mobile: Top Row */}
-                        <div className="flex items-center gap-3 md:hidden">
-                          <ChevronDown
-                            className={`h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
-                              isExpanded ? "rotate-180" : ""
-                            }`}
-                          />
-                          <Badge variant="default" className="shrink-0">
-                            {formatActionType(log.actionType)}
-                          </Badge>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="text-xs text-muted-foreground ml-auto cursor-help">
-                                {formatTimestamp(log.timestamp)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-xs">
-                                {formatFullTimestamp(log.timestamp)}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-
-                        {/* Desktop: Single Row */}
+                      {/* Mobile: Top Row */}
+                      <div className="flex items-center gap-3 md:hidden">
                         <ChevronDown
-                          className={`hidden md:block h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
+                          className={`h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
                             isExpanded ? "rotate-180" : ""
                           }`}
                         />
-
-                        <Badge
-                          variant="default"
-                          className="hidden md:flex shrink-0 min-w-[180px] justify-center"
-                        >
+                        <Badge variant="default" className="shrink-0">
                           {formatActionType(log.actionType)}
                         </Badge>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-xs text-muted-foreground ml-auto cursor-help">
+                              {formatTimestamp(log.timestamp)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">
+                              {formatFullTimestamp(log.timestamp)}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
 
-                        <div className="flex items-center gap-4 flex-1 min-w-0 md:justify-center">
-                          <code className="px-2 py-0.5 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text-highlight">
-                            {formatAddress(log.target.toString())}
-                          </code>
-                          <span className="text-xs text-muted-foreground shrink-0">
-                            →
-                          </span>
-                          <code className="px-2 py-0.5 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text-highlight">
-                            {formatAddress(log.actor.toString())}
-                          </code>
-                        </div>
+                      {/* Desktop: Single Row */}
+                      <ChevronDown
+                        className={`hidden md:block h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
 
-                        <div className="hidden md:flex items-center gap-3 shrink-0">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1 cursor-help">
-                                <Calendar className="h-3 w-3" />
-                                {formatTimestamp(log.timestamp)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-xs">
-                                {formatFullTimestamp(log.timestamp)}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </button>
+                      <Badge
+                        variant="default"
+                        className="hidden md:flex shrink-0 min-w-[180px] justify-center"
+                      >
+                        {formatActionType(log.actionType)}
+                      </Badge>
 
-                      {/* Expanded View */}
-                      {isExpanded && (
-                        <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
-                          <div className="bg-theme-background p-4 rounded-md">
-                            {/* Action Summary */}
-                            <div className="text-xs text-muted-foreground mb-1">
-                              Activity:
+                      <div className="flex items-center gap-4 flex-1 min-w-0 md:justify-center">
+                        <code className="px-2 py-0.5 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text-highlight">
+                          {formatAddress(log.target.toString())}
+                        </code>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          →
+                        </span>
+                        <code className="px-2 py-0.5 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text-highlight">
+                          {formatAddress(log.actor.toString())}
+                        </code>
+                      </div>
+
+                      <div className="hidden md:flex items-center gap-3 shrink-0">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 cursor-help">
+                              <Calendar className="h-3 w-3" />
+                              {formatTimestamp(log.timestamp)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">
+                              {formatFullTimestamp(log.timestamp)}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </button>
+
+                    {/* Expanded View */}
+                    {isExpanded && (
+                      <div className="border-t border-theme-border bg-[hsl(var(--input))] p-2">
+                        <div className="bg-theme-background p-4 rounded-md">
+                          {/* Action Summary */}
+                          <div className="text-xs text-muted-foreground mb-1">
+                            Activity:
+                          </div>
+                          <div className="mb-4 p-3 bg-theme-card-bg border border-theme-border rounded-lg">
+                            <div className="text-sm text-theme-text-highlight font-medium">
+                              <span className="text-theme-primary font-semibold">
+                                {formatActionType(log.actionType)}
+                              </span>{" "}
+                              of{" "}
+                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                {formatAddress(log.target.toString())}
+                              </code>{" "}
+                              by{" "}
+                              <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
+                                {formatAddress(log.actor.toString())}
+                              </code>
                             </div>
-                            <div className="mb-4 p-3 bg-theme-card-bg border border-theme-border rounded-lg">
-                              <div className="text-sm text-theme-text-highlight font-medium">
-                                <span className="text-theme-primary font-semibold">
-                                  {formatActionType(log.actionType)}
-                                </span>{" "}
-                                of{" "}
-                                <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                  {formatAddress(log.target.toString())}
-                                </code>{" "}
-                                by{" "}
-                                <code className="px-1.5 py-0.5 bg-theme-card-bg rounded text-xs font-mono text-theme-primary">
-                                  {formatAddress(log.actor.toString())}
-                                </code>
+                            {log.metadata && (
+                              <div className="mt-2 text-xs text-muted-foreground">
+                                <span className="font-medium">Details:</span>{" "}
+                                {log.metadata}
                               </div>
-                              {log.metadata && (
+                            )}
+                            {log.amount !== null &&
+                              log.amount !== undefined && (
                                 <div className="mt-2 text-xs text-muted-foreground">
-                                  <span className="font-medium">Details:</span>{" "}
-                                  {log.metadata}
+                                  <span className="font-medium">Amount:</span>{" "}
+                                  {(log.amount / 1e6).toFixed(2)} USDC
                                 </div>
                               )}
-                              {log.amount !== null &&
-                                log.amount !== undefined && (
-                                  <div className="mt-2 text-xs text-muted-foreground">
-                                    <span className="font-medium">Amount:</span>{" "}
-                                    {(log.amount / 1e6).toFixed(2)} USDC
-                                  </div>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                              {/* Left Column */}
-                              <div className="space-y-4">
-                                <div>
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Target Address:
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                      {log.target.toString()}
-                                    </code>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="shrink-0 h-7 w-7 p-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.open(
-                                          `https://explorer.solana.com/address/${log.target.toString()}?cluster=${
-                                            process.env
-                                              .NEXT_PUBLIC_SOLANA_NETWORK ||
-                                            "devnet"
-                                          }`,
-                                          "_blank",
-                                        );
-                                      }}
-                                    >
-                                      <ExternalLink className="h-3 w-3" />
-                                    </Button>
-                                  </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                            {/* Left Column */}
+                            <div className="space-y-4">
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  Target Address:
                                 </div>
-                                <div>
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Actor Address:
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
-                                      {log.actor.toString()}
-                                    </code>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="shrink-0 h-7 w-7 p-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.open(
-                                          `https://explorer.solana.com/address/${log.actor.toString()}?cluster=${
-                                            process.env
-                                              .NEXT_PUBLIC_SOLANA_NETWORK ||
-                                            "devnet"
-                                          }`,
-                                          "_blank",
-                                        );
-                                      }}
-                                    >
-                                      <ExternalLink className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Log Account Address:
-                                  </div>
-                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
-                                    {log.publicKey.toString()}
+                                <div className="flex items-center gap-2">
+                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                    {log.target.toString()}
                                   </code>
-                                </div>
-                              </div>
-                              {/* Right Column */}
-                              <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
-                                <div>
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Timestamp:
-                                  </div>
-                                  <div className="text-sm text-theme-text-highlight">
-                                    {formatFullTimestamp(log.timestamp)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    {formatTimestamp(log.timestamp)}
-                                  </div>
-                                </div>
-                                <div className="pt-2">
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    className="w-full"
+                                    variant="ghost"
+                                    className="shrink-0 h-7 w-7 p-0"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       window.open(
-                                        `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=${
+                                        `https://explorer.solana.com/address/${log.target.toString()}?cluster=${
                                           process.env
                                             .NEXT_PUBLIC_SOLANA_NETWORK ||
                                           "devnet"
@@ -625,52 +547,122 @@ export default function NGOActivityLogPage() {
                                       );
                                     }}
                                   >
-                                    <ExternalLink className="h-3 w-3 mr-2" />
-                                    View on Explorer
+                                    <ExternalLink className="h-3 w-3" />
                                   </Button>
                                 </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  Actor Address:
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-primary flex-1 break-all">
+                                    {log.actor.toString()}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="shrink-0 h-7 w-7 p-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(
+                                        `https://explorer.solana.com/address/${log.actor.toString()}?cluster=${
+                                          process.env
+                                            .NEXT_PUBLIC_SOLANA_NETWORK ||
+                                          "devnet"
+                                        }`,
+                                        "_blank",
+                                      );
+                                    }}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  Log Account Address:
+                                </div>
+                                <code className="px-2 py-1 bg-theme-card-bg border border-theme-border rounded text-xs font-mono text-theme-text block break-all">
+                                  {log.publicKey.toString()}
+                                </code>
+                              </div>
+                            </div>
+                            {/* Right Column */}
+                            <div className="space-y-4 md:border-l md:border-theme-border md:pl-6">
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  Timestamp:
+                                </div>
+                                <div className="text-sm text-theme-text-highlight">
+                                  {formatFullTimestamp(log.timestamp)}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {formatTimestamp(log.timestamp)}
+                                </div>
+                              </div>
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `https://explorer.solana.com/address/${log.publicKey.toString()}?cluster=${
+                                        process.env
+                                          .NEXT_PUBLIC_SOLANA_NETWORK ||
+                                        "devnet"
+                                      }`,
+                                      "_blank",
+                                    );
+                                  }}
+                                >
+                                  <ExternalLink className="h-3 w-3 mr-2" />
+                                  View on Explorer
+                                </Button>
                               </div>
                             </div>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                <div className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
-                </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+              <div className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }
