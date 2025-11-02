@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { AdminAction, AdminActionType } from "@/types/admin";
 import { useProgram } from "./use-program";
 
@@ -35,19 +36,18 @@ interface UseAdminActionsReturn {
  */
 export function useAdminActions(): UseAdminActionsReturn {
   const { program } = useProgram();
-  const [actions, setActions] = useState<AdminAction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchActions = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: actions = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["adminActions"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       const actionAccounts = await (
         program.account as unknown as ProgramAccountNamespace
@@ -56,7 +56,7 @@ export function useAdminActions(): UseAdminActionsReturn {
       const mappedActions: AdminAction[] = actionAccounts.map((account) => ({
         publicKey: account.publicKey,
         actionType: Object.keys(
-          account.account.actionType,
+          account.account.actionType
         )[0] as AdminActionType,
         target: account.account.target,
         admin: account.account.admin,
@@ -69,23 +69,20 @@ export function useAdminActions(): UseAdminActionsReturn {
       // Sort by timestamp descending (newest first)
       mappedActions.sort((a, b) => b.timestamp - a.timestamp);
 
-      setActions(mappedActions);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching admin actions:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return mappedActions;
+    },
+    enabled: !!program,
+    staleTime: 30 * 1000, // 30 seconds
+  });
 
-  useEffect(() => {
-    fetchActions();
-  }, [fetchActions]);
+  const refetchActions = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   return {
     actions,
     loading,
-    error,
-    refetch: fetchActions,
+    error: error as Error | null,
+    refetch: refetchActions,
   };
 }

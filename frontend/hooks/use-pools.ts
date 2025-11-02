@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { DistributionType, FundPool } from "@/types/program";
 import { useProgram } from "./use-program";
 
@@ -25,19 +26,18 @@ interface UsePoolsReturn {
 
 export function usePools(): UsePoolsReturn {
   const { program } = useProgram();
-  const [pools, setPools] = useState<FundPool[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchPools = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: pools = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["pools"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       const poolAccounts =
         await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
@@ -54,7 +54,7 @@ export function usePools(): UsePoolsReturn {
           tokenMint: account.account.tokenMint,
           tokenAccount: account.account.tokenAccount,
           distributionType: parseDistributionType(
-            account.account.distributionType,
+            account.account.distributionType
           ),
           totalDeposited: account.account.totalDeposited.toNumber(),
           totalDistributed: account.account.totalDistributed.toNumber(),
@@ -85,41 +85,37 @@ export function usePools(): UsePoolsReturn {
             : null,
           description: account.account.description,
           bump: account.account.bump,
-        }),
+        })
       );
 
-      setPools(formattedPools);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching pools:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedPools;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchPools();
-  }, [fetchPools]);
+  const refetchPools = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByDisaster = useCallback(
     (disasterId: string) => {
-      return pools.filter((p) => p.disasterId === disasterId);
+      return pools.filter((p: FundPool) => p.disasterId === disasterId);
     },
-    [pools],
+    [pools]
   );
 
   const filterByStatus = useCallback(
     (isActive: boolean) => {
-      return pools.filter((p) => p.isActive === isActive);
+      return pools.filter((p: FundPool) => p.isActive === isActive);
     },
-    [pools],
+    [pools]
   );
 
   return {
     pools,
     loading,
-    error,
-    refetch: fetchPools,
+    error: error as Error | null,
+    refetch: refetchPools,
     filterByDisaster,
     filterByStatus,
   };

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { derivePlatformConfigPDA } from "@/lib/anchor/pdas";
 import type { PlatformConfig } from "@/types/program";
 import { useProgram } from "./use-program";
@@ -14,19 +15,18 @@ interface UsePlatformConfigReturn {
 
 export function usePlatformConfig(): UsePlatformConfigReturn {
   const { program } = useProgram();
-  const [config, setConfig] = useState<PlatformConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchConfig = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: config = null,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["platformConfig"],
+    queryFn: async (): Promise<PlatformConfig | null> => {
+      if (!program) {
+        return null;
+      }
 
       const [configPDA] = derivePlatformConfigPDA();
 
@@ -37,12 +37,10 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
 
       // If account doesn't exist yet (not initialized), return null
       if (!configAccount) {
-        setConfig(null);
-        setLoading(false);
-        return;
+        return null;
       }
 
-      setConfig({
+      return {
         publicKey: configPDA,
         admin: configAccount.admin,
         platformFeePercentage: configAccount.platformFeePercentage,
@@ -78,23 +76,20 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
         // Verified NGO privilege fields
         verifiedNgoMaxDonation: configAccount.verifiedNgoMaxDonation.toNumber(),
         verifiedNgoPoolLimit: configAccount.verifiedNgoPoolLimit,
-      });
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching platform config:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      };
+    },
+    enabled: !!program,
+    staleTime: 60 * 1000, // 1 minute - platform config changes infrequently
+  });
 
-  useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
+  const refetchConfig = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   return {
     config,
     loading,
-    error,
-    refetch: fetchConfig,
+    error: error as Error | null,
+    refetch: refetchConfig,
   };
 }

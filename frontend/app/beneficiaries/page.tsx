@@ -6,10 +6,11 @@ import {
   List,
   MapPin,
   Plus,
+  RefreshCw,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BeneficiaryRegistrationModal } from "@/components/beneficiaries/beneficiary-registration-modal";
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
@@ -27,19 +28,24 @@ import { ParticleSystem } from "@/components/ui/particle-system";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useAdmin } from "@/hooks/use-admin";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
+import { useFieldWorker } from "@/hooks/use-field-worker";
 import { useNGO } from "@/hooks/use-ngo";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
 import { useProgram } from "@/hooks/use-program";
-import { deriveFieldWorkerPDA } from "@/lib/anchor/pdas";
 import { VERIFICATION_STATUSES, VERIFICATION_THRESHOLD } from "@/lib/constants";
 import { formatDate, formatVerificationStatus } from "@/lib/formatters";
 
 export default function BeneficiariesPage() {
-  const { beneficiaries, loading } = useBeneficiaries();
+  const {
+    beneficiaries,
+    loading,
+    refetch: refetchBeneficiaries,
+  } = useBeneficiaries();
   const { config } = usePlatformConfig();
-  const { wallet, program } = useProgram();
+  const { wallet } = useProgram();
   const { isAdmin } = useAdmin();
   const { ngo } = useNGO();
+  const { isFieldWorker } = useFieldWorker();
 
   // Get verification threshold from platform config, fallback to constant
   const verificationThreshold =
@@ -47,30 +53,17 @@ export default function BeneficiariesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [isFieldWorker, setIsFieldWorker] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
 
-  // Check if user is a field worker
-  useEffect(() => {
-    const checkFieldWorker = async () => {
-      if (!program || !wallet.publicKey) {
-        setIsFieldWorker(false);
-        return;
-      }
-
-      try {
-        const [fieldWorkerPDA] = deriveFieldWorkerPDA(wallet.publicKey);
-        // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
-        await (program.account as any).fieldWorker.fetch(fieldWorkerPDA);
-        setIsFieldWorker(true);
-      } catch {
-        setIsFieldWorker(false);
-      }
-    };
-
-    checkFieldWorker();
-  }, [program, wallet.publicKey]);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetchBeneficiaries();
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  };
 
   const filteredBeneficiaries = beneficiaries.filter((beneficiary) => {
     const matchesSearch =
@@ -193,7 +186,7 @@ export default function BeneficiariesPage() {
                 </div>
               </div>
 
-              {loading ? (
+              {loading && beneficiaries.length === 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 6 }, (_, i) => {
                     const uniqueId = `beneficiary-skeleton-${Date.now()}-${i}`;
@@ -394,12 +387,24 @@ export default function BeneficiariesPage() {
               Registered disaster victims
             </p>
           </div>
-          {isFieldWorker && (
-            <Button onClick={() => setShowRegisterModal(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Register Beneficiary
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
             </Button>
-          )}
+            {isFieldWorker && (
+              <Button onClick={() => setShowRegisterModal(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Register Beneficiary
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -482,7 +487,7 @@ export default function BeneficiariesPage() {
           )}
         </div>
 
-        {loading ? (
+        {loading && beneficiaries.length === 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => {
               const uniqueId = `beneficiary-skeleton-${Date.now()}-${i}`;

@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useProgram } from "./use-program";
 
 export interface Distribution {
@@ -40,19 +41,18 @@ interface UseDistributionsReturn {
 
 export function useDistributions(): UseDistributionsReturn {
   const { program } = useProgram();
-  const [distributions, setDistributions] = useState<Distribution[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchDistributions = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: distributions = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["distributions"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       const distributionAccounts =
         await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
@@ -82,43 +82,41 @@ export function useDistributions(): UseDistributionsReturn {
           allocationWeight: account.account.allocationWeight,
           notes: account.account.notes,
           bump: account.account.bump,
-        }),
+        })
       );
 
-      setDistributions(formattedDistributions);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching distributions:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedDistributions;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchDistributions();
-  }, [fetchDistributions]);
+  const refetchDistributions = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByPool = useCallback(
     (poolAddress: PublicKey) => {
-      return distributions.filter((d) => d.pool.equals(poolAddress));
+      return distributions.filter((d: Distribution) =>
+        d.pool.equals(poolAddress)
+      );
     },
-    [distributions],
+    [distributions]
   );
 
   const filterByBeneficiary = useCallback(
     (beneficiaryAddress: PublicKey) => {
-      return distributions.filter((d) =>
-        d.beneficiary.equals(beneficiaryAddress),
+      return distributions.filter((d: Distribution) =>
+        d.beneficiary.equals(beneficiaryAddress)
       );
     },
-    [distributions],
+    [distributions]
   );
 
   return {
     distributions,
     loading,
-    error,
-    refetch: fetchDistributions,
+    error: error as Error | null,
+    refetch: refetchDistributions,
     filterByPool,
     filterByBeneficiary,
   };

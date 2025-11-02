@@ -4,6 +4,7 @@ import "./globals.css";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { FaviconProvider } from "@/components/providers/favicon-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SolanaWalletProvider } from "@/components/providers/wallet-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,14 +41,16 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <FaviconProvider />
-          <SolanaWalletProvider>
-            <Header />
-            <main className="pt-20 flex-1 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-              {children}
-            </main>
-            <Footer />
-            <Toaster />
-          </SolanaWalletProvider>
+          <QueryProvider>
+            <SolanaWalletProvider>
+              <Header />
+              <main className="pt-20 flex-1 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
+                {children}
+              </main>
+              <Footer />
+              <Toaster />
+            </SolanaWalletProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

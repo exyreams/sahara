@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Grid3x3, List, Plus } from "lucide-react";
+import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { PoolCard } from "@/components/pools/pool-card";
@@ -25,7 +25,7 @@ import { useProgram } from "@/hooks/use-program";
 
 export default function PoolsPage() {
   const { wallet } = useProgram();
-  const { pools, loading } = usePools();
+  const { pools, loading, refetch: refetchPools } = usePools();
   const { config } = usePlatformConfig();
   const { ngo } = useNGO();
   const { isAdmin } = useAdmin();
@@ -34,9 +34,18 @@ export default function PoolsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Only verified, active, non-blacklisted NGOs can create pools
   const canCreatePool = ngo?.isVerified && ngo?.isActive && !ngo?.isBlacklisted;
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetchPools();
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  };
 
   const filteredPools = pools.filter((pool) => {
     const matchesSearch =
@@ -265,12 +274,24 @@ export default function PoolsPage() {
               Disaster relief fund pools
             </p>
           </div>
-          {canCreatePool && (
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Pool
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
             </Button>
-          )}
+            {canCreatePool && (
+              <Button onClick={() => setShowCreateModal(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Pool
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Create Pool Modal */}

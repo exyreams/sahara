@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { FieldWorker } from "@/types/program";
 import { useProgram } from "./use-program";
 
@@ -16,19 +17,18 @@ interface UseFieldWorkersReturn {
 
 export function useFieldWorkers(): UseFieldWorkersReturn {
   const { program } = useProgram();
-  const [fieldWorkers, setFieldWorkers] = useState<FieldWorker[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchFieldWorkers = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: fieldWorkers = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["fieldWorkers"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       const fieldWorkerAccounts =
         await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
@@ -61,41 +61,39 @@ export function useFieldWorkers(): UseFieldWorkersReturn {
           registeredBy: account.account.registeredBy,
           notes: account.account.notes,
           bump: account.account.bump,
-        }),
+        })
       );
 
-      setFieldWorkers(formattedFieldWorkers);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching field workers:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedFieldWorkers;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchFieldWorkers();
-  }, [fetchFieldWorkers]);
+  const refetchFieldWorkers = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByNGO = useCallback(
     (ngoPublicKey: PublicKey) => {
-      return fieldWorkers.filter((fw) => fw.ngo?.equals(ngoPublicKey));
+      return fieldWorkers.filter((fw: FieldWorker) =>
+        fw.ngo?.equals(ngoPublicKey)
+      );
     },
-    [fieldWorkers],
+    [fieldWorkers]
   );
 
   const filterByStatus = useCallback(
     (isActive: boolean) => {
-      return fieldWorkers.filter((fw) => fw.isActive === isActive);
+      return fieldWorkers.filter((fw: FieldWorker) => fw.isActive === isActive);
     },
-    [fieldWorkers],
+    [fieldWorkers]
   );
 
   return {
     fieldWorkers,
     loading,
-    error,
-    refetch: fetchFieldWorkers,
+    error: error as Error | null,
+    refetch: refetchFieldWorkers,
     filterByNGO,
     filterByStatus,
   };

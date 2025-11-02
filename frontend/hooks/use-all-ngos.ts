@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { NGO } from "@/types/program";
 import { useProgram } from "./use-program";
 
@@ -59,24 +60,18 @@ interface UseAllNGOsReturn {
  */
 export function useAllNGOs(): UseAllNGOsReturn {
   const { program } = useProgram();
-  const [ngos, setNgos] = useState<NGO[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchNGOs = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      setIsInitialLoad(false);
-      return;
-    }
-
-    try {
-      // Only show loading state on initial load
-      if (isInitialLoad) {
-        setLoading(true);
+  const {
+    data: ngos = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["ngos"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
       }
-      setError(null);
 
       const ngoAccounts = await (
         program.account as unknown as ProgramAccountNamespace
@@ -122,24 +117,19 @@ export function useAllNGOs(): UseAllNGOsReturn {
         blacklistedBy: account.account.blacklistedBy || null,
       }));
 
-      setNgos(mappedNGOs);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching NGOs:", err);
-    } finally {
-      setLoading(false);
-      setIsInitialLoad(false);
-    }
-  }, [program, isInitialLoad]);
+      return mappedNGOs;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchNGOs();
-  }, [fetchNGOs]);
+  const refetchNGOs = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   return {
     ngos,
     loading,
-    error,
-    refetch: fetchNGOs,
+    error: error as Error | null,
+    refetch: refetchNGOs,
   };
 }

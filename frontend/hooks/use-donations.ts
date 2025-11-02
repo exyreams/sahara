@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useProgram } from "./use-program";
 
 export interface DonationRecord {
@@ -36,19 +37,18 @@ interface UseDonationsReturn {
 
 export function useDonations(): UseDonationsReturn {
   const { program } = useProgram();
-  const [donations, setDonations] = useState<DonationRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchDonations = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: donations = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["donations"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       // Fetch all donation records from the Solana blockchain via Anchor program
       const donationAccounts =
@@ -75,48 +75,50 @@ export function useDonations(): UseDonationsReturn {
           donorName: account.account.donorName,
           donorEmail: account.account.donorEmail,
           receiptSent: account.account.receiptSent,
-        }),
+        })
       );
 
-      setDonations(formattedDonations);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching donations:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedDonations;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchDonations();
-  }, [fetchDonations]);
+  const refetchDonations = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByPool = useCallback(
     (poolAddress: PublicKey) => {
-      return donations.filter((d) => d.pool?.equals(poolAddress));
+      return donations.filter((d: DonationRecord) =>
+        d.pool?.equals(poolAddress)
+      );
     },
-    [donations],
+    [donations]
   );
 
   const filterByDisaster = useCallback(
     (disasterId: string) => {
-      return donations.filter((d) => d.disasterId === disasterId);
+      return donations.filter(
+        (d: DonationRecord) => d.disasterId === disasterId
+      );
     },
-    [donations],
+    [donations]
   );
 
   const filterByRecipient = useCallback(
     (recipientAddress: PublicKey) => {
-      return donations.filter((d) => d.recipient.equals(recipientAddress));
+      return donations.filter((d: DonationRecord) =>
+        d.recipient.equals(recipientAddress)
+      );
     },
-    [donations],
+    [donations]
   );
 
   return {
     donations,
     loading,
-    error,
-    refetch: fetchDonations,
+    error: error as Error | null,
+    refetch: refetchDonations,
     filterByPool,
     filterByDisaster,
     filterByRecipient,

@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useProgram } from "./use-program";
 
 export interface ActivityLog {
@@ -16,17 +17,17 @@ export interface ActivityLog {
 
 export function useActivityLogs() {
   const { program } = useProgram();
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchActivityLogs = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
+  const {
+    data: logs = [],
+    isLoading: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["activityLogs"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       // Get all activity log accounts using Anchor's fetch all
       const activityLogAccounts =
@@ -48,23 +49,21 @@ export function useActivityLogs() {
           amount: item.account.amount,
           timestamp: item.account.timestamp.toNumber(),
           metadata: item.account.metadata,
-        }),
+        })
       );
 
       // Sort by timestamp (newest first)
       activityLogs.sort((a, b) => b.timestamp - a.timestamp);
 
-      setLogs(activityLogs);
-    } catch (error) {
-      console.error("Error fetching activity logs:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return activityLogs;
+    },
+    enabled: !!program,
+    staleTime: 10 * 1000, // 10 seconds - activity logs change frequently
+  });
 
-  useEffect(() => {
-    fetchActivityLogs();
-  }, [fetchActivityLogs]);
+  const refetchActivityLogs = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
-  return { logs, loading, refetch: fetchActivityLogs };
+  return { logs, loading, refetch: refetchActivityLogs };
 }

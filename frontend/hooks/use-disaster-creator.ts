@@ -1,7 +1,7 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { deriveNGOPDA, derivePlatformConfigPDA } from "@/lib/anchor/pdas";
 import { useProgram } from "./use-program";
 
@@ -14,21 +14,16 @@ interface CreatorInfo {
 
 export function useDisasterCreator(authorityKey?: PublicKey): CreatorInfo {
   const { program } = useProgram();
-  const [creatorInfo, setCreatorInfo] = useState<CreatorInfo>({
-    type: "unknown",
-    address: authorityKey?.toBase58() || "",
-    loading: true,
-  });
 
-  useEffect(() => {
-    async function fetchCreator() {
+  const { data: creatorInfo, isLoading } = useQuery({
+    queryKey: ["disasterCreator", authorityKey?.toBase58()],
+    queryFn: async (): Promise<CreatorInfo> => {
       if (!program || !authorityKey) {
-        setCreatorInfo({
+        return {
           type: "unknown",
           address: authorityKey?.toBase58() || "",
           loading: false,
-        });
-        return;
+        };
       }
 
       try {
@@ -40,13 +35,12 @@ export function useDisasterCreator(authorityKey?: PublicKey): CreatorInfo {
           const config = await program.account.platformConfig.fetch(configPDA);
 
           if (config.admin.toBase58() === authorityKey.toBase58()) {
-            setCreatorInfo({
+            return {
               type: "admin",
               name: "Platform Admin",
               address: authorityKey.toBase58(),
               loading: false,
-            });
-            return;
+            };
           }
         } catch (error) {
           console.error("Error fetching config:", error);
@@ -60,35 +54,40 @@ export function useDisasterCreator(authorityKey?: PublicKey): CreatorInfo {
           const ngoAccount = await program.account.ngo.fetch(ngoPDA);
 
           if (ngoAccount) {
-            setCreatorInfo({
+            return {
               type: "ngo",
               name: ngoAccount.name || "NGO",
               address: authorityKey.toBase58(),
               loading: false,
-            });
-            return;
+            };
           }
         } catch {
           // Not an NGO
         }
 
-        setCreatorInfo({
+        return {
           type: "unknown",
           address: authorityKey.toBase58(),
           loading: false,
-        });
+        };
       } catch (error) {
         console.error("Error fetching creator info:", error);
-        setCreatorInfo({
+        return {
           type: "unknown",
           address: authorityKey.toBase58(),
           loading: false,
-        });
+        };
       }
+    },
+    enabled: !!program && !!authorityKey,
+    staleTime: 5 * 60 * 1000, // 5 minutes - creator info rarely changes
+  });
+
+  return (
+    creatorInfo || {
+      type: "unknown",
+      address: authorityKey?.toBase58() || "",
+      loading: isLoading,
     }
-
-    fetchCreator();
-  }, [program, authorityKey]);
-
-  return creatorInfo;
+  );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { ChevronDown, Copy, ExternalLink, LogOut, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,35 +15,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WalletModal } from "@/components/wallet/wallet-modal";
+import { useWalletBalance } from "@/hooks/use-wallet-balance";
 import { getAddressExplorerUrl, truncateAddress } from "@/lib/formatters";
 
 export function WalletButton() {
   const { publicKey, disconnect, connected } = useWallet();
-  const { connection } = useConnection();
   const [modalOpen, setModalOpen] = useState(false);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-
-  // Fetch wallet balance
-  useEffect(() => {
-    if (publicKey && connected) {
-      setIsLoadingBalance(true);
-      connection
-        .getBalance(publicKey)
-        .then((bal) => {
-          setBalance(bal / LAMPORTS_PER_SOL);
-        })
-        .catch((err) => {
-          console.error("Error fetching balance:", err);
-          setBalance(null);
-        })
-        .finally(() => {
-          setIsLoadingBalance(false);
-        });
-    } else {
-      setBalance(null);
-    }
-  }, [publicKey, connected, connection]);
+  const { balance, isLoading: isLoadingBalance } = useWalletBalance();
 
   const handleCopyAddress = async () => {
     if (publicKey) {

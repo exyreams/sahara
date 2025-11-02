@@ -16,7 +16,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { DonationIcon } from "@/components/icons/donation-icon";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
@@ -77,9 +77,20 @@ export default function PoolDetailPage({ params }: PageProps) {
   const { wallet, program } = useProgram();
   const { ngos } = useAllNGOs();
   const { submit, isLoading: isClosing } = useTransaction();
-  const [pool, setPool] = useState<FundPool | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Find pool directly from pools array using useMemo
+  const pool = useMemo(() => {
+    if (pools.length === 0) return null;
+    try {
+      const poolPubkey = new PublicKey(resolvedParams.id);
+      return pools.find((p) => p.publicKey.equals(poolPubkey)) || null;
+    } catch (err) {
+      console.error("Invalid pool ID:", err);
+      return null;
+    }
+  }, [pools, resolvedParams.id]);
   const {
     donations,
     loading: donationsLoading,
@@ -92,7 +103,7 @@ export default function PoolDetailPage({ params }: PageProps) {
   } = useDistributions();
   const { beneficiaries } = useBeneficiaries();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [expandedDistributions, setExpandedDistributions] = useState<
     Set<string>
@@ -169,25 +180,15 @@ export default function PoolDetailPage({ params }: PageProps) {
     return `https://explorer.solana.com/tx/${signature}?cluster=${network}`;
   };
 
-  useEffect(() => {
-    if (!loading && pools.length > 0) {
-      try {
-        const poolPubkey = new PublicKey(resolvedParams.id);
-        const foundPool = pools.find((p) => p.publicKey.equals(poolPubkey));
-        setPool(foundPool || null);
-      } catch (err) {
-        console.error("Invalid pool ID:", err);
-        setPool(null);
-      }
-    }
-  }, [pools, loading, resolvedParams.id]);
-
   // Get creator information
   const creatorNGO = pool
     ? ngos.find((ngo) => ngo.authority.toBase58() === pool.authority.toBase58())
     : null;
 
-  if (loading) {
+  // Only show loading skeleton if we don't have the pool data yet (first load)
+  const isLoading = !pool && loading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-theme-bg">
         <main className="flex-1 container mx-auto px-4 py-8 space-y-6">
@@ -220,7 +221,7 @@ export default function PoolDetailPage({ params }: PageProps) {
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from(
               { length: 4 },
-              (_, i) => `stats-card-skeleton-${i}`,
+              (_, i) => `stats-card-skeleton-${i}`
             ).map((key) => (
               <Card key={key} className="bg-theme-card-bg border-theme-border">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -268,7 +269,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                 <div className="grid gap-3 md:grid-cols-3">
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `key-detail-skeleton-${i}`,
+                    (_, i) => `key-detail-skeleton-${i}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -286,7 +287,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                     {Array.from(
                       { length: 2 },
-                      (_, i) => `pool-stat-skeleton-${i}`,
+                      (_, i) => `pool-stat-skeleton-${i}`
                     ).map((key) => (
                       <div key={key}>
                         <div className="h-3 w-24 bg-theme-border rounded animate-pulse mb-2" />
@@ -301,7 +302,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `distribution-stat-skeleton-${i}`,
+                      (_, i) => `distribution-stat-skeleton-${i}`
                     ).map((key) => (
                       <div key={key}>
                         <div className="h-3 w-24 bg-theme-border rounded animate-pulse mb-2" />
@@ -316,7 +317,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 3 },
-                      (_, i) => `beneficiary-skeleton-${i}`,
+                      (_, i) => `beneficiary-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -340,7 +341,8 @@ export default function PoolDetailPage({ params }: PageProps) {
     );
   }
 
-  if (error || !pool) {
+  // Only show "not found" if we're done loading and still don't have a pool
+  if (!loading && (error || !pool)) {
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -356,6 +358,11 @@ export default function PoolDetailPage({ params }: PageProps) {
         </Card>
       </div>
     );
+  }
+
+  // If still loading and no pool yet, return null (skeleton already shown above)
+  if (!pool) {
+    return null;
   }
 
   // Convert from microUSDC to USDC
@@ -461,7 +468,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       async () => {
                         const [poolPDA] = deriveFundPoolPDA(
                           pool.disasterId,
-                          pool.poolId,
+                          pool.poolId
                         );
 
                         if (pool.isActive) {
@@ -469,14 +476,14 @@ export default function PoolDetailPage({ params }: PageProps) {
                           const timestamp = Math.floor(Date.now() / 1000);
                           const [activityLogPDA] = deriveActivityLogPDA(
                             walletPublicKey,
-                            timestamp,
+                            timestamp
                           );
 
                           const tx = await program.methods
                             .closePool(
                               pool.disasterId,
                               pool.poolId,
-                              new BN(timestamp),
+                              new BN(timestamp)
                             )
                             .accounts({
                               pool: poolPDA,
@@ -511,7 +518,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                         onSuccess: () => {
                           refetch();
                         },
-                      },
+                      }
                     );
                   }}
                 >
@@ -521,8 +528,8 @@ export default function PoolDetailPage({ params }: PageProps) {
                       ? "Closing..."
                       : "Reopening..."
                     : pool.isActive
-                      ? "Close Pool"
-                      : "Reopen Pool"}
+                    ? "Close Pool"
+                    : "Reopen Pool"}
                 </Button>
               )}
             </div>
@@ -839,7 +846,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       <div className="space-y-2">
                         {Array.from(
                           { length: 3 },
-                          (_, i) => `disaster-skeleton-${i}`,
+                          (_, i) => `disaster-skeleton-${i}`
                         ).map((key) => (
                           <div
                             key={key}
@@ -858,7 +865,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                       <div className="space-y-2">
                         {poolDistributions.map((distribution) => {
                           const beneficiary = beneficiaries.find((b) =>
-                            b.publicKey.equals(distribution.beneficiary),
+                            b.publicKey.equals(distribution.beneficiary)
                           );
                           const allocated =
                             distribution.amountAllocated / 1_000_000;
@@ -870,7 +877,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               onClick={(e) => {
                                 e.preventDefault();
                                 router.push(
-                                  `/beneficiaries/${distribution.beneficiary.toBase58()}`,
+                                  `/beneficiaries/${distribution.beneficiary.toBase58()}`
                                 );
                               }}
                               className="flex items-center gap-3 p-3 rounded-lg border border-theme-border hover:border-theme-primary/50 hover:bg-theme-primary/5 transition-all cursor-pointer"
@@ -925,7 +932,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 5 },
-                      (_, i) => `donation-skeleton-${i}`,
+                      (_, i) => `donation-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -987,7 +994,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                donation.timestamp * 1000,
+                                donation.timestamp * 1000
                               ).toLocaleDateString()}
                             </span>
                           </button>
@@ -1020,7 +1027,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                   <p className="text-sm text-theme-text">
                                     $
                                     {(donation.platformFee / 1_000_000).toFixed(
-                                      2,
+                                      2
                                     )}{" "}
                                     USDC
                                   </p>
@@ -1032,7 +1039,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                   <p className="text-sm text-theme-primary font-semibold">
                                     $
                                     {(donation.netAmount / 1_000_000).toFixed(
-                                      2,
+                                      2
                                     )}{" "}
                                     USDC
                                   </p>
@@ -1043,7 +1050,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                   </p>
                                   <p className="text-sm text-theme-text">
                                     {new Date(
-                                      donation.timestamp * 1000,
+                                      donation.timestamp * 1000
                                     ).toLocaleString()}
                                   </p>
                                 </div>
@@ -1054,7 +1061,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                     </p>
                                     <a
                                       href={getExplorerUrl(
-                                        donation.transactionSignature,
+                                        donation.transactionSignature
                                       )}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -1113,7 +1120,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {Array.from(
                       { length: 2 },
-                      (_, i) => `distribution-skeleton-${i}`,
+                      (_, i) => `distribution-skeleton-${i}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -1174,7 +1181,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
                               {new Date(
-                                distribution.createdAt * 1000,
+                                distribution.createdAt * 1000
                               ).toLocaleDateString()}
                             </span>
                           </button>
@@ -1221,7 +1228,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                     </p>
                                     <p className="text-sm text-theme-text">
                                       {new Date(
-                                        distribution.unlockTime * 1000,
+                                        distribution.unlockTime * 1000
                                       ).toLocaleString()}
                                     </p>
                                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Grid3x3, List, Plus } from "lucide-react";
+import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";
@@ -28,7 +28,7 @@ export default function DisastersPage() {
   const { wallet } = useProgram();
   const { isAdmin } = useAdmin();
   const { ngo } = useNGO();
-  const { disasters, loading } = useDisasters();
+  const { disasters, loading, refetch: refetchDisasters } = useDisasters();
   const { config } = usePlatformConfig();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
@@ -36,10 +36,19 @@ export default function DisastersPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check if user can create disasters (admin or verified NGO)
   const canCreateDisaster =
     isAdmin || (ngo?.isVerified && ngo?.isActive && !ngo?.isBlacklisted);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetchDisasters();
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  };
 
   const filteredDisasters = disasters.filter((disaster) => {
     const matchesSearch =
@@ -320,12 +329,24 @@ export default function DisastersPage() {
               View and manage disaster relief efforts
             </p>
           </div>
-          {canCreateDisaster && (
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Disaster
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
             </Button>
-          )}
+            {canCreateDisaster && (
+              <Button onClick={() => setShowCreateModal(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Disaster
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Create Disaster Modal */}

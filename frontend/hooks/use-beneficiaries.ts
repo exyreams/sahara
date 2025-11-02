@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { Beneficiary, VerificationStatus } from "@/types/program";
 import { useProgram } from "./use-program";
 
@@ -15,19 +16,18 @@ interface UseBeneficiariesReturn {
 
 export function useBeneficiaries(): UseBeneficiariesReturn {
   const { program } = useProgram();
-  const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchBeneficiaries = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: beneficiaries = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["beneficiaries"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       // @ts-expect-error - Anchor generates account types dynamically
       const beneficiaryAccounts = await program.account.beneficiary.all();
@@ -75,41 +75,41 @@ export function useBeneficiaries(): UseBeneficiariesReturn {
             ? account.account.flaggedAt.toNumber()
             : null,
           bump: account.account.bump,
-        }),
+        })
       );
 
-      setBeneficiaries(formattedBeneficiaries);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching beneficiaries:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedBeneficiaries;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchBeneficiaries();
-  }, [fetchBeneficiaries]);
+  const refetchBeneficiaries = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByDisaster = useCallback(
     (disasterId: string) => {
-      return beneficiaries.filter((b) => b.disasterId === disasterId);
+      return beneficiaries.filter(
+        (b: Beneficiary) => b.disasterId === disasterId
+      );
     },
-    [beneficiaries],
+    [beneficiaries]
   );
 
   const filterByStatus = useCallback(
     (status: VerificationStatus) => {
-      return beneficiaries.filter((b) => b.verificationStatus === status);
+      return beneficiaries.filter(
+        (b: Beneficiary) => b.verificationStatus === status
+      );
     },
-    [beneficiaries],
+    [beneficiaries]
   );
 
   return {
     beneficiaries,
     loading,
-    error,
-    refetch: fetchBeneficiaries,
+    error: error as Error | null,
+    refetch: refetchBeneficiaries,
     filterByDisaster,
     filterByStatus,
   };

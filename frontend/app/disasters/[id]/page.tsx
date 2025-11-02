@@ -120,7 +120,6 @@ export default function DisasterDetailPage({
   // Only active field workers can register beneficiaries
   const canRegisterBeneficiary = currentFieldWorker?.isActive;
 
-  const disaster = disasters.find((d) => d.eventId === id);
   const disasterBeneficiaries = beneficiaries.filter(
     (b) => b.disasterId === id
   );
@@ -158,12 +157,17 @@ export default function DisasterDetailPage({
     activityPage * activityItemsPerPage
   );
 
+  // Find the disaster first
+  const disaster = disasters.find((d) => d.eventId === id);
+
+  // Only show loading skeleton if we don't have the disaster data yet (first load)
   const loading =
-    disastersLoading ||
-    beneficiariesLoading ||
-    poolsLoading ||
-    donationsLoading ||
-    distributionsLoading;
+    !disaster &&
+    (disastersLoading ||
+      beneficiariesLoading ||
+      poolsLoading ||
+      donationsLoading ||
+      distributionsLoading);
 
   // Get creator information
   const creatorInfo = useDisasterCreator(disaster?.authority);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import type { DisasterEvent, DisasterType } from "@/types/program";
 import { useProgram } from "./use-program";
 
@@ -15,19 +16,18 @@ interface UseDisastersReturn {
 
 export function useDisasters(): UseDisastersReturn {
   const { program } = useProgram();
-  const [disasters, setDisasters] = useState<DisasterEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchDisasters = useCallback(async () => {
-    if (!program) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: disasters = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["disasters"],
+    queryFn: async () => {
+      if (!program) {
+        return [];
+      }
 
       // @ts-expect-error - Anchor generates account types dynamically
       const disasterAccounts = await program.account.disasterEvent.all();
@@ -66,41 +66,37 @@ export function useDisasters(): UseDisastersReturn {
             updatedAt: account.account.updatedAt.toNumber(),
             bump: account.account.bump,
           };
-        },
+        }
       );
 
-      setDisasters(formattedDisasters);
-    } catch (err) {
-      setError(err as Error);
-      console.error("Error fetching disasters:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [program]);
+      return formattedDisasters;
+    },
+    enabled: !!program,
+  });
 
-  useEffect(() => {
-    fetchDisasters();
-  }, [fetchDisasters]);
+  const refetchDisasters = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filterByStatus = useCallback(
     (isActive: boolean) => {
-      return disasters.filter((d) => d.isActive === isActive);
+      return disasters.filter((d: DisasterEvent) => d.isActive === isActive);
     },
-    [disasters],
+    [disasters]
   );
 
   const filterByType = useCallback(
     (type: DisasterType) => {
-      return disasters.filter((d) => d.eventType === type);
+      return disasters.filter((d: DisasterEvent) => d.eventType === type);
     },
-    [disasters],
+    [disasters]
   );
 
   return {
     disasters,
     loading,
-    error,
-    refetch: fetchDisasters,
+    error: error as Error | null,
+    refetch: refetchDisasters,
     filterByStatus,
     filterByType,
   };
