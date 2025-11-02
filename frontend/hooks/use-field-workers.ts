@@ -67,6 +67,8 @@ export function useFieldWorkers(): UseFieldWorkersReturn {
       return formattedFieldWorkers;
     },
     enabled: !!program,
+    staleTime: 30 * 1000, // 30 seconds - field worker data changes moderately
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch
   });
 
   const refetchFieldWorkers = useCallback(async () => {

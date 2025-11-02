@@ -79,6 +79,7 @@ export function useNGO(): UseNGOReturn {
     },
     enabled: !!program && !!wallet.publicKey,
     staleTime: 2 * 60 * 1000, // 2 minutes - NGO data rarely changes
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch to prevent flash
   });
 
   const refetchNGO = useCallback(async () => {

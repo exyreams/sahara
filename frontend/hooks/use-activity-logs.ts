@@ -59,6 +59,7 @@ export function useActivityLogs() {
     },
     enabled: !!program,
     staleTime: 10 * 1000, // 10 seconds - activity logs change frequently
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch
   });
 
   const refetchActivityLogs = useCallback(async () => {

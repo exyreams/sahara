@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid3x3, List, Plus, Users } from "lucide-react";
+import { Grid3x3, List, Plus, RefreshCw, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { FieldWorkerCard } from "@/components/field-workers/field-worker-card";
@@ -33,13 +33,13 @@ export default function FieldWorkersPage() {
 
   const loading = ngoLoading || workersLoading;
 
-  const _handleRefresh = async () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     await refetch();
     setIsRefreshing(false);
   };
 
-  if (loading || isRefreshing) {
+  if (loading) {
     return (
       <div className="space-y-6">
         {/* Header Skeleton */}
@@ -65,7 +65,7 @@ export default function FieldWorkersPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from(
             { length: 6 },
-            (_, i) => `field-worker-card-skeleton-${i}`,
+            (_, i) => `field-worker-card-skeleton-${i}`
           ).map((key) => (
             <Card key={key} className="bg-theme-card-bg border-theme-border">
               <CardHeader>
@@ -194,7 +194,7 @@ export default function FieldWorkersPage() {
   }
 
   const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey),
+    fw.ngo?.equals(ngo.publicKey)
   );
 
   // Filter field workers based on search and status
@@ -227,13 +227,26 @@ export default function FieldWorkersPage() {
             Manage your organization's field workers
           </p>
         </div>
-        <Button
-          onClick={() => setShowRegisterModal(true)}
-          disabled={!ngo.isVerified}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Register Field Worker
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => setShowRegisterModal(true)}
+            disabled={!ngo.isVerified}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Register Field Worker
+          </Button>
+        </div>
       </div>
 
       {!ngo.isVerified && (
@@ -249,7 +262,11 @@ export default function FieldWorkersPage() {
       )}
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div
+        className={`flex flex-col md:flex-row gap-4 mb-6 transition-opacity duration-200 ${
+          isRefreshing ? "opacity-50 pointer-events-none" : "opacity-100"
+        }`}
+      >
         <SearchInput
           placeholder="Search by name, organization, or email..."
           onSearch={setSearchQuery}
@@ -282,59 +299,69 @@ export default function FieldWorkersPage() {
       </div>
 
       {/* Results Count */}
-      <div className="flex items-center gap-2 mb-4">
+      <div
+        className={`flex items-center gap-2 mb-4 transition-opacity duration-200 ${
+          isRefreshing ? "opacity-50" : "opacity-100"
+        }`}
+      >
         <Badge variant="secondary">
           {filteredWorkers.length}{" "}
           {filteredWorkers.length === 1 ? "worker" : "workers"}
         </Badge>
       </div>
 
-      {filteredWorkers.length > 0 ? (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-              : "flex flex-col gap-3"
-          }
-        >
-          {filteredWorkers.map((worker) => (
-            <FieldWorkerCard
-              key={worker.publicKey.toBase58()}
-              worker={worker}
-              viewMode={viewMode}
-              beneficiaries={beneficiaries}
-            />
-          ))}
-        </div>
-      ) : (
-        <Card className="bg-theme-card-bg border-theme-border">
-          <CardHeader className="text-center py-12">
-            <div className="flex justify-center mb-4">
-              <Users className="h-12 w-12 text-theme-text/40" />
-            </div>
-            <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
-              {searchQuery || statusFilters.length > 0
-                ? "No field workers found"
-                : "No Field Workers"}
-            </CardTitle>
-            <CardDescription className="text-theme-text/60 mb-4">
-              {searchQuery || statusFilters.length > 0
-                ? "Try adjusting your filters"
-                : ngo.isVerified
+      <div
+        className={`transition-opacity duration-200 ${
+          isRefreshing ? "opacity-50" : "opacity-100"
+        }`}
+      >
+        {filteredWorkers.length > 0 ? (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+                : "flex flex-col gap-3"
+            }
+          >
+            {filteredWorkers.map((worker) => (
+              <FieldWorkerCard
+                key={worker.publicKey.toBase58()}
+                worker={worker}
+                viewMode={viewMode}
+                beneficiaries={beneficiaries}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card className="bg-theme-card-bg border-theme-border">
+            <CardHeader className="text-center py-12">
+              <div className="flex justify-center mb-4">
+                <Users className="h-12 w-12 text-theme-text/40" />
+              </div>
+              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
+                {searchQuery || statusFilters.length > 0
+                  ? "No field workers found"
+                  : "No Field Workers"}
+              </CardTitle>
+              <CardDescription className="text-theme-text/60 mb-4">
+                {searchQuery || statusFilters.length > 0
+                  ? "Try adjusting your filters"
+                  : ngo.isVerified
                   ? "Register your first field worker to start verifying beneficiaries"
                   : "Wait for NGO verification to register field workers"}
-            </CardDescription>
-            {ngo.isVerified && !searchQuery && statusFilters.length === 0 && (
-              <div className="flex justify-center">
-                <Button onClick={() => setShowRegisterModal(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Register Field Worker
-                </Button>
-              </div>
-            )}
-          </CardHeader>
-        </Card>
-      )}
+              </CardDescription>
+              {ngo.isVerified && !searchQuery && statusFilters.length === 0 && (
+                <div className="flex justify-center">
+                  <Button onClick={() => setShowRegisterModal(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Register Field Worker
+                  </Button>
+                </div>
+              )}
+            </CardHeader>
+          </Card>
+        )}
+      </div>
 
       {/* Registration Modal */}
       <FieldWorkerCreationModal

@@ -121,6 +121,7 @@ export function useAllNGOs(): UseAllNGOsReturn {
     },
     enabled: !!program,
     staleTime: 30 * 1000, // 30 seconds - NGO data changes moderately
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch
   });
 
   const refetchNGOs = useCallback(async () => {

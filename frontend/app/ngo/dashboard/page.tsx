@@ -11,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
 import { Header } from "@/components/layout/header";
@@ -34,16 +34,36 @@ import { formatCurrency, formatNumber } from "@/lib/formatters";
 
 export default function NGODashboardPage() {
   const { ngo, loading: ngoLoading, refetch: refetchNGO } = useNGO();
-  const { fieldWorkers, loading: workersLoading } = useFieldWorkers();
-  const { beneficiaries, loading: beneficiariesLoading } = useBeneficiaries();
-  const { logs, loading: logsLoading } = useActivityLogs();
+  const {
+    fieldWorkers,
+    loading: workersLoading,
+    refetch: refetchWorkers,
+  } = useFieldWorkers();
+  const {
+    beneficiaries,
+    loading: beneficiariesLoading,
+    refetch: refetchBeneficiaries,
+  } = useBeneficiaries();
+  const {
+    logs,
+    loading: logsLoading,
+    refetch: refetchLogs,
+  } = useActivityLogs();
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   const loading = ngoLoading || workersLoading || beneficiariesLoading;
+
+  // Track when initial load is complete
+  useEffect(() => {
+    if (!loading && ngo) {
+      setHasInitiallyLoaded(true);
+    }
+  }, [loading, ngo]);
 
   const toggleExpanded = (activityKey: string) => {
     setExpandedActivities((prev) => {
@@ -59,8 +79,15 @@ export default function NGODashboardPage() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetchNGO();
-    setIsRefreshing(false);
+    await Promise.all([
+      refetchNGO(),
+      refetchWorkers(),
+      refetchBeneficiaries(),
+      refetchLogs(),
+    ]);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
   };
 
   const getExplorerUrl = (address: string) => {
@@ -79,8 +106,8 @@ export default function NGODashboardPage() {
           // Actions performed by any of the NGO's field workers
           fieldWorkers.some(
             (fw) =>
-              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority),
-          ),
+              fw.ngo?.equals(ngo.publicKey) && log.actor.equals(fw.authority)
+          )
       )
     : [];
 
@@ -101,7 +128,7 @@ export default function NGODashboardPage() {
 
   // Combine and sort all activities
   const allActivities = [...ngoLogs, ...fieldWorkerLogs].sort(
-    (a, b) => b.timestamp - a.timestamp,
+    (a, b) => b.timestamp - a.timestamp
   );
 
   // Get recent 5 NGO-specific activities
@@ -155,7 +182,7 @@ export default function NGODashboardPage() {
     return `${days}d ago`;
   };
 
-  if (loading) {
+  if (loading && !hasInitiallyLoaded) {
     return (
       <div className="space-y-8">
         {/* Header Skeleton */}
@@ -203,7 +230,7 @@ export default function NGODashboardPage() {
                   <div className="h-3 w-20 bg-theme-border rounded animate-pulse" />
                 </CardContent>
               </Card>
-            ),
+            )
           )}
         </div>
 
@@ -218,7 +245,7 @@ export default function NGODashboardPage() {
               {/* Contact info rows */}
               {Array.from(
                 { length: 6 },
-                (_, j) => `contact-row-skeleton-${j}`,
+                (_, j) => `contact-row-skeleton-${j}`
               ).map((key) => (
                 <div key={key} className="flex justify-between">
                   <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
@@ -232,7 +259,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 6 },
-                      (_, j) => `disaster-type-skeleton-${j}`,
+                      (_, j) => `disaster-type-skeleton-${j}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -246,7 +273,7 @@ export default function NGODashboardPage() {
                   <div className="flex flex-wrap gap-1">
                     {Array.from(
                       { length: 5 },
-                      (_, j) => `service-type-skeleton-${j}`,
+                      (_, j) => `service-type-skeleton-${j}`
                     ).map((key) => (
                       <div
                         key={key}
@@ -275,7 +302,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-worker-skeleton-${j}`,
+                    (_, j) => `team-worker-skeleton-${j}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -299,7 +326,7 @@ export default function NGODashboardPage() {
                 <div className="space-y-2">
                   {Array.from(
                     { length: 3 },
-                    (_, j) => `team-beneficiary-skeleton-${j}`,
+                    (_, j) => `team-beneficiary-skeleton-${j}`
                   ).map((key) => (
                     <div
                       key={key}
@@ -333,7 +360,7 @@ export default function NGODashboardPage() {
             <div className="space-y-2">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-skeleton-${i}`,
+                (_, i) => `activity-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -355,7 +382,8 @@ export default function NGODashboardPage() {
     );
   }
 
-  if (!ngo) {
+  // Only show "no NGO" screen if we've loaded and there's truly no NGO (not during refresh)
+  if (!ngo && hasInitiallyLoaded && !isRefreshing) {
     return (
       <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
         {/* Left Side - Particle Background (40%) */}
@@ -446,13 +474,18 @@ export default function NGODashboardPage() {
     );
   }
 
+  // Safety check - should not happen with placeholderData, but TypeScript needs it
+  if (!ngo) {
+    return null;
+  }
+
   const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey),
+    fw.ngo?.equals(ngo.publicKey)
   );
 
   // Count beneficiaries registered by this NGO's field workers
   const ngoBeneficiaries = beneficiaries.filter((b) =>
-    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
+    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy))
   );
   const ngoBeneficiariesCount = ngoBeneficiaries.length;
 
@@ -462,261 +495,17 @@ export default function NGODashboardPage() {
     return total + b.totalReceived;
   }, 0);
 
-  // Refresh skeleton - lighter, only shows content area
-  if (isRefreshing && ngo) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-8">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight wrap-break-word">
-                  {ngo.name}
-                </h1>
-                {ngo.isVerified && (
-                  <VerifiedIcon
-                    className="w-6 h-6 sm:w-7 sm:h-7 shrink-0"
-                    tooltip="Verified NGO"
-                  />
-                )}
-              </div>
-              <div className="flex gap-2 items-center flex-wrap">
-                <Badge variant={ngo.isVerified ? "default" : "secondary"}>
-                  {ngo.isVerified ? "Verified" : "Pending Verification"}
-                </Badge>
-                <Badge variant={ngo.isActive ? "default" : "secondary"}>
-                  {ngo.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex gap-2 items-center flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={true}
-              >
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Refresh
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/ngo/field-workers">
-                  <Users className="h-4 w-4 mr-2" />
-                  View Field Workers
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/pools">
-                  <FundIcon className="h-4 w-4 mr-2" />
-                  View Fund Pools
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/beneficiaries">
-                  <Users className="h-4 w-4 mr-2" />
-                  View Beneficiaries
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Statistics */}
-          <div className="grid gap-4 md:grid-cols-4 mb-8">
-            {/* Aid Distributed Card - Special styling */}
-            <Card className="border-theme-primary/20 bg-linear-to-br from-theme-primary/5 to-transparent">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-9 w-24 bg-theme-border rounded animate-pulse mb-2" />
-                <div className="h-3 w-32 bg-theme-border rounded animate-pulse" />
-              </CardContent>
-            </Card>
-
-            {/* Other Cards */}
-            {Array.from(
-              { length: 3 },
-              (_, i) => `mobile-stats-card-skeleton-${i}`,
-            ).map((key) => (
-              <Card key={key}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                  <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 w-16 bg-theme-border rounded animate-pulse mb-2" />
-                  <div className="h-3 w-20 bg-theme-border rounded animate-pulse" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Organization Info & Team Overview */}
-          <div className="grid gap-6 md:grid-cols-2 mb-8">
-            {/* Organization Details with Operating Areas */}
-            <Card className="bg-theme-card-bg border-theme-border">
-              <CardHeader>
-                <div className="h-6 w-40 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Contact info rows */}
-                {Array.from(
-                  { length: 6 },
-                  (_, j) => `mobile-contact-row-skeleton-${j}`,
-                ).map((key) => (
-                  <div key={key} className="flex justify-between">
-                    <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                    <div className="h-4 w-40 bg-theme-border rounded animate-pulse" />
-                  </div>
-                ))}
-                {/* Operating Areas section */}
-                <div className="pt-4 border-t border-theme-border space-y-3">
-                  <div>
-                    <div className="h-4 w-32 bg-theme-border rounded animate-pulse mb-2" />
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from(
-                        { length: 6 },
-                        (_, j) => `disaster-badge-skeleton-${j}`,
-                      ).map((key) => (
-                        <div
-                          key={key}
-                          className="h-6 w-20 bg-theme-border rounded animate-pulse"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse mb-2" />
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from(
-                        { length: 5 },
-                        (_, j) => `service-badge-skeleton-${j}`,
-                      ).map((key) => (
-                        <div
-                          key={key}
-                          className="h-6 w-24 bg-theme-border rounded animate-pulse"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Team Overview */}
-            <Card className="bg-theme-card-bg border-theme-border">
-              <CardHeader>
-                <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
-                <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Field Workers Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                    <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
-                  </div>
-                  <div className="space-y-2">
-                    {Array.from(
-                      { length: 3 },
-                      (_, j) => `field-worker-skeleton-${j}`,
-                    ).map((key) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                        </div>
-                        <div className="h-5 w-12 bg-theme-border rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {/* Beneficiaries Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-4 w-24 bg-theme-border rounded animate-pulse" />
-                    <div className="h-7 w-16 bg-theme-border rounded animate-pulse" />
-                  </div>
-                  <div className="space-y-2">
-                    {Array.from(
-                      { length: 3 },
-                      (_, j) => `beneficiary-skeleton-${j}`,
-                    ).map((key) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
-                        </div>
-                        <div className="h-5 w-16 bg-theme-border rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity */}
-          <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="h-6 w-32 bg-theme-border rounded animate-pulse mb-1" />
-                  <div className="h-4 w-48 bg-theme-border rounded animate-pulse" />
-                </div>
-                <div className="h-9 w-20 bg-theme-border rounded animate-pulse" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {Array.from(
-                  { length: 5 },
-                  (_, i) => `recent-activity-skeleton-${i}`,
-                ).map((key) => (
-                  <div
-                    key={key}
-                    className="border border-theme-border rounded-lg overflow-hidden"
-                  >
-                    <div className="flex items-center gap-3 p-3 animate-pulse">
-                      <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                      <div className="h-4 w-4 bg-theme-border rounded shrink-0" />
-                      <div className="h-6 w-36 bg-theme-border rounded shrink-0" />
-                      <div className="flex-1" />
-                      <div className="h-4 w-16 bg-theme-border rounded shrink-0" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-8">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-3">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight wrap-break-word">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               {ngo.name}
             </h1>
             {ngo.isVerified && (
               <VerifiedIcon
-                className="w-6 h-6 sm:w-7 sm:h-7 shrink-0"
+                className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
                 tooltip="Verified NGO"
               />
             )}
@@ -754,19 +543,19 @@ export default function NGODashboardPage() {
           <Button asChild variant="outline" size="sm">
             <Link href="/ngo/field-workers">
               <Users className="h-4 w-4 mr-2" />
-              View Field Workers
+              Field Workers
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href="/pools">
               <FundIcon className="h-4 w-4 mr-2" />
-              View Fund Pools
+              Fund Pools
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href="/beneficiaries">
               <Users className="h-4 w-4 mr-2" />
-              View Beneficiaries
+              Beneficiaries
             </Link>
           </Button>
         </div>
@@ -781,7 +570,7 @@ export default function NGODashboardPage() {
             </CardTitle>
             <FundIcon className="h-4 w-4 text-theme-primary" />
           </CardHeader>
-          <CardContent>
+          <CardContent className={isRefreshing ? "opacity-50" : ""}>
             <div className="text-3xl font-bold text-theme-primary">
               {formatCurrency(totalAidDistributed)}
             </div>
@@ -796,7 +585,7 @@ export default function NGODashboardPage() {
             <CardTitle className="text-sm font-medium">Field Workers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className={isRefreshing ? "opacity-50" : ""}>
             <div className="text-2xl font-bold">{ngo.fieldWorkersCount}</div>
             <p className="text-xs text-muted-foreground">
               {ngoFieldWorkers.filter((fw) => fw.isActive).length} active
@@ -809,7 +598,7 @@ export default function NGODashboardPage() {
             <CardTitle className="text-sm font-medium">Beneficiaries</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className={isRefreshing ? "opacity-50" : ""}>
             <div className="text-2xl font-bold">
               {formatNumber(ngoBeneficiariesCount)}
             </div>
@@ -824,7 +613,7 @@ export default function NGODashboardPage() {
             <CardTitle className="text-sm font-medium">Fund Pools</CardTitle>
             <FundIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className={isRefreshing ? "opacity-50" : ""}>
             <div className="text-2xl font-bold">{ngo.poolsCreated}</div>
             <p className="text-xs text-muted-foreground">Created</p>
           </CardContent>
@@ -1046,11 +835,11 @@ export default function NGODashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {logsLoading ? (
+          {logsLoading || isRefreshing ? (
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`,
+                (_, i) => `activity-log-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -1135,7 +924,7 @@ export default function NGODashboardPage() {
                               </p>
                               <a
                                 href={getExplorerUrl(
-                                  activity.target.toString(),
+                                  activity.target.toString()
                                 )}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -1152,7 +941,7 @@ export default function NGODashboardPage() {
                             </p>
                             <p className="text-sm text-theme-text">
                               {new Date(
-                                activity.timestamp * 1000,
+                                activity.timestamp * 1000
                               ).toLocaleString()}
                             </p>
                           </div>
@@ -1225,7 +1014,7 @@ export default function NGODashboardPage() {
                                         {(
                                           Number.parseInt(
                                             parsedData.Amount,
-                                            10,
+                                            10
                                           ) / 1_000_000
                                         ).toFixed(2)}{" "}
                                         USDC
@@ -1291,7 +1080,7 @@ export default function NGODashboardPage() {
                                         );
                                       }
                                       return null;
-                                    },
+                                    }
                                   )}
                                 </div>
                               </div>

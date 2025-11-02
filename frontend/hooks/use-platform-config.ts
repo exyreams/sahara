@@ -80,6 +80,7 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
     },
     enabled: !!program,
     staleTime: 60 * 1000, // 1 minute - platform config changes infrequently
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch
   });
 
   const refetchConfig = useCallback(async () => {

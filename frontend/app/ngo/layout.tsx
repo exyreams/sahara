@@ -32,7 +32,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     {
-      href: "/ngo",
+      href: "/ngo/dashboard",
       label: "Dashboard",
       icon: Home,
     },
@@ -77,7 +77,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
                     <div className="h-4 w-4 bg-theme-border rounded animate-pulse" />
                     <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
                   </div>
-                ),
+                )
               )}
             </div>
           </aside>
@@ -117,7 +117,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
           <div
             className={cn(
               "flex items-center h-16",
-              sidebarCollapsed ? "justify-center" : "justify-between px-3",
+              sidebarCollapsed ? "justify-center" : "justify-between px-3"
             )}
           >
             <AnimatePresence mode="wait">
@@ -138,7 +138,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={cn(
                 "flex items-center justify-center shrink-0 p-2 cursor-pointer rounded-lg transition-all duration-200",
-                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
+                "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
               )}
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -153,10 +153,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
           {/* Nav Items */}
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              item.href === "/ngo"
-                ? pathname === "/ngo" || pathname === "/ngo/dashboard"
-                : pathname.startsWith(item.href);
+            const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -166,7 +163,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
                   sidebarCollapsed && "justify-center",
                   isActive
                     ? "bg-theme-primary text-theme-background"
-                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary",
+                    : "text-theme-text hover:bg-theme-primary/10 hover:text-theme-primary"
                 )}
                 title={sidebarCollapsed ? item.label : undefined}
               >

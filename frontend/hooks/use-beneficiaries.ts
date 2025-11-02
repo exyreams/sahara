@@ -82,6 +82,7 @@ export function useBeneficiaries(): UseBeneficiariesReturn {
     },
     enabled: !!program,
     staleTime: 20 * 1000, // 20 seconds - beneficiary data changes frequently
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch
   });
 
   const refetchBeneficiaries = useCallback(async () => {

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FieldWorkerCreationModal } from "@/components/field-workers/field-worker-creation-modal";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAdmin } from "@/hooks/use-admin";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
+import { useFieldWorkers } from "@/hooks/use-field-workers";
 import { useNGO } from "@/hooks/use-ngo";
 import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
@@ -65,7 +66,7 @@ function VerificationActivity({
   // Filter verified beneficiaries
   const verifiedBeneficiaries = useMemo(() => {
     return beneficiaries.filter((b) =>
-      b.verifierApprovals.some((v) => v.equals(fieldWorker.authority)),
+      b.verifierApprovals.some((v) => v.equals(fieldWorker.authority))
     );
   }, [beneficiaries, fieldWorker.authority]);
 
@@ -75,10 +76,7 @@ function VerificationActivity({
       (b) =>
         searchQuery === "" ||
         b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.authority
-          .toBase58()
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()),
+        b.authority.toBase58().toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [verifiedBeneficiaries, searchQuery]);
 
@@ -267,13 +265,13 @@ function BeneficiariesList({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [expandedBeneficiary, setExpandedBeneficiary] = useState<string | null>(
-    null,
+    null
   );
 
   // Get unique districts
   const districts = useMemo(() => {
     const uniqueDistricts = new Set(
-      beneficiaries.map((b) => b.location.district),
+      beneficiaries.map((b) => b.location.district)
     );
     return Array.from(uniqueDistricts).sort();
   }, [beneficiaries]);
@@ -393,10 +391,10 @@ function BeneficiariesList({
                         beneficiary.verificationStatus === "Verified"
                           ? "default"
                           : beneficiary.verificationStatus === "Pending"
-                            ? "secondary"
-                            : beneficiary.verificationStatus === "Flagged"
-                              ? "destructive"
-                              : "outline"
+                          ? "secondary"
+                          : beneficiary.verificationStatus === "Flagged"
+                          ? "destructive"
+                          : "outline"
                       }
                       className="shrink-0"
                     >
@@ -525,87 +523,51 @@ export default function FieldWorkerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { program, wallet } = useProgram();
+  const { wallet } = useProgram();
   const { ngo } = useNGO();
   const { isAdmin } = useAdmin();
   const { beneficiaries } = useBeneficiaries();
+  const { fieldWorkers, loading, refetch } = useFieldWorkers();
   const { submit, isLoading: isUpdating } = useTransaction();
-  const [fieldWorker, setFieldWorker] = useState<FieldWorker | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const id = params.id as string;
-  const activeTab = searchParams.get("tab") || "about";
+  const activeTab = searchParams.get("tab") || "overview";
+
+  // Set default tab in URL on initial load
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      router.replace(`/ngo/field-workers/${id}?tab=overview`, {
+        scroll: false,
+      });
+    }
+  }, [searchParams, router, id]);
 
   const handleTabChange = (value: string) => {
-    router.push(`/ngo/field-workers/${id}?tab=${value}`);
+    router.push(`/ngo/field-workers/${id}?tab=${value}`, { scroll: false });
   };
 
-  const fetchFieldWorker = useCallback(async () => {
-    if (!program || !id) return;
+  // Get field worker from cached data
+  const fieldWorker = fieldWorkers.find((fw) => fw.authority.toBase58() === id);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const authority = new PublicKey(id);
-      const [fieldWorkerPDA] = deriveFieldWorkerPDA(authority);
-
-      // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
-      const account = await (program.account as any).fieldWorker.fetch(
-        fieldWorkerPDA,
-      );
-
-      setFieldWorker({
-        publicKey: fieldWorkerPDA,
-        authority,
-        name: account.name,
-        organization: account.organization,
-        ngo: account.ngo,
-        phoneNumber: account.phoneNumber,
-        email: account.email,
-        isActive: account.isActive,
-        verificationsCount: account.verificationsCount,
-        registrationsCount: account.registrationsCount,
-        flagsRaised: account.flagsRaised,
-        assignedDistricts: account.assignedDistricts,
-        credentials: account.credentials,
-        registeredAt: account.registeredAt,
-        activatedAt: account.activatedAt,
-        deactivatedAt: account.deactivatedAt,
-        lastActivityAt: account.lastActivityAt,
-        registeredBy: account.registeredBy,
-        notes: account.notes,
-        bump: account.bump,
-      });
-    } catch (err) {
-      console.error("Error fetching field worker:", err);
-      setError("Field worker not found");
-    } finally {
-      setLoading(false);
-    }
-  }, [program, id]);
-
-  useEffect(() => {
-    fetchFieldWorker();
-  }, [fetchFieldWorker]);
+  // Only show loading skeleton if we don't have the field worker data yet (first load)
+  const isLoading = !fieldWorker && loading;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchFieldWorker();
+    await refetch();
     setIsRefreshing(false);
   };
 
   // Get beneficiaries registered by this field worker
   const registeredBeneficiaries = beneficiaries.filter((b) =>
-    b.registeredBy.equals(fieldWorker?.authority || PublicKey.default),
+    b.registeredBy.equals(fieldWorker?.authority || PublicKey.default)
   );
 
   // Get flagged beneficiaries by this field worker (only visible to NGO and admin)
   const flaggedBeneficiaries = beneficiaries.filter((b) =>
-    b.flaggedBy?.equals(fieldWorker?.authority || PublicKey.default),
+    b.flaggedBy?.equals(fieldWorker?.authority || PublicKey.default)
   );
 
   const canViewFlags =
@@ -647,11 +609,11 @@ export default function FieldWorkerDetailPage() {
           });
           router.refresh();
         },
-      },
+      }
     );
   };
 
-  if (loading || isRefreshing) {
+  if (isLoading || isRefreshing) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -693,7 +655,7 @@ export default function FieldWorkerDetailPage() {
                       <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
                     </CardContent>
                   </Card>
-                ),
+                )
               )}
             </div>
 
@@ -717,14 +679,14 @@ export default function FieldWorkerDetailPage() {
                   {/* Section skeleton */}
                   {Array.from(
                     { length: 3 },
-                    (_, i) => `section-skeleton-${i}`,
+                    (_, i) => `section-skeleton-${i}`
                   ).map((key, index) => (
                     <div key={key} className="space-y-4">
                       <div className="h-5 w-40 bg-theme-border rounded animate-pulse" />
                       <div className="grid gap-4 md:grid-cols-2 pl-7">
                         {Array.from(
                           { length: 4 },
-                          (_, j) => `field-skeleton-${key}-${j}`,
+                          (_, j) => `field-skeleton-${key}-${j}`
                         ).map((fieldKey) => (
                           <div key={fieldKey} className="space-y-2">
                             <div className="h-3 w-24 bg-theme-border rounded animate-pulse" />
@@ -746,7 +708,7 @@ export default function FieldWorkerDetailPage() {
     );
   }
 
-  if (error || !fieldWorker) {
+  if (!fieldWorker) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -836,8 +798,8 @@ export default function FieldWorkerDetailPage() {
                 {isUpdating
                   ? "Updating..."
                   : fieldWorker.isActive
-                    ? "Deactivate"
-                    : "Activate"}
+                  ? "Deactivate"
+                  : "Activate"}
               </Button>
             </div>
           )}
@@ -893,13 +855,14 @@ export default function FieldWorkerDetailPage() {
 
         {/* Tabs */}
         <Tabs
+          defaultValue="overview"
           value={activeTab}
           onValueChange={handleTabChange}
           className="space-y-6"
         >
           <TabsList className="grid w-full grid-cols-4 h-11">
-            <TabsTrigger value="about" className="cursor-pointer">
-              About
+            <TabsTrigger value="overview" className="cursor-pointer">
+              Overview
             </TabsTrigger>
             <TabsTrigger value="beneficiaries" className="cursor-pointer">
               Beneficiaries ({registeredBeneficiaries.length})
@@ -912,8 +875,8 @@ export default function FieldWorkerDetailPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* About Tab */}
-          <TabsContent value="about">
+          {/* Overview Tab */}
+          <TabsContent value="overview">
             <Card className="p-12 bg-theme-card-bg border-theme-border">
               <CardHeader>
                 <CardTitle>Field Worker Information</CardTitle>
@@ -961,7 +924,7 @@ export default function FieldWorkerDetailPage() {
                       </p>
                       <p className="font-medium">
                         {new Date(
-                          fieldWorker.registeredAt * 1000,
+                          fieldWorker.registeredAt * 1000
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -972,7 +935,7 @@ export default function FieldWorkerDetailPage() {
                         </p>
                         <p className="font-medium">
                           {new Date(
-                            fieldWorker.activatedAt * 1000,
+                            fieldWorker.activatedAt * 1000
                           ).toLocaleString()}
                         </p>
                       </div>
@@ -983,7 +946,7 @@ export default function FieldWorkerDetailPage() {
                       </p>
                       <p className="font-medium">
                         {new Date(
-                          fieldWorker.lastActivityAt * 1000,
+                          fieldWorker.lastActivityAt * 1000
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -1134,7 +1097,7 @@ export default function FieldWorkerDetailPage() {
             mode="edit"
             onSuccess={() => {
               // Refetch field worker data after successful update
-              fetchFieldWorker();
+              refetch();
             }}
           />
         )}
