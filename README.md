@@ -22,7 +22,6 @@
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
-- [User Roles](#user-roles)
 - [Known Bugs & Limitations](#known-bugs--limitations)
 - [Contributing](#contributing)
 - [Code of Conduct](#code-of-conduct)
@@ -82,7 +81,7 @@ Sahara solves these problems through:
 
 ### Multi-Signature Verification
 
-- **3-of-5 Approval System**: Prevents fraud and ensures legitimacy
+- **3-of-5 Approval System**: Prevents fraud and ensures legitimacy (Number of Approal can by configured by Administrator from system configurations)
 - **Field Worker Network**: On-ground verification by trusted NGO staff
 - **Immutable Records**: Blockchain-based identity and verification
 
@@ -368,69 +367,42 @@ See [SETUP.md](SETUP.md) for:
 
 ```
 sahara/
-├── sahara-core/          # Anchor program (Solana smart contracts)
+├── sahara-core/              # Anchor program (Solana smart contracts)
 │   ├── programs/
 │   │   └── sahara-core/
 │   │       ├── src/
 │   │       │   ├── lib.rs           # Program entry point
 │   │       │   ├── state/           # Account structures
-│   │       │   └── instructions/    # Instruction handlers
+│   │       │   ├── instructions/    # Instruction handlers
+│   │       │   ├── errors.rs        # Custom error definitions
+│   │       │   └── constants.rs     # Program constants
 │   │       └── Cargo.toml
-│   ├── tests/            # Integration tests
-│   └── Anchor.toml       # Anchor configuration
+│   ├── tests/                # Integration tests
+│   ├── migrations/           # Deployment scripts
+│   ├── Anchor.toml           # Anchor configuration
+│   └── Cargo.toml
 │
-├── frontend/             # Next.js web application
-│   ├── app/              # Next.js App Router pages
-│   ├── components/       # React components
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Utilities & Anchor setup
-│   └── types/            # TypeScript types
+├── frontend/                 # Next.js web application
+│   ├── app/                  # Next.js App Router pages
+│   ├── components/           # React components
+│   │   ├── ui/               # shadcn/ui components
+│   │   └── ...               # Feature components
+│   ├── hooks/                # Custom React hooks
+│   ├── lib/                  # Utilities & Anchor setup
+│   ├── types/                # TypeScript types
+│   ├── public/               # Static assets
+│   └── package.json
 │
-└── README.md
+├── assets/                   # Project assets
+├── CODE_OF_CONDUCT.md        # Community guidelines
+├── CONTRIBUTING.md           # Contribution guidelines
+├── Issues.md                 # Known issues documentation
+├── LICENSE                   # MIT License
+├── README.md                 # Project documentation
+└── SETUP.md                  # Setup instructions
 ```
 
 </details>
-
-## User Roles
-
-### 1. Beneficiaries (Disaster Victims)
-
-- Register with field worker assistance
-- Get verified through multi-sig process
-- Receive direct donations
-- Claim distributions from fund pools
-- View donation history
-
-### 2. Donors
-
-- Browse verified beneficiaries
-- Make direct donations (USDC/SOL)
-- Donate to fund pools
-- Track donation impact
-- View transaction history
-
-### 3. NGOs
-
-- Register organization
-- Manage field workers
-- Create fund pools
-- Distribute funds to beneficiaries
-- View organization statistics
-
-### 4. Field Workers
-
-- Register beneficiaries
-- Verify beneficiaries (multi-sig)
-- View verification dashboard
-- Track registrations
-
-### 5. Platform Admin
-
-- Configure platform settings
-- Verify NGOs
-- Manage disasters
-- Emergency pause controls
-- View platform analytics
 
 ## Known Bugs & Limitations
 
@@ -476,26 +448,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## FAQ
 
-**Q: Why Solana instead of Ethereum?**
-A: Solana offers sub-second finality and extremely low transaction costs (~$0.00025), making it ideal for high-frequency, low-value transactions common in disaster relief.
+**Why Solana instead of Ethereum?**
+: Solana offers sub-second finality and extremely low transaction costs (~$0.00025), making it ideal for high-frequency, low-value transactions common in disaster relief.
 
-**Q: How do beneficiaries without crypto wallets receive funds?**
-A: Field workers can help create wallets on-site. Future phases will include SMS/USSD interfaces for feature phones.
+**How do beneficiaries without crypto wallets receive funds?**
+: Field workers can help create wallets on-site. Future phases will include SMS/USSD interfaces for feature phones.
 
-**Q: What prevents fake beneficiary registrations?**
-A: Multi-signature verification (3-of-5 field workers) and admin review of flagged cases provide strong fraud prevention.
+**What prevents fake beneficiary registrations?**
+: Multi-signature verification (3-of-5 field workers) and admin review of flagged cases provide strong fraud prevention.
 
-**Q: Can donors see where their money goes?**
-A: Yes! All transactions are on-chain and fully transparent. Donors can track their donations in real-time.
+**Can donors see where their money goes?**
+: Yes! All transactions are on-chain and fully transparent. Donors can track their donations in real-time.
 
-**Q: What happens if an NGO becomes malicious?**
-A: Admins can deactivate NGOs, preventing them from creating new distributions. Existing distributions remain claimable by beneficiaries.
+**What happens if an NGO becomes malicious?**
+: Admins can deactivate NGOs, preventing them from creating new distributions. Existing distributions remain claimable by beneficiaries.
 
-**Q: How are exchange rates handled?**
-A: Currently uses stablecoins (USDC) to avoid volatility. SOL donations are also supported.
+**How are exchange rates handled?**
+: Currently uses stablecoins (USDC) to avoid volatility. SOL donations are also supported.
 
 ---
 
-**Built with ❤️ for disaster relief transparency**
+**Built with ❤️ for disaster relief transparency by @exyreams**
 
 _Making every donation count, one block at a time_
