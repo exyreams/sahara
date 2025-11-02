@@ -22,18 +22,41 @@
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
 - [User Roles](#user-roles)
-- [Production Deployment](#production-deployment)
+- [Known Bugs & Limitations](#known-bugs--limitations)
 - [Contributing](#contributing)
-- [Roadmap](#roadmap)
+- [Code of Conduct](#code-of-conduct)
 - [License](#license)
+- [Contact](#contact)
+- [FAQ](#faq)
 
 ## Overview
 
 **Sahara** is a blockchain-based disaster relief platform built on Solana that enables direct, transparent, and instant aid distribution to verified disaster victims in Nepal. By leveraging blockchain technology, we eliminate middlemen, reduce overhead costs, and ensure every dollar reaches those who need it most.
 
+### Why Sahara?
+
+- **Instant**: Sub-second transaction finality on Solana
+- **Low Cost**: ~$0.00025 per transaction (vs traditional 30-40% overhead)
+- **Transparent**: All transactions visible on-chain
+- **Secure**: Multi-signature verification prevents fraud
+- **Direct**: Wallet-to-wallet transfers, no intermediaries
+- **Accountable**: Complete audit trail for all activities
+
+### Deployment
+
 **Program ID (Devnet):** `6Ke32uyhxtjAPP7BBRD2SjzmpATL6sAdNg9v7rxyvmU1`
+
+**Live Demo:** [https://saharasol.vercel.app/](https://saharasol.vercel.app/)
+
+### Hackathon Highlights
+
+- Fully functional smart contracts on Solana
+- Complete web application with role-based access
+- Multi-signature verification system
+- Flexible fund distribution mechanisms
+- Real-time activity tracking and audit logs
+- Admin dashboard with comprehensive controls
 
 ## Problem Statement
 
@@ -145,11 +168,10 @@ Sahara solves these problems through:
 - Transaction tracking
 - Admin audit logs and activity monitoring
 
-### Test Accounts
+<details>
+<summary>Test Accounts (Click to expand)</summary>
 
-For testing purposes, you can use the following pre-configured account:
-
-> **⚠️ Test Account Only**: This is a test wallet for demonstration purposes on Devnet. Do not use on Mainnet or send real funds.
+> **⚠️ Test Account Only**: These are test wallets for demonstration purposes on Devnet. Do not use on Mainnet or send real funds.
 
 **Admin Account:**
 
@@ -170,41 +192,80 @@ This account is already registered and verified as an NGO on the platform. You c
 - Creating fund pools
 - Distributing funds to beneficiaries
 
+</details>
+
 ## Key Features
 
-### For Platform Admins
+### Multi-Signature Verification System
 
-- **Platform Configuration**: Manage fees and thresholds
-- **NGO Verification**: Approve registered NGOs
-- **Emergency Controls**: Pause platform in emergencies
-- **Analytics Dashboard**: Monitor platform statistics
+- **3-of-5 Approval Mechanism**: Beneficiaries require approval from 3 out of 5 field workers
+- **Fraud Prevention**: Prevents single-point manipulation
+- **Decentralized Trust**: No single entity controls verification
+- **Immutable Records**: All verifications recorded on-chain
 
-### For NGOs
+### Flexible Fund Distribution
 
-- **Field Worker Management**: Register and manage verification staff
-- **Fund Pool Creation**: Set up transparent relief funds
-- **Beneficiary Registration**: Register disaster victims
-- **Distribution Management**: Allocate funds to beneficiaries
+- **Multiple Distribution Types**:
+  - **Equal Distribution**: Split funds equally among beneficiaries
+  - **Family Size Weighted**: Allocate based on family size
+  - **Damage Severity Weighted**: Prioritize by damage assessment
+- **Time-Locked Distributions**: Split immediate and locked funds (e.g., 70% immediate, 30% locked for 30 days)
+- **Eligibility Criteria**: Set minimum family size or damage severity requirements
+- **Transparent Allocation**: All distribution rules visible on-chain
 
-### For Field Workers
+### Smart Fund Pools
 
-- **Beneficiary Verification**: Participate in multi-sig approval
-- **On-Ground Registration**: Register victims in disaster zones
-- **Verification Dashboard**: Track approval status
+- **Disaster-Specific Pools**: Create dedicated pools for each disaster event
+- **Target Amount Goals**: Set fundraising targets
+- **Real-Time Balance Tracking**: Monitor deposits, distributions, and claims
+- **Multiple Token Support**: USDC and SOL (extensible to other SPL tokens)
+- **Pool Management**: Activate, pause, or close pools as needed
 
-### For Beneficiaries (Disaster Victims)
+### Role-Based Access Control
 
-- **Direct Aid Reception**: Receive USDC/SOL directly to wallet
-- **Instant Access**: Claim funds immediately after distribution
-- **Transparent History**: View all received aid on-chain
-- **Mobile-First**: PWA with offline support (future)
+#### Platform Admins
 
-### For Donors
+- **Platform Configuration**: Manage fees, thresholds, and system settings
+- **NGO Verification**: Single and batch NGO approval
+- **NGO Status Management**: Activate/deactivate organizations
+- **Emergency Controls**: Pause platform in critical situations
+- **Audit Logs**: Complete activity tracking and monitoring
+- **Beneficiary Review**: Review flagged beneficiaries
+- **Analytics Dashboard**: Monitor platform-wide statistics
 
-- **Direct Donations**: Send aid directly to verified victims
+#### NGOs (Verified Organizations)
+
+- **Disaster Event Management**: Create and manage disaster events
+- **Field Worker Registration**: Onboard and manage verification staff
+- **Fund Pool Creation**: Set up transparent relief funds with custom rules
+- **Distribution Management**: Allocate funds to verified beneficiaries
+- **Activity Logs**: Track all organizational actions
+- **Dashboard Analytics**: View organization-specific metrics
+
+#### Field Workers
+
+- **Beneficiary Registration**: Register disaster victims on-ground
+- **Multi-Sig Verification**: Participate in beneficiary approval process
+- **Flag Beneficiaries**: Report suspicious cases for admin review
+- **Verification Dashboard**: Track approval status and pending verifications
+- **District Assignment**: Work within assigned geographical areas
+
+#### Beneficiaries (Disaster Victims)
+
+- **Direct Aid Reception**: Receive USDC/SOL directly to personal wallet
+- **Instant Claims**: Claim immediate portion of distributions
+- **Time-Locked Claims**: Claim locked funds after specified period
+- **Transparent History**: View all received aid and donations on-chain
+- **Profile Management**: Update personal information when needed
+- **Wallet Integration**: Seamless Solana wallet connection
+
+#### Donors
+
+- **Direct Donations**: Send aid directly to verified beneficiaries
 - **Pool Donations**: Contribute to disaster-specific fund pools
-- **Real-Time Tracking**: See exactly where your money goes
-- **Tax Receipts**: On-chain donation records (future)
+- **Real-Time Tracking**: See exactly where donations go
+- **Transaction History**: View all donation records on-chain
+- **Impact Visibility**: Track how funds are distributed and claimed
 
 ## Architecture
 
@@ -258,67 +319,6 @@ graph TB
     Program --> Donations
 ```
 
-### Beneficiary Registration Flow
-
-```mermaid
-sequenceDiagram
-    participant FW as Field Worker
-    participant UI as Frontend
-    participant Wallet as Wallet
-    participant Program as Anchor Program
-    participant Chain as Blockchain
-
-    FW->>UI: Register Beneficiary
-    UI->>UI: Validate Form Data
-    UI->>Wallet: Request Transaction
-    Wallet->>Wallet: Sign Transaction
-    Wallet->>Program: Submit Transaction
-
-    Program->>Program: Verify Field Worker
-    Program->>Program: Check NGO Status
-    Program->>Program: Validate Disaster
-    Program->>Program: Create Beneficiary PDA
-
-    Program->>Chain: Store Beneficiary Data
-    Chain-->>Program: Confirmation
-    Program-->>Wallet: Transaction Success
-    Wallet-->>UI: Update UI
-    UI-->>FW: Show Success Message
-```
-
-### Fund Distribution Flow
-
-```mermaid
-sequenceDiagram
-    participant NGO as NGO Admin
-    participant UI as Frontend
-    participant Program as Anchor Program
-    participant Pool as Fund Pool
-    participant Ben as Beneficiary
-
-    NGO->>UI: Create Distribution
-    UI->>Program: Submit Distribution TX
-
-    Program->>Program: Verify NGO Authority
-    Program->>Pool: Check Pool Balance
-    Program->>Program: Calculate Allocations
-
-    loop For Each Beneficiary
-        Program->>Program: Create Distribution PDA
-        Program->>Program: Set Allocation Amount
-        Program->>Program: Set Lock Period
-    end
-
-    Program-->>UI: Distribution Created
-
-    Note over Ben,Program: After Lock Period
-    Ben->>UI: Claim Distribution
-    UI->>Program: Submit Claim TX
-    Program->>Pool: Transfer Tokens
-    Pool-->>Ben: Tokens Received
-    Program-->>UI: Claim Success
-```
-
 ### Data Storage
 
 All data stored on-chain in Solana accounts (no traditional database):
@@ -338,6 +338,7 @@ All data stored on-chain in Solana accounts (no traditional database):
 - **Frontend**: Next.js 16 + TypeScript 5.9
 - **UI**: Tailwind CSS 4 + shadcn/ui
 - **Wallet**: Solana Wallet Adapter
+- **State Management**: TanStack Query (React Query)
 
 ## Getting Started
 
@@ -362,26 +363,8 @@ See [SETUP.md](SETUP.md) for:
 - Testing instructions
 - Troubleshooting tips
 
-### Test Accounts
-
-For testing purposes, you can use the following pre-configured account:
-
-> **⚠️ Test Account Only**: This is a test wallet for demonstration purposes on Devnet. Do not use on Mainnet or send real funds.
-
-**Verified NGO Account:**
-
-```
-Private Key: 2izCjxjHXU4jspqEnasEh6QSyRj1CgNKBvHjv6wmzaiyFMNjNyqWF2qV7dtSFUvZ1b16jkvqiLqAiJCbXfHLu4Ba
-```
-
-This account is already registered and verified as an NGO on the platform. You can import it into your Solana wallet (Phantom, Solflare, etc.) to test NGO features such as:
-
-- Creating disaster events
-- Registering field workers
-- Creating fund pools
-- Distributing funds to beneficiaries
-
-## Project Structure
+<details>
+<summary>Project Structure (Click to expand)</summary>
 
 ```
 sahara/
@@ -405,6 +388,8 @@ sahara/
 │
 └── README.md
 ```
+
+</details>
 
 ## User Roles
 
@@ -447,59 +432,67 @@ sahara/
 - Emergency pause controls
 - View platform analytics
 
+## Known Bugs & Limitations
+
+### Current Known Issues
+
+1. **Distribution Calculation Bug**: The current implementation has a critical bug with weighted distribution calculations when beneficiaries are added incrementally. This can cause incorrect fund allocations and negative pool balances. For production use, we recommend:
+
+   - Using Equal distribution type for most reliable results
+   - Pre-registering all beneficiaries before creating distributions
+   - Testing distribution calculations thoroughly before mainnet deployment
+   - See [Issues.md](Issues.md) for technical details
+
+2. **Pool Editing Restrictions**: Once a pool has distributions, certain fields (distribution type, eligibility criteria, percentages) should not be modified. UI validation for this is pending implementation.
+
+3. **Partial Claim Logic**: The claim function may fail when trying to claim only the immediate portion before the time lock expires. This needs to be fixed to allow partial claims.
+
+4. **Devnet Only**: Currently deployed on Solana Devnet for testing. Mainnet deployment requires additional security audits and bug fixes.
+
+### Security Considerations
+
+- **Smart Contract Audits**: Not yet audited - use at your own risk
+- **Test Thoroughly**: Always test on Devnet before mainnet deployment
+- **Private Keys**: Never share private keys or use test keys on mainnet
+- **Fund Safety**: Start with small amounts when testing distributions
+- **Known Bugs**: Review the bugs document before using in production
+
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
 
-### Development Workflow
+## Code of Conduct
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Solana Foundation** for the amazing blockchain platform
-- **Anchor Framework** for simplifying Solana development
-- **shadcn/ui** for beautiful UI components
-- **Nepal Red Cross** for inspiration and domain knowledge
 
 ## Contact
 
 - **GitHub**: [@exyreams](https://github.com/exyreams)
 - **Project**: [github.com/exyreams/sahara](https://github.com/exyreams/sahara)
 
-## Roadmap
+## FAQ
 
-### Phase 1: MVP (Current)
+**Q: Why Solana instead of Ethereum?**
+A: Solana offers sub-second finality and extremely low transaction costs (~$0.00025), making it ideal for high-frequency, low-value transactions common in disaster relief.
 
-- Core smart contracts
-- Frontend application
-- Multi-sig verification
-- Fund pools and distributions
-- Devnet deployment
+**Q: How do beneficiaries without crypto wallets receive funds?**
+A: Field workers can help create wallets on-site. Future phases will include SMS/USSD interfaces for feature phones.
 
-### Phase 2: Production
+**Q: What prevents fake beneficiary registrations?**
+A: Multi-signature verification (3-of-5 field workers) and admin review of flagged cases provide strong fraud prevention.
 
-- Mainnet deployment
-- Mobile PWA
-- SMS interface for non-smartphone users
-- Database indexer for performance
-- Analytics dashboard
+**Q: Can donors see where their money goes?**
+A: Yes! All transactions are on-chain and fully transparent. Donors can track their donations in real-time.
 
-### Phase 3: Scale
+**Q: What happens if an NGO becomes malicious?**
+A: Admins can deactivate NGOs, preventing them from creating new distributions. Existing distributions remain claimable by beneficiaries.
 
-- Multi-country support
-- NFT-based identity
-- Integration with traditional NGOs
-- Government partnerships
-- Impact reporting tools
+**Q: How are exchange rates handled?**
+A: Currently uses stablecoins (USDC) to avoid volatility. SOL donations are also supported.
 
 ---
 
