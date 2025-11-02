@@ -3,6 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
+import { Sparkles } from "lucide-react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { Button } from "@/components/ui/button";
@@ -202,25 +204,66 @@ export function PoolForm({
     label: `${disaster.name} (${disaster.eventId})`,
   }));
 
+  // Generate pool ID based on selected disaster and distribution type
+  const generatePoolId = useCallback(() => {
+    const selectedDisasterId = form.getValues("disasterId");
+    const distributionType = form.getValues("distributionType");
+
+    if (!selectedDisasterId) {
+      return;
+    }
+
+    // Get a random 4-digit number for uniqueness (0000-9999)
+    const randomNum = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0");
+
+    // Distribution type name
+    const distTypeMap: Record<string, string> = {
+      Equal: "equal",
+      WeightedFamily: "family",
+      WeightedDamage: "damage",
+      Milestone: "milestone",
+    };
+    const distType = distTypeMap[distributionType] || "pool";
+
+    // Format: {disaster-id}-{distribution-type}-pool-{random}
+    // Example: earthquake-2025-equal-pool-7392
+    const generatedId = `${selectedDisasterId}-${distType}-pool-${randomNum}`;
+
+    // Truncate if too long (max 32 chars)
+    const poolId =
+      generatedId.length > 32 ? generatedId.substring(0, 32) : generatedId;
+
+    form.setValue("poolId", poolId);
+  }, [form]);
+
+  // Watch for distribution type changes and auto-update pool ID
+  const watchedDistributionType = form.watch("distributionType");
+  const watchedDisasterId = form.watch("disasterId");
+
+  useEffect(() => {
+    // Only auto-update if not in edit mode and both fields are filled
+    if (!isEditMode && watchedDisasterId && watchedDistributionType) {
+      // Only update if pool ID is empty or was auto-generated (contains "-pool-")
+      const currentPoolId = form.getValues("poolId");
+      if (!currentPoolId || currentPoolId.includes("-pool-")) {
+        generatePoolId();
+      }
+    }
+  }, [
+    watchedDistributionType,
+    watchedDisasterId,
+    form.getValues,
+    generatePoolId,
+    isEditMode,
+  ]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Pool ID and Disaster Event - Side by Side */}
+        {/* Disaster Event and Distribution Type - Side by Side */}
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="poolId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pool ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="relief-pool-01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="disasterId"
@@ -233,25 +276,8 @@ export function PoolForm({
                     onChange={field.onChange}
                     options={disasterOptions}
                     placeholder="Type or select disaster..."
-                    disabled={!!disasterId}
+                    disabled={!!disasterId || isEditMode}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Pool Name and Distribution Type - Side by Side */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pool Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Emergency Relief Fund" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -287,6 +313,70 @@ export function PoolForm({
           />
         </div>
 
+        {/* Pool ID and Pool Name - Side by Side */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="poolId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Pool ID{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/32)
+                  </span>
+                </FormLabel>
+                <div className="flex gap-2">
+                  <FormControl>
+                    <Input
+                      placeholder="earthquake-2025-equal-pool-7392"
+                      maxLength={32}
+                      {...field}
+                      disabled={isEditMode}
+                    />
+                  </FormControl>
+                  {!isEditMode && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={generatePoolId}
+                      disabled={!form.watch("disasterId")}
+                      title="Generate Pool ID"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Pool Name{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Emergency Relief Fund"
+                    maxLength={100}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Eligibility Criteria */}
         <FormField
           control={form.control}
@@ -294,7 +384,10 @@ export function PoolForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Eligibility Criteria ({field.value?.length || 0}/500)
+                Eligibility Criteria{" "}
+                <span className="text-xs text-muted-foreground">
+                  ({field.value?.length || 0}/500)
+                </span>
               </FormLabel>
               <FormControl>
                 <Textarea
@@ -467,7 +560,10 @@ export function PoolForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Description ({field.value?.length || 0}/500)
+                Description{" "}
+                <span className="text-xs text-muted-foreground">
+                  ({field.value?.length || 0}/500)
+                </span>
               </FormLabel>
               <FormControl>
                 <Textarea

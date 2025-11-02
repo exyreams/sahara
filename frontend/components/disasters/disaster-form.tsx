@@ -235,10 +235,16 @@ export function DisasterForm({
             name="eventId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Event ID</FormLabel>
+                <FormLabel>
+                  Event ID{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/32)
+                  </span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="earthquake-2025-01"
+                    maxLength={32}
                     {...field}
                     disabled={isEditMode}
                   />
@@ -282,9 +288,18 @@ export function DisasterForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Disaster Name</FormLabel>
+                <FormLabel>
+                  Disaster Name{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Kathmandu Earthquake 2025" {...field} />
+                  <Input
+                    placeholder="Kathmandu Earthquake 2025"
+                    maxLength={100}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -378,9 +393,18 @@ export function DisasterForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Specific Address</FormLabel>
+                <FormLabel>
+                  Specific Address{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/200)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Specific location details" {...field} />
+                  <Input
+                    placeholder="Specific location details"
+                    maxLength={200}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -453,11 +477,17 @@ export function DisasterForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>
+                Description{" "}
+                <span className="text-xs text-muted-foreground">
+                  ({field.value?.length || 0}/500)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Describe the disaster event and its impact..."
                   className="min-h-[100px]"
+                  maxLength={500}
                   {...field}
                 />
               </FormControl>
@@ -471,11 +501,17 @@ export function DisasterForm({
           name="affectedAreas"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Affected Areas (Optional)</FormLabel>
+              <FormLabel>
+                Affected Areas (Optional){" "}
+                <span className="text-xs text-muted-foreground">
+                  ({affectedAreasText.length}/500)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter affected areas separated by commas (e.g., Kathmandu Valley, Pokhara, Chitwan)"
                   className="min-h-[80px]"
+                  maxLength={500}
                   value={affectedAreasText}
                   onChange={(e) => {
                     const value = e.target.value;

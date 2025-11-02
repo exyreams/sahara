@@ -40,7 +40,12 @@ export const beneficiaryFormSchema = z.object({
   ),
   disasterId: z.string().min(1, "Disaster ID is required").max(32),
   name: z.string().min(1, "Name is required").max(100),
-  phone: z.string().regex(/^\+?[0-9]{10,15}$/, "Invalid phone number"),
+  phone: z
+    .string()
+    .regex(
+      /^\+?[0-9\s\-()]{10,20}$/,
+      "Invalid phone number (10-15 digits, spaces and dashes allowed)",
+    ),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   district: z.string().min(1, "District is required").max(50),
@@ -76,7 +81,10 @@ export const ngoFormSchema = z.object({
   email: z.string().email("Invalid email address").max(100, "Email too long"),
   phoneNumber: z
     .string()
-    .regex(/^\+?[0-9]{10,15}$/, "Invalid phone number (10-15 digits)"),
+    .regex(
+      /^\+?[0-9\s\-()]{10,20}$/,
+      "Invalid phone number (10-15 digits, spaces and dashes allowed)",
+    ),
   website: z
     .string()
     .url("Invalid URL")
@@ -131,7 +139,12 @@ export const fieldWorkerFormSchema = z.object({
   ),
   name: z.string().min(1, "Name is required").max(100),
   organization: z.string().min(1, "Organization is required").max(100),
-  phoneNumber: z.string().regex(/^\+?[0-9]{10,15}$/, "Invalid phone number"),
+  phoneNumber: z
+    .string()
+    .regex(
+      /^\+?[0-9\s\-()]{10,20}$/,
+      "Invalid phone number (10-15 digits, spaces and dashes allowed)",
+    ),
   email: z.string().email("Invalid email address"),
   assignedDistricts: z.array(z.string()).min(1, "Select at least one district"),
   credentials: z.string().max(500).default(""),

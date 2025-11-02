@@ -162,7 +162,7 @@ export default function InitializePlatformPage() {
 
   // Wallet connected - Split-screen design
   return (
-    <div className="min-h-screen flex flex-col bg-theme-background">
+    <div className="min-h-screen flex flex-col bg-theme-background -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
       <main className="flex-1 flex">
         {/* Left Side - Particle Background (40%) */}
         <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
@@ -229,11 +229,15 @@ export default function InitializePlatformPage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="platformName" className="text-theme-text">
-                        Platform Name
+                        Platform Name{" "}
+                        <span className="text-xs text-muted-foreground">
+                          ({platformName.length}/100)
+                        </span>
                       </Label>
                       <Input
                         id="platformName"
                         value={platformName}
+                        maxLength={100}
                         onChange={(e) => setPlatformName(e.target.value)}
                         className="bg-theme-background border-theme-border text-theme-text"
                       />
@@ -244,11 +248,15 @@ export default function InitializePlatformPage() {
                         htmlFor="platformVersion"
                         className="text-theme-text"
                       >
-                        Platform Version
+                        Platform Version{" "}
+                        <span className="text-xs text-muted-foreground">
+                          ({platformVersion.length}/20)
+                        </span>
                       </Label>
                       <Input
                         id="platformVersion"
                         value={platformVersion}
+                        maxLength={20}
                         onChange={(e) => setPlatformVersion(e.target.value)}
                         className="bg-theme-background border-theme-border text-theme-text"
                       />

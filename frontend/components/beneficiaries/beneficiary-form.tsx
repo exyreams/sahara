@@ -590,9 +590,14 @@ export function BeneficiaryForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>
+                  Full Name{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John Doe" maxLength={100} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -732,9 +737,18 @@ export function BeneficiaryForm({
             name="occupation"
             render={({ field }) => (
               <FormItem className="md:col-span-6">
-                <FormLabel>Occupation (Optional)</FormLabel>
+                <FormLabel>
+                  Occupation (Optional){" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Farmer, Teacher, etc." {...field} />
+                  <Input
+                    placeholder="Farmer, Teacher, etc."
+                    maxLength={100}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -769,9 +783,18 @@ export function BeneficiaryForm({
             name="address"
             render={({ field }) => (
               <FormItem className="md:col-span-6">
-                <FormLabel>Address</FormLabel>
+                <FormLabel>
+                  Address{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/200)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Specific location details" {...field} />
+                  <Input
+                    placeholder="Specific location details"
+                    maxLength={200}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -822,11 +845,17 @@ export function BeneficiaryForm({
           name="damageDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Damage Description</FormLabel>
+              <FormLabel>
+                Damage Description{" "}
+                <span className="text-xs text-muted-foreground">
+                  ({field.value?.length || 0}/500)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Describe the damage to property..."
                   className="resize-none"
+                  maxLength={500}
                   {...field}
                 />
               </FormControl>
@@ -840,11 +869,17 @@ export function BeneficiaryForm({
           name="specialNeeds"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Special Needs (Optional)</FormLabel>
+              <FormLabel>
+                Special Needs (Optional){" "}
+                <span className="text-xs text-muted-foreground">
+                  ({field.value?.length || 0}/500)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Medical conditions, disabilities, etc."
                   className="resize-none"
+                  maxLength={500}
                   {...field}
                 />
               </FormControl>

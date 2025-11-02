@@ -232,9 +232,18 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organization Name</FormLabel>
+                  <FormLabel>
+                    Organization Name{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({field.value?.length || 0}/150)
+                    </span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Nepal Red Cross Society" {...field} />
+                    <Input
+                      placeholder="Sahara Foundation Society"
+                      maxLength={150}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -246,9 +255,14 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               name="registrationNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Registration Number</FormLabel>
+                  <FormLabel>
+                    Registration Number{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({field.value?.length || 0}/50)
+                    </span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="REG-12345" {...field} />
+                    <Input placeholder="REG-12345" maxLength={50} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,11 +276,17 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({field.value?.length || 0}/100)
+                    </span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="contact@ngo.org"
+                      maxLength={100}
                       {...field}
                     />
                   </FormControl>
@@ -295,9 +315,18 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             name="website"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Website (Optional)</FormLabel>
+                <FormLabel>
+                  Website (Optional){" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="https://ngo.org" {...field} />
+                  <Input
+                    placeholder="https://ngo.org"
+                    maxLength={100}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -309,9 +338,18 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>
+                  Address{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/300)
+                  </span>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="Kathmandu, Nepal" {...field} />
+                  <Input
+                    placeholder="Kathmandu, Nepal"
+                    maxLength={300}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -323,10 +361,17 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>
+                  Description{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/1000)
+                  </span>
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Brief description of your organization..."
+                    className="min-h-[120px]"
+                    maxLength={1000}
                     {...field}
                   />
                 </FormControl>
@@ -382,7 +427,9 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                               />
                             </FormControl>
                             <FormLabel
-                              className={`text-sm font-normal cursor-pointer ${isDisabled ? "text-muted-foreground" : ""}`}
+                              className={`text-sm font-normal cursor-pointer ${
+                                isDisabled ? "text-muted-foreground" : ""
+                              }`}
                             >
                               {district}
                             </FormLabel>
@@ -444,7 +491,9 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                               />
                             </FormControl>
                             <FormLabel
-                              className={`text-sm font-normal cursor-pointer ${isDisabled ? "text-muted-foreground" : ""}`}
+                              className={`text-sm font-normal cursor-pointer ${
+                                isDisabled ? "text-muted-foreground" : ""
+                              }`}
                             >
                               {area}
                             </FormLabel>
@@ -465,9 +514,14 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               name="contactPersonName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Person Name</FormLabel>
+                  <FormLabel>
+                    Contact Person Name{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({field.value?.length || 0}/100)
+                    </span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="John Doe" maxLength={100} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -479,9 +533,18 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               name="contactPersonRole"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Person Role</FormLabel>
+                  <FormLabel>
+                    Contact Person Role{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({field.value?.length || 0}/100)
+                    </span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Executive Director" {...field} />
+                    <Input
+                      placeholder="Executive Director"
+                      maxLength={100}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
