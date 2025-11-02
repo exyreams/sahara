@@ -127,7 +127,7 @@ export function ParticleHero() {
         particleThemes[currentTheme as keyof typeof particleThemes]?.color ||
         particleThemes.sahara.color;
       particlesRef.current = textCoordinates.map(
-        (coord) => new Particle(coord.x, coord.y, color),
+        (coord) => new Particle(coord.x, coord.y, color)
       );
     };
 
@@ -186,7 +186,7 @@ export function ParticleHero() {
   }, [currentTheme]);
 
   return (
-    <div className="relative w-full h-screen bg-theme-background">
+    <div className="relative w-screen h-screen bg-theme-background -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );

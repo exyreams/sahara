@@ -10,7 +10,7 @@ export function Footer() {
   return (
     <footer className="relative bg-theme-background">
       {/* Footer Content */}
-      <div className="bg-theme-card-bg px-6 py-12 border-t border-theme-border">
+      <div className="bg-theme-card-bg px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-12 border-t border-theme-border">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             {/* About */}

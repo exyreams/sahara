@@ -205,8 +205,8 @@ export default function NGOPage() {
           </section>
 
           {/* How It Works */}
-          <section className="border-t border-theme-border bg-theme-card-bg/20">
-            <div className="container mx-auto px-4 py-16">
+          <section className="border-t border-theme-border bg-theme-card-bg/20 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
+            <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-16">
               <h2 className="text-3xl font-bold text-center mb-12 text-theme-text-highlight">
                 How It Works
               </h2>

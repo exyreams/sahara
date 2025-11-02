@@ -42,7 +42,9 @@ export default function RootLayout({
           <FaviconProvider />
           <SolanaWalletProvider>
             <Header />
-            <main className="pt-20 flex-1">{children}</main>
+            <main className="pt-20 flex-1 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
+              {children}
+            </main>
             <Footer />
             <Toaster />
           </SolanaWalletProvider>

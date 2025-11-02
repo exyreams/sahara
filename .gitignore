@@ -55,3 +55,5 @@ logs/
 # Misc
 .turbo
 /test-ledger
+
+assets/sahara_logo

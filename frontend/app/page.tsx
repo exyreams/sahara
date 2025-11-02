@@ -22,7 +22,7 @@ export default function Home() {
   const activeDisasters = disasters.filter((d) => d.isActive).slice(0, 6);
   const verifiedBeneficiaries = beneficiaries
     .filter(
-      (b) => formatVerificationStatus(b.verificationStatus) === "Verified",
+      (b) => formatVerificationStatus(b.verificationStatus) === "Verified"
     )
     .slice(0, 6);
   const activePools = pools.filter((p) => p.isActive).slice(0, 6);
@@ -162,7 +162,7 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from(
                 { length: 6 },
-                (_, i) => `beneficiary-skeleton-${i}`,
+                (_, i) => `beneficiary-skeleton-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -276,7 +276,7 @@ export default function Home() {
                       <div className="h-4 bg-theme-border rounded w-full" />
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           ) : activePools.length > 0 ? (
@@ -332,8 +332,8 @@ export default function Home() {
         </section>
 
         {/* How It Works */}
-        <section className="border-t border-theme-border bg-theme-card-bg/20">
-          <div className="container mx-auto px-4 py-16">
+        <section className="border-t border-theme-border bg-theme-card-bg/20 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20">
+          <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-16">
             <h2 className="text-3xl font-bold tracking-tight text-center mb-12 text-theme-text-highlight">
               How It Works
             </h2>
