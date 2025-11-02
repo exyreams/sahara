@@ -526,7 +526,7 @@ export default function FieldWorkerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { wallet } = useProgram();
+  const { program, wallet } = useProgram();
   const { ngo } = useNGO();
   const { isAdmin } = useAdmin();
   const { beneficiaries } = useBeneficiaries();
@@ -605,12 +605,8 @@ export default function FieldWorkerDetailPage() {
           fieldWorker.isActive ? "deactivated" : "activated"
         } successfully`,
         onSuccess: () => {
-          // Update local state
-          setFieldWorker({
-            ...fieldWorker,
-            isActive: !fieldWorker.isActive,
-          });
-          router.refresh();
+          // Refetch to update cached data
+          refetch();
         },
       },
     );
