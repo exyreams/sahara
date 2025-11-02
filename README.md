@@ -167,6 +167,8 @@ Sahara solves these problems through:
 - Transaction tracking
 - Admin audit logs and activity monitoring
 
+### Test Accounts
+
 <details>
 <summary>Test Accounts (Click to expand)</summary>
 
@@ -224,6 +226,8 @@ This account is already registered and verified as an NGO on the platform. You c
 
 #### Platform Admins
 
+[Administrator Role.webm](https://github.com/user-attachments/assets/9bffa27d-c5a0-4852-898d-d893712f2518)
+
 - **Platform Configuration**: Manage fees, thresholds, and system settings
 - **NGO Verification**: Single and batch NGO approval
 - **NGO Status Management**: Activate/deactivate organizations
@@ -234,6 +238,8 @@ This account is already registered and verified as an NGO on the platform. You c
 
 #### NGOs (Verified Organizations)
 
+[NGO Role.webm](https://github.com/user-attachments/assets/8a63ad9d-9be8-470a-abe4-e82251624e87)
+
 - **Disaster Event Management**: Create and manage disaster events
 - **Field Worker Registration**: Onboard and manage verification staff
 - **Fund Pool Creation**: Set up transparent relief funds with custom rules
@@ -243,6 +249,8 @@ This account is already registered and verified as an NGO on the platform. You c
 
 #### Field Workers
 
+[Field Worker Role.webm](https://github.com/user-attachments/assets/d7b73ee9-0b93-4403-a452-42e4b96b1911)
+
 - **Beneficiary Registration**: Register disaster victims on-ground
 - **Multi-Sig Verification**: Participate in beneficiary approval process
 - **Flag Beneficiaries**: Report suspicious cases for admin review
@@ -250,6 +258,8 @@ This account is already registered and verified as an NGO on the platform. You c
 - **District Assignment**: Work within assigned geographical areas
 
 #### Beneficiaries (Disaster Victims)
+
+[Beneficiaries Role.webm](https://github.com/user-attachments/assets/1bb289aa-aa0d-4f90-84e4-d7c65e7086f3)
 
 - **Direct Aid Reception**: Receive USDC/SOL directly to personal wallet
 - **Instant Claims**: Claim immediate portion of distributions
@@ -259,6 +269,8 @@ This account is already registered and verified as an NGO on the platform. You c
 - **Wallet Integration**: Seamless Solana wallet connection
 
 #### Donors
+
+[Donor Role.webm](https://github.com/user-attachments/assets/f2b3c450-54ae-444a-ba6d-a6e8308ff55c)
 
 - **Direct Donations**: Send aid directly to verified beneficiaries
 - **Pool Donations**: Contribute to disaster-specific fund pools
