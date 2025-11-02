@@ -91,6 +91,8 @@ export default function DisasterDetailPage({
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
     new Set()
   );
+  const [activityPage, setActivityPage] = useState(1);
+  const activityItemsPerPage = 10;
 
   const toggleActivityExpanded = (activityKey: string) => {
     setExpandedActivities((prev) => {
@@ -146,6 +148,15 @@ export default function DisasterDetailPage({
       data: d,
     })),
   ].sort((a, b) => b.timestamp - a.timestamp);
+
+  // Pagination for activities
+  const activityTotalPages = Math.ceil(
+    allActivities.length / activityItemsPerPage
+  );
+  const paginatedActivities = allActivities.slice(
+    (activityPage - 1) * activityItemsPerPage,
+    activityPage * activityItemsPerPage
+  );
 
   const loading =
     disastersLoading ||
@@ -907,7 +918,7 @@ export default function DisasterDetailPage({
               </div>
             ) : (
               <div className="space-y-2">
-                {allActivities.slice(0, 20).map((activity, index) => {
+                {paginatedActivities.map((activity, index) => {
                   const activityKey = `${activity.type}-${index}`;
                   const isExpanded = expandedActivities.has(activityKey);
 
@@ -1256,6 +1267,36 @@ export default function DisasterDetailPage({
                     );
                   }
                 })}
+              </div>
+            )}
+            {allActivities.length > activityItemsPerPage && (
+              <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                <div className="text-sm text-muted-foreground">
+                  Page {activityPage} of {activityTotalPages} (
+                  {allActivities.length} total)
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
+                    disabled={activityPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setActivityPage((p) =>
+                        Math.min(activityTotalPages, p + 1)
+                      )
+                    }
+                    disabled={activityPage === activityTotalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
