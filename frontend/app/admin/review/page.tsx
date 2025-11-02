@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ChevronDown,
   Flag,
+  Info,
   RefreshCw,
   Search,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import { Dropdown } from "@/components/ui/dropdown";
 import { Input } from "@/components/ui/input";
 import { useAllNGOs } from "@/hooks/use-all-ngos";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
+import { useFieldWorkers } from "@/hooks/use-field-workers";
 import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
 import { deriveBeneficiaryPDA } from "@/lib/anchor/pdas";
@@ -37,6 +39,7 @@ export default function AdminReviewPage() {
     loading: beneficiariesLoading,
     refetch: refetchBeneficiaries,
   } = useBeneficiaries();
+  const { fieldWorkers } = useFieldWorkers();
   const { program, wallet } = useProgram();
   const { submit, isLoading: txLoading } = useTransaction();
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,7 +59,7 @@ export default function AdminReviewPage() {
 
   // Get flagged beneficiaries
   const flaggedBeneficiaries = beneficiaries.filter(
-    (b) => b.verificationStatus === "Flagged" && b.flaggedBy,
+    (b) => b.verificationStatus === "Flagged" && b.flaggedBy
   );
 
   // Get NGOs that need review (not verified or pending re-verification after update)
@@ -136,7 +139,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId,
+          beneficiary.disasterId
         );
 
         // Approve and clear flag
@@ -147,7 +150,7 @@ export default function AdminReviewPage() {
             {
               approve: true,
               notes: null,
-            },
+            }
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -162,7 +165,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      },
+      }
     );
   };
 
@@ -175,7 +178,7 @@ export default function AdminReviewPage() {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId,
+          beneficiary.disasterId
         );
 
         // Reject and keep flag
@@ -186,7 +189,7 @@ export default function AdminReviewPage() {
             {
               approve: false,
               notes: null,
-            },
+            }
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -201,7 +204,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchBeneficiaries();
         },
-      },
+      }
     );
   };
 
@@ -227,7 +230,7 @@ export default function AdminReviewPage() {
         onSuccess: () => {
           refetchNGOs();
         },
-      },
+      }
     );
   };
 
@@ -267,7 +270,7 @@ export default function AdminReviewPage() {
             <div className="space-y-3">
               {Array.from(
                 { length: 5 },
-                (_, i) => `skeleton-item-${Date.now()}-${i}`,
+                (_, i) => `skeleton-item-${Date.now()}-${i}`
               ).map((key) => (
                 <div
                   key={key}
@@ -414,7 +417,7 @@ export default function AdminReviewPage() {
                       </div>
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           ) : filteredItems.length === 0 ? (
@@ -433,7 +436,7 @@ export default function AdminReviewPage() {
                     key={item.id}
                     className={cn(
                       "border border-theme-border rounded-lg overflow-hidden transition-all duration-200",
-                      "hover:border-theme-primary/50",
+                      "hover:border-theme-primary/50"
                     )}
                   >
                     <div className="p-4">
@@ -444,23 +447,33 @@ export default function AdminReviewPage() {
                               {isFlagged ? (
                                 <Flag className="h-5 w-5 text-yellow-500 shrink-0" />
                               ) : (
-                                <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
+                                <Info className="h-5 w-5 text-blue-500 shrink-0" />
                               )}
-                              <h3 className="font-semibold text-lg text-theme-text-highlight truncate">
+                              <h3
+                                className={cn(
+                                  "font-semibold text-lg truncate",
+                                  isFlagged
+                                    ? "text-yellow-600 dark:text-yellow-500"
+                                    : "text-blue-600 dark:text-blue-500"
+                                )}
+                              >
                                 {item.name}
                               </h3>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <Badge
-                                variant={
-                                  isFlagged ? "destructive" : "secondary"
+                                variant={isFlagged ? "outline" : "default"}
+                                className={
+                                  isFlagged
+                                    ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                    : ""
                                 }
                               >
                                 {isFlagged
                                   ? "Flagged"
                                   : !isFlagged && isNGOUpdate(item.data as NGO)
-                                    ? "NGO Update"
-                                    : "New NGO"}
+                                  ? "NGO Update"
+                                  : "New NGO"}
                               </Badge>
                               <button
                                 type="button"
@@ -511,7 +524,7 @@ export default function AdminReviewPage() {
                                   {(item.data as Beneficiary).flaggedAt
                                     ? formatDate(
                                         (item.data as Beneficiary)
-                                          .flaggedAt as number,
+                                          .flaggedAt as number
                                       )
                                     : "N/A"}
                                 </span>
@@ -536,7 +549,7 @@ export default function AdminReviewPage() {
                                     <span>
                                       Last Updated:{" "}
                                       {formatDate(
-                                        (item.data as NGO).lastActivityAt,
+                                        (item.data as NGO).lastActivityAt
                                       )}
                                     </span>
                                     <span className="text-orange-600 font-medium">
@@ -547,7 +560,7 @@ export default function AdminReviewPage() {
                                   <span>
                                     Registered:{" "}
                                     {formatDate(
-                                      (item.data as NGO).registeredAt,
+                                      (item.data as NGO).registeredAt
                                     )}
                                   </span>
                                 )}
@@ -563,28 +576,30 @@ export default function AdminReviewPage() {
                                   variant="default"
                                   onClick={() =>
                                     handleApproveBeneficiary(
-                                      item.data as Beneficiary,
+                                      item.data as Beneficiary
                                     )
                                   }
                                   disabled={txLoading}
                                 >
-                                  Approve & Verify
+                                  Clear Flag & Verify
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="destructive"
                                   onClick={() =>
                                     handleRejectBeneficiary(
-                                      item.data as Beneficiary,
+                                      item.data as Beneficiary
                                     )
                                   }
                                   disabled={txLoading}
                                 >
-                                  Reject
+                                  Mark as Rejected
                                 </Button>
                                 <Button size="sm" variant="outline" asChild>
                                   <Link
-                                    href={`/beneficiaries/${(item.data as Beneficiary).authority.toBase58()}`}
+                                    href={`/beneficiaries/${(
+                                      item.data as Beneficiary
+                                    ).authority.toBase58()}`}
                                   >
                                     View Details
                                   </Link>
@@ -625,20 +640,67 @@ export default function AdminReviewPage() {
                               >
                                 <div className="mt-4 pt-4 border-t border-theme-border space-y-4">
                                   {isFlagged ? (
-                                    (item.data as Beneficiary)
-                                      .flaggedReason && (
-                                      <div className="space-y-2">
-                                        <p className="text-sm font-medium">
-                                          Flag Reason:
-                                        </p>
-                                        <p className="text-sm text-yellow-600">
-                                          {
-                                            (item.data as Beneficiary)
-                                              .flaggedReason
-                                          }
-                                        </p>
-                                      </div>
-                                    )
+                                    <>
+                                      {(item.data as Beneficiary)
+                                        .flaggedReason && (
+                                        <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                          <div className="flex items-start gap-3">
+                                            <Flag className="h-5 w-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
+                                            <div className="flex-1 space-y-2">
+                                              <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-100">
+                                                Flagged for Review
+                                              </p>
+                                              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                                This beneficiary has been
+                                                flagged and is under review.
+                                              </p>
+                                              <div className="mt-3 space-y-2">
+                                                <p className="text-xs font-medium text-yellow-900 dark:text-yellow-100">
+                                                  Reason
+                                                </p>
+                                                <div className="bg-yellow-100/50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded p-3">
+                                                  <p className="text-sm italic text-yellow-900 dark:text-yellow-100">
+                                                    "
+                                                    {
+                                                      (item.data as Beneficiary)
+                                                        .flaggedReason
+                                                    }
+                                                    "
+                                                  </p>
+                                                </div>
+                                              </div>
+                                              {(item.data as Beneficiary)
+                                                .flaggedBy && (
+                                                <div className="mt-3 pt-3 border-t border-yellow-200 dark:border-yellow-800">
+                                                  <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                                                    Flagged by:{" "}
+                                                    {(() => {
+                                                      const flagger =
+                                                        fieldWorkers.find(
+                                                          (fw) =>
+                                                            fw.authority.equals(
+                                                              (
+                                                                item.data as Beneficiary
+                                                              ).flaggedBy!
+                                                            )
+                                                        );
+                                                      return flagger
+                                                        ? flagger.name
+                                                        : (
+                                                            item.data as Beneficiary
+                                                          ).flaggedBy
+                                                            ?.toBase58()
+                                                            .slice(0, 8) +
+                                                            "...";
+                                                    })()}
+                                                  </p>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </>
                                   ) : (
                                     <div className="space-y-4">
                                       {isNGOUpdate(item.data as NGO) && (
@@ -651,11 +713,11 @@ export default function AdminReviewPage() {
                                             {(item.data as NGO).verifiedAt &&
                                               formatDate(
                                                 (item.data as NGO)
-                                                  .verifiedAt as number,
+                                                  .verifiedAt as number
                                               )}
                                             . They updated their information on{" "}
                                             {formatDate(
-                                              (item.data as NGO).lastActivityAt,
+                                              (item.data as NGO).lastActivityAt
                                             )}{" "}
                                             and require re-verification. Please
                                             review all details carefully before
