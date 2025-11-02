@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ParticleSystem } from "@/components/ui/particle-system";
 import { useNGO } from "@/hooks/use-ngo";
 import { useProgram } from "@/hooks/use-program";
 import { cn } from "@/lib/utils";
@@ -49,12 +51,60 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
   ];
 
   // Get particle text based on current route
-  const _getParticleText = () => {
-    if (pathname === "/ngo") return "Dashboard";
+  const getParticleText = () => {
+    if (pathname === "/ngo/dashboard") return "Dashboard";
     if (pathname === "/ngo/field-workers") return "Workers";
     if (pathname === "/ngo/activity-log") return "Activity";
     return "NGO";
   };
+
+  // Check wallet connection FIRST to avoid skeleton flash
+  // If wallet not connected and not on main NGO page, show access denied immediately
+  if (!wallet.connected && pathname !== "/ngo") {
+    return (
+      <div className="min-h-screen bg-theme-background flex flex-col">
+        {/* Particle System Section - Top */}
+        <section className="relative w-full bg-theme-background overflow-hidden h-[30vh] min-h-[250px] mt-8">
+          <div className="absolute inset-0 mx-8">
+            <ParticleSystem text={getParticleText()} />
+          </div>
+        </section>
+
+        {/* Access Denied Content - Bottom */}
+        <section className="flex-1 flex items-start justify-center px-4 pt-4 pb-8">
+          <div className="w-full max-w-xl text-center space-y-10">
+            {/* Content */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                  Access Denied
+                </h1>
+                <p className="text-lg text-theme-text max-w-md mx-auto">
+                  You need to connect your wallet to access this area
+                </p>
+              </div>
+
+              {/* Info text */}
+              <div className="max-w-lg mx-auto">
+                <p className="text-sm text-theme-text/70 leading-relaxed">
+                  This section is restricted to registered NGOs only. Please
+                  connect your wallet and register your NGO to access the NGO
+                  portal.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <div className="flex justify-center">
+              <Button asChild size="lg" className="h-12 text-base px-8">
+                <Link href="/">Go to Home</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   // Show loading state - only show sidebar skeleton if wallet is connected
   if (loading || initialLoading) {
@@ -96,7 +146,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If wallet not connected or NGO not registered, show without sidebar
+  // If wallet not connected or NGO not registered, show without sidebar (for /ngo page)
   if (!wallet.connected || !ngo) {
     return (
       <main className="flex-1 flex flex-col min-h-screen">{children}</main>
