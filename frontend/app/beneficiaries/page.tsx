@@ -10,11 +10,12 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BeneficiaryRegistrationModal } from "@/components/beneficiaries/beneficiary-registration-modal";
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
+import { SortDropdown } from "@/components/search/sort-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,6 +57,14 @@ export default function BeneficiariesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
+  const [sortBy, setSortBy] = useState<
+    | "newest"
+    | "oldest"
+    | "name-asc"
+    | "name-desc"
+    | "severity-high"
+    | "severity-low"
+  >("newest");
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -65,29 +74,61 @@ export default function BeneficiariesPage() {
     }, 500);
   };
 
-  const filteredBeneficiaries = beneficiaries.filter((beneficiary) => {
-    const matchesSearch =
-      !searchQuery ||
-      beneficiary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      beneficiary.disasterId
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      beneficiary.location.district
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  const filteredAndSortedBeneficiaries = useMemo(() => {
+    // Filter beneficiaries
+    const filtered = beneficiaries.filter((beneficiary) => {
+      const matchesSearch =
+        !searchQuery ||
+        beneficiary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        beneficiary.disasterId
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        beneficiary.location.district
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    const matchesStatus =
-      statusFilters.length === 0 ||
-      statusFilters.includes(beneficiary.verificationStatus);
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        statusFilters.includes(beneficiary.verificationStatus);
 
-    const matchesOwner =
-      ownerFilter === "all" ||
-      (ownerFilter === "mine" &&
-        wallet.publicKey &&
-        beneficiary.registeredBy.equals(wallet.publicKey));
+      const matchesOwner =
+        ownerFilter === "all" ||
+        (ownerFilter === "mine" &&
+          wallet.publicKey &&
+          beneficiary.registeredBy.equals(wallet.publicKey));
 
-    return matchesSearch && matchesStatus && matchesOwner;
-  });
+      return matchesSearch && matchesStatus && matchesOwner;
+    });
+
+    // Sort beneficiaries
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.registeredAt - a.registeredAt;
+        case "oldest":
+          return a.registeredAt - b.registeredAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "severity-high":
+          return b.damageSeverity - a.damageSeverity;
+        case "severity-low":
+          return a.damageSeverity - b.damageSeverity;
+        default:
+          return b.registeredAt - a.registeredAt;
+      }
+    });
+
+    return sorted;
+  }, [
+    beneficiaries,
+    searchQuery,
+    statusFilters,
+    ownerFilter,
+    wallet.publicKey,
+    sortBy,
+  ]);
 
   // Wallet not connected - Show particle hero
   if (!wallet.connected) {
@@ -168,6 +209,19 @@ export default function BeneficiariesPage() {
                   selectedValues={statusFilters}
                   onSelectionChange={setStatusFilters}
                 />
+                <SortDropdown
+                  label="Sort By"
+                  options={[
+                    { value: "newest", label: "Newest First" },
+                    { value: "oldest", label: "Oldest First" },
+                    { value: "name-asc", label: "Name (A-Z)" },
+                    { value: "name-desc", label: "Name (Z-A)" },
+                    { value: "severity-high", label: "Severity (High)" },
+                    { value: "severity-low", label: "Severity (Low)" },
+                  ]}
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as typeof sortBy)}
+                />
                 <div className="flex gap-1 border border-theme-border rounded-lg p-1">
                   <Button
                     variant={viewMode === "grid" ? "default" : "ghost"}
@@ -211,7 +265,7 @@ export default function BeneficiariesPage() {
                     );
                   })}
                 </div>
-              ) : filteredBeneficiaries.length > 0 ? (
+              ) : filteredAndSortedBeneficiaries.length > 0 ? (
                 <div
                   className={
                     viewMode === "grid"
@@ -219,7 +273,7 @@ export default function BeneficiariesPage() {
                       : "flex flex-col gap-3"
                   }
                 >
-                  {filteredBeneficiaries.map((beneficiary) => (
+                  {filteredAndSortedBeneficiaries.map((beneficiary) => (
                     <Link
                       key={beneficiary.publicKey.toBase58()}
                       href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
@@ -447,6 +501,20 @@ export default function BeneficiariesPage() {
             onSelectionChange={setStatusFilters}
           />
 
+          <SortDropdown
+            label="Sort By"
+            options={[
+              { value: "newest", label: "Newest First" },
+              { value: "oldest", label: "Oldest First" },
+              { value: "name-asc", label: "Name (A-Z)" },
+              { value: "name-desc", label: "Name (Z-A)" },
+              { value: "severity-high", label: "Severity (High)" },
+              { value: "severity-low", label: "Severity (Low)" },
+            ]}
+            value={sortBy}
+            onValueChange={(value) => setSortBy(value as typeof sortBy)}
+          />
+
           <div className="flex gap-1 border border-theme-border rounded-lg p-1">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
@@ -469,8 +537,8 @@ export default function BeneficiariesPage() {
 
         <div className="flex items-center gap-2 mb-4">
           <Badge variant="secondary">
-            {filteredBeneficiaries.length}{" "}
-            {filteredBeneficiaries.length === 1 ? "result" : "results"}
+            {filteredAndSortedBeneficiaries.length}{" "}
+            {filteredAndSortedBeneficiaries.length === 1 ? "result" : "results"}
           </Badge>
           {(searchQuery ||
             statusFilters.length > 0 ||
@@ -514,7 +582,7 @@ export default function BeneficiariesPage() {
               );
             })}
           </div>
-        ) : filteredBeneficiaries.length > 0 ? (
+        ) : filteredAndSortedBeneficiaries.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -522,7 +590,7 @@ export default function BeneficiariesPage() {
                 : "flex flex-col gap-3"
             }
           >
-            {filteredBeneficiaries.map((beneficiary) => (
+            {filteredAndSortedBeneficiaries.map((beneficiary) => (
               <Link
                 key={beneficiary.publicKey.toBase58()}
                 href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
@@ -661,6 +729,9 @@ export default function BeneficiariesPage() {
         <BeneficiaryRegistrationModal
           open={showRegisterModal}
           onOpenChange={setShowRegisterModal}
+          onSuccess={() => {
+            setShowRegisterModal(false);
+          }}
         />
       </main>
     </div>

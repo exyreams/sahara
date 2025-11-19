@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { FieldWorkerForm } from "@/components/field-workers/field-worker-form";
 import {
   WideModal,
@@ -25,20 +24,14 @@ export function FieldWorkerCreationModal({
   mode = "create",
   onSuccess,
 }: FieldWorkerCreationModalProps) {
-  const router = useRouter();
-
   const handleSuccess = () => {
     // Close modal immediately
     onOpenChange(false);
-    // Call custom onSuccess if provided, otherwise refresh
+    // Call custom onSuccess if provided
     if (onSuccess) {
       onSuccess();
-    } else {
-      // Delay refresh slightly to ensure modal is fully closed
-      setTimeout(() => {
-        router.refresh();
-      }, 100);
     }
+    // No need for router.refresh() - query invalidation handles data refresh
   };
 
   const isEditMode = mode === "edit";

@@ -2,11 +2,12 @@
 
 import { Grid3x3, List, Plus, RefreshCw, Users } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FieldWorkerCard } from "@/components/field-workers/field-worker-card";
 import { FieldWorkerCreationModal } from "@/components/field-workers/field-worker-creation-modal";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
+import { SortDropdown } from "@/components/search/sort-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,9 @@ export default function FieldWorkersPage() {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "name-asc" | "name-desc"
+  >("newest");
 
   const loading = ngoLoading || workersLoading;
 
@@ -38,6 +42,49 @@ export default function FieldWorkersPage() {
     await refetch();
     setIsRefreshing(false);
   };
+
+  // Get NGO field workers
+  const ngoFieldWorkers = useMemo(() => {
+    if (!ngo) return [];
+    return fieldWorkers.filter((fw) => fw.ngo?.equals(ngo.publicKey));
+  }, [fieldWorkers, ngo]);
+
+  // Filter and sort field workers
+  const filteredAndSortedWorkers = useMemo(() => {
+    // Filter field workers based on search and status
+    const filtered = ngoFieldWorkers.filter((worker) => {
+      const matchesSearch =
+        !searchQuery ||
+        worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        (statusFilters.includes("active") && worker.isActive) ||
+        (statusFilters.includes("inactive") && !worker.isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+
+    // Sort field workers
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.registeredAt - a.registeredAt;
+        case "oldest":
+          return a.registeredAt - b.registeredAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        default:
+          return b.registeredAt - a.registeredAt;
+      }
+    });
+
+    return sorted;
+  }, [ngoFieldWorkers, searchQuery, statusFilters, sortBy]);
 
   if (loading) {
     return (
@@ -65,7 +112,7 @@ export default function FieldWorkersPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from(
             { length: 6 },
-            (_, i) => `field-worker-card-skeleton-${i}`,
+            (_, i) => `field-worker-card-skeleton-${i}`
           ).map((key) => (
             <Card key={key} className="bg-theme-card-bg border-theme-border">
               <CardHeader>
@@ -193,26 +240,6 @@ export default function FieldWorkersPage() {
     );
   }
 
-  const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey),
-  );
-
-  // Filter field workers based on search and status
-  const filteredWorkers = ngoFieldWorkers.filter((worker) => {
-    const matchesSearch =
-      !searchQuery ||
-      worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      worker.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      worker.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilters.length === 0 ||
-      (statusFilters.includes("active") && worker.isActive) ||
-      (statusFilters.includes("inactive") && !worker.isActive);
-
-    return matchesSearch && matchesStatus;
-  });
-
   const statusOptions = [
     { value: "active", label: "Active" },
     { value: "inactive", label: "Inactive" },
@@ -278,6 +305,17 @@ export default function FieldWorkersPage() {
           selectedValues={statusFilters}
           onSelectionChange={setStatusFilters}
         />
+        <SortDropdown
+          label="Sort By"
+          options={[
+            { value: "newest", label: "Newest First" },
+            { value: "oldest", label: "Oldest First" },
+            { value: "name-asc", label: "Name (A-Z)" },
+            { value: "name-desc", label: "Name (Z-A)" },
+          ]}
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as typeof sortBy)}
+        />
         <div className="flex gap-1 border border-theme-border rounded-lg p-1">
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
@@ -305,8 +343,8 @@ export default function FieldWorkersPage() {
         }`}
       >
         <Badge variant="secondary">
-          {filteredWorkers.length}{" "}
-          {filteredWorkers.length === 1 ? "worker" : "workers"}
+          {filteredAndSortedWorkers.length}{" "}
+          {filteredAndSortedWorkers.length === 1 ? "worker" : "workers"}
         </Badge>
       </div>
 
@@ -315,7 +353,7 @@ export default function FieldWorkersPage() {
           isRefreshing ? "opacity-50" : "opacity-100"
         }`}
       >
-        {filteredWorkers.length > 0 ? (
+        {filteredAndSortedWorkers.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -323,7 +361,7 @@ export default function FieldWorkersPage() {
                 : "flex flex-col gap-3"
             }
           >
-            {filteredWorkers.map((worker) => (
+            {filteredAndSortedWorkers.map((worker) => (
               <FieldWorkerCard
                 key={worker.publicKey.toBase58()}
                 worker={worker}
@@ -347,8 +385,8 @@ export default function FieldWorkersPage() {
                 {searchQuery || statusFilters.length > 0
                   ? "Try adjusting your filters"
                   : ngo.isVerified
-                    ? "Register your first field worker to start verifying beneficiaries"
-                    : "Wait for NGO verification to register field workers"}
+                  ? "Register your first field worker to start verifying beneficiaries"
+                  : "Wait for NGO verification to register field workers"}
               </CardDescription>
               {ngo.isVerified && !searchQuery && statusFilters.length === 0 && (
                 <div className="flex justify-center">
@@ -367,6 +405,9 @@ export default function FieldWorkersPage() {
       <FieldWorkerCreationModal
         open={showRegisterModal}
         onOpenChange={setShowRegisterModal}
+        onSuccess={() => {
+          setShowRegisterModal(false);
+        }}
       />
     </>
   );

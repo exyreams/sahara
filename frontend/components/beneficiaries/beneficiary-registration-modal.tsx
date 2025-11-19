@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { BeneficiaryForm } from "@/components/beneficiaries/beneficiary-form";
 import {
   WideModal,
@@ -26,18 +25,14 @@ export function BeneficiaryRegistrationModal({
   beneficiary,
   onSuccess,
 }: BeneficiaryRegistrationModalProps) {
-  const router = useRouter();
   const isEditMode = !!beneficiary;
 
   const handleSuccess = () => {
     onOpenChange(false);
     if (onSuccess) {
       onSuccess();
-    } else {
-      setTimeout(() => {
-        router.refresh();
-      }, 100);
     }
+    // No need for router.refresh() - query invalidation handles data refresh
   };
 
   return (
