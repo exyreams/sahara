@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { AlertTriangle } from "lucide-react";
@@ -45,6 +46,7 @@ interface NGOFormProps {
 export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
+  const queryClient = useQueryClient();
   const [showWarning, setShowWarning] = useState(false);
   const [pendingData, setPendingData] = useState<NGOFormData | null>(null);
 
@@ -123,10 +125,10 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               Buffer.from("activity"),
               wallet.publicKey.toBuffer(),
               Buffer.from(
-                new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer),
+                new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer)
               ),
             ],
-            program.programId,
+            program.programId
           );
 
           tx = await program.methods
@@ -146,7 +148,7 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                 bankAccountInfo: data.bankAccountInfo || null,
                 taxId: data.taxId || null,
               },
-              new BN(timestamp),
+              new BN(timestamp)
             )
             .accounts({
               ngo: ngoPDA,
@@ -192,6 +194,10 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             ? "NGO updated successfully. Pending admin verification."
             : "NGO registered successfully",
         onSuccess: () => {
+          // Invalidate NGO queries to refetch data
+          queryClient.invalidateQueries({ queryKey: ["ngo"] });
+          queryClient.invalidateQueries({ queryKey: ["ngos"] });
+
           // Small delay before calling parent onSuccess to ensure transaction is fully processed
           setTimeout(() => {
             if (mode === "create") {
@@ -200,7 +206,7 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             onSuccess?.();
           }, 50);
         },
-      },
+      }
     );
   };
 
@@ -420,8 +426,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                                     ? field.onChange([...field.value, district])
                                     : field.onChange(
                                         field.value?.filter(
-                                          (value: string) => value !== district,
-                                        ),
+                                          (value: string) => value !== district
+                                        )
                                       );
                                 }}
                               />
@@ -484,8 +490,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                                     ? field.onChange([...field.value, area])
                                     : field.onChange(
                                         field.value?.filter(
-                                          (value: string) => value !== area,
-                                        ),
+                                          (value: string) => value !== area
+                                        )
                                       );
                                 }}
                               />
@@ -558,8 +564,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                 ? "Updating..."
                 : "Registering..."
               : mode === "edit"
-                ? "Update NGO"
-                : "Register NGO"}
+              ? "Update NGO"
+              : "Register NGO"}
           </Button>
         </form>
       </Form>

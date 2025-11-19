@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { Sparkles } from "lucide-react";
@@ -57,6 +58,7 @@ export function PoolForm({
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
   const { disasters } = useDisasters();
+  const queryClient = useQueryClient();
 
   const isEditMode = mode === "edit" && !!pool;
 
@@ -134,7 +136,7 @@ export function PoolForm({
         const [poolPDA] = deriveFundPoolPDA(data.disasterId, data.poolId);
         const [poolTokenAccountPDA] = derivePoolTokenAccountPDA(
           data.disasterId,
-          data.poolId,
+          data.poolId
         );
         const [disasterPDA] = deriveDisasterPDA(data.disasterId);
         const [ngoPDA] = deriveNGOPDA(walletPubkey);
@@ -165,7 +167,7 @@ export function PoolForm({
             data.disasterId,
             data.poolId,
             new BN(timestamp),
-            params,
+            params
           )
           .accounts({
             pool: poolPDA,
@@ -189,12 +191,15 @@ export function PoolForm({
           ? "Fund pool updated successfully"
           : "Fund pool created successfully",
         onSuccess: () => {
+          // Invalidate pools query to refetch data
+          queryClient.invalidateQueries({ queryKey: ["pools"] });
+
           if (!isEditMode) {
             form.reset();
           }
           onSuccess?.();
         },
-      },
+      }
     );
   };
 
@@ -462,7 +467,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined,
+                        e.target.value ? Number(e.target.value) : undefined
                       )
                     }
                   />
@@ -488,7 +493,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined,
+                        e.target.value ? Number(e.target.value) : undefined
                       )
                     }
                   />
@@ -517,7 +522,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined,
+                        e.target.value ? Number(e.target.value) : undefined
                       )
                     }
                   />
@@ -542,7 +547,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined,
+                        e.target.value ? Number(e.target.value) : undefined
                       )
                     }
                   />
@@ -584,8 +589,8 @@ export function PoolForm({
               ? "Updating..."
               : "Creating..."
             : isEditMode
-              ? "Update Fund Pool"
-              : "Create Fund Pool"}
+            ? "Update Fund Pool"
+            : "Create Fund Pool"}
         </Button>
       </form>
     </Form>

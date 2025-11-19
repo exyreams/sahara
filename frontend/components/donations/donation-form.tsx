@@ -7,6 +7,7 @@ import {
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { useForm } from "react-hook-form";
@@ -62,6 +63,7 @@ export function DonationForm({
 }: DonationFormProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     resolver: zodResolver(donationFormSchema),
@@ -104,13 +106,13 @@ export function DonationForm({
           const beneficiaryAuthority = new PublicKey(recipientAddress);
           const [beneficiaryPDA] = deriveBeneficiaryPDA(
             beneficiaryAuthority,
-            disasterId,
+            disasterId
           );
           const [disasterPDA] = deriveDisasterPDA(disasterId);
           const [donationRecordPDA] = deriveDonationRecordPDA(
             wallet.publicKey,
             beneficiaryPDA,
-            timestamp,
+            timestamp
           );
 
           console.log("Beneficiary PDA:", beneficiaryPDA.toBase58());
@@ -122,56 +124,57 @@ export function DonationForm({
           // Get token accounts
           const donorTokenAccount = await getAssociatedTokenAddress(
             tokenMint,
-            wallet.publicKey,
+            wallet.publicKey
           );
           const beneficiaryTokenAccount = await getAssociatedTokenAddress(
             tokenMint,
-            beneficiaryAuthority,
+            beneficiaryAuthority
           );
 
           console.log("Donor Token Account:", donorTokenAccount.toBase58());
           console.log(
             "Beneficiary Token Account:",
-            beneficiaryTokenAccount.toBase58(),
+            beneficiaryTokenAccount.toBase58()
           );
 
           // Check if donor token account exists
-          const donorTokenAccountInfo =
-            await connection.getAccountInfo(donorTokenAccount);
+          const donorTokenAccountInfo = await connection.getAccountInfo(
+            donorTokenAccount
+          );
 
           console.log("Donor Token Account Exists:", !!donorTokenAccountInfo);
 
           if (!donorTokenAccountInfo) {
             throw new Error(
-              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`,
+              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`
             );
           }
 
           // Check if beneficiary token account exists
           const beneficiaryTokenAccountInfo = await connection.getAccountInfo(
-            beneficiaryTokenAccount,
+            beneficiaryTokenAccount
           );
 
           console.log(
             "Beneficiary Token Account Exists:",
-            !!beneficiaryTokenAccountInfo,
+            !!beneficiaryTokenAccountInfo
           );
 
           // Get platform fee recipient
           const platformFeeRecipient = await getAssociatedTokenAddress(
             tokenMint,
-            configAccount.platformFeeRecipient,
+            configAccount.platformFeeRecipient
           );
 
           console.log(
             "Platform Fee Recipient:",
-            platformFeeRecipient.toBase58(),
+            platformFeeRecipient.toBase58()
           );
 
           // Derive activity log PDA
           const [activityLogPDA] = deriveActivityLogPDA(
             wallet.publicKey,
-            timestamp,
+            timestamp
           );
 
           console.log("Activity Log PDA:", activityLogPDA.toBase58());
@@ -187,7 +190,7 @@ export function DonationForm({
                 message: data.message || "",
                 isAnonymous: data.isAnonymous,
               },
-              new BN(timestamp),
+              new BN(timestamp)
             )
             .accounts({
               beneficiary: beneficiaryPDA,
@@ -212,7 +215,7 @@ export function DonationForm({
                 beneficiaryAuthority, // owner
                 tokenMint, // mint
                 TOKEN_PROGRAM_ID,
-                ASSOCIATED_TOKEN_PROGRAM_ID,
+                ASSOCIATED_TOKEN_PROGRAM_ID
               ),
             ]);
           }
@@ -228,13 +231,13 @@ export function DonationForm({
           const [poolPDA] = deriveFundPoolPDA(disasterId, poolId);
           const [poolTokenAccountPDA] = derivePoolTokenAccountPDA(
             disasterId,
-            poolId,
+            poolId
           );
           const [_disasterPDA] = deriveDisasterPDA(disasterId);
           const [donationRecordPDA] = deriveDonationRecordPDA(
             wallet.publicKey,
             poolPDA,
-            timestamp,
+            timestamp
           );
           const [configPDA] = derivePlatformConfigPDA();
 
@@ -244,7 +247,7 @@ export function DonationForm({
           // Get pool data to find the token mint it uses
           // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
           const poolAccount = await (program.account as any).fundPool.fetch(
-            poolPDA,
+            poolPDA
           );
           const tokenMint = poolAccount.tokenMint;
 
@@ -262,17 +265,18 @@ export function DonationForm({
             tokenMint,
             wallet.publicKey,
             false, // allowOwnerOffCurve
-            mintTokenProgram, // programId
+            mintTokenProgram // programId
           );
 
           // Check if donor token account exists
-          const donorTokenAccountInfo =
-            await connection.getAccountInfo(donorTokenAccount);
+          const donorTokenAccountInfo = await connection.getAccountInfo(
+            donorTokenAccount
+          );
 
           // Derive activity log PDA
           const [activityLogPDA] = deriveActivityLogPDA(
             wallet.publicKey,
-            timestamp,
+            timestamp
           );
 
           // Derive NGO PDA from pool authority (we already fetched poolAccount above)
@@ -284,13 +288,13 @@ export function DonationForm({
             (program.account as any).platformConfig.fetch(configPDA);
           const platformFeeRecipient = await getAssociatedTokenAddress(
             tokenMint,
-            configAccount.platformFeeRecipient,
+            configAccount.platformFeeRecipient
           );
 
           // Check if donor token account exists
           if (!donorTokenAccountInfo) {
             throw new Error(
-              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`,
+              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`
             );
           }
 
@@ -304,7 +308,7 @@ export function DonationForm({
                 message: data.message || "",
                 isAnonymous: data.isAnonymous,
               },
-              new BN(timestamp.toString()),
+              new BN(timestamp.toString())
             )
             .accounts({
               pool: poolPDA,
@@ -334,10 +338,14 @@ export function DonationForm({
           data.token === "SOL" ? "wSOL" : data.token
         } successfully`,
         onSuccess: () => {
+          // Invalidate donations and pools queries to refetch data
+          queryClient.invalidateQueries({ queryKey: ["donations"] });
+          queryClient.invalidateQueries({ queryKey: ["pools"] });
+
           form.reset();
           onSuccess?.();
         },
-      },
+      }
     );
   };
 

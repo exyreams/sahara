@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { CheckCircle2 } from "lucide-react";
@@ -24,10 +25,11 @@ interface VerifyButtonProps {
 export function VerifyButton({ beneficiary, onSuccess }: VerifyButtonProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
+  const queryClient = useQueryClient();
   const [hasVerified, setHasVerified] = useState(
     beneficiary.verifierApprovals.some(
-      (v) => wallet.publicKey && v.equals(wallet.publicKey),
-    ),
+      (v) => wallet.publicKey && v.equals(wallet.publicKey)
+    )
   );
 
   const handleVerify = async () => {
@@ -39,7 +41,7 @@ export function VerifyButton({ beneficiary, onSuccess }: VerifyButtonProps) {
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiary.authority,
-          beneficiary.disasterId,
+          beneficiary.disasterId
         );
         const [disasterPDA] = deriveDisasterPDA(beneficiary.disasterId);
         const [fieldWorkerPDA] = deriveFieldWorkerPDA(wallet.publicKey);
@@ -48,14 +50,14 @@ export function VerifyButton({ beneficiary, onSuccess }: VerifyButtonProps) {
         const timestamp = Math.floor(Date.now() / 1000);
         const [activityLogPDA] = deriveActivityLogPDA(
           wallet.publicKey,
-          timestamp,
+          timestamp
         );
 
         const tx = await program.methods
           .verifyBeneficiary(
             beneficiary.authority,
             beneficiary.disasterId,
-            new BN(timestamp),
+            new BN(timestamp)
           )
           .accounts({
             beneficiary: beneficiaryPDA,
@@ -74,10 +76,13 @@ export function VerifyButton({ beneficiary, onSuccess }: VerifyButtonProps) {
       {
         successMessage: "Beneficiary verified successfully",
         onSuccess: () => {
+          // Invalidate beneficiaries query to refetch data
+          queryClient.invalidateQueries({ queryKey: ["beneficiaries"] });
+
           setHasVerified(true);
           onSuccess?.();
         },
-      },
+      }
     );
   };
 

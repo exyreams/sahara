@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ interface DistributionWithPool extends Distribution {
 
 export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
   const { wallet, program } = useProgram();
+  const queryClient = useQueryClient();
   const {
     distributions,
     loading: loadingDistributions,
@@ -46,7 +48,7 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
   const { pools, loading: loadingPools } = usePools();
   const { submit, isLoading } = useTransaction();
   const [pendingClaims, setPendingClaims] = useState<DistributionWithPool[]>(
-    [],
+    []
   );
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
       (d) =>
         wallet.publicKey &&
         d.beneficiary.equals(wallet.publicKey) &&
-        !d.isFullyClaimed,
+        !d.isFullyClaimed
     );
 
     // Enrich with pool data
@@ -97,18 +99,18 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
         const [poolPDA] = deriveFundPoolPDA(pool.disasterId, pool.poolId);
         const [poolTokenAccountPDA] = derivePoolTokenAccountPDA(
           pool.disasterId,
-          pool.poolId,
+          pool.poolId
         );
         const [distributionPDA] = deriveDistributionPDA(walletPubkey, poolPDA);
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           walletPubkey,
-          pool.disasterId,
+          pool.disasterId
         );
 
         // Get beneficiary token account
         const beneficiaryTokenAccount = await getAssociatedTokenAccount(
           walletPubkey,
-          platformConfig.usdcMint,
+          platformConfig.usdcMint
         );
 
         // Call claim_distribution instruction
@@ -128,12 +130,17 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
         return tx;
       },
       {
-        successMessage: `Claimed ${formatAmount(distribution.amountAllocated - distribution.amountClaimed)} USDC`,
+        successMessage: `Claimed ${formatAmount(
+          distribution.amountAllocated - distribution.amountClaimed
+        )} USDC`,
         onSuccess: () => {
+          // Invalidate distributions query to refetch data
+          queryClient.invalidateQueries({ queryKey: ["distributions"] });
+
           refetch();
           onSuccess?.();
         },
-      },
+      }
     );
   };
 
@@ -310,8 +317,12 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
                 {isLoading
                   ? "Processing..."
                   : isLocked && immediateUnclaimed === 0
-                    ? "Locked - Not Yet Available"
-                    : `Claim ${formatAmount(immediateUnclaimed > 0 ? immediateUnclaimed : unclaimedAmount)} USDC`}
+                  ? "Locked - Not Yet Available"
+                  : `Claim ${formatAmount(
+                      immediateUnclaimed > 0
+                        ? immediateUnclaimed
+                        : unclaimedAmount
+                    )} USDC`}
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">

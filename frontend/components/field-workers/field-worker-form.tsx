@@ -2,6 +2,7 @@
 
 import { BN } from "@coral-xyz/anchor";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -70,6 +71,7 @@ export function FieldWorkerForm({
 }: FieldWorkerFormProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
+  const queryClient = useQueryClient();
 
   const isEditMode = mode === "edit";
 
@@ -124,7 +126,7 @@ export function FieldWorkerForm({
             throw error;
           }
           throw new Error(
-            "NGO account not found. Please register your NGO first.",
+            "NGO account not found. Please register your NGO first."
           );
         }
 
@@ -147,7 +149,7 @@ export function FieldWorkerForm({
               wallet.publicKey.toBuffer(),
               timestampBuffer,
             ],
-            program.programId,
+            program.programId
           );
 
           const updateParams = {
@@ -176,7 +178,7 @@ export function FieldWorkerForm({
             // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
             await (program.account as any).fieldWorker.fetch(fieldWorkerPDA);
             throw new Error(
-              "A field worker with this wallet address is already registered",
+              "A field worker with this wallet address is already registered"
             );
           } catch (error) {
             // If account doesn't exist, that's good - we can proceed
@@ -223,7 +225,7 @@ export function FieldWorkerForm({
             }
             if (error instanceof Error) {
               throw new Error(
-                `Failed to register field worker: ${error.message}`,
+                `Failed to register field worker: ${error.message}`
               );
             }
             throw error;
@@ -237,12 +239,15 @@ export function FieldWorkerForm({
           ? "Field worker updated successfully"
           : "Field worker registered successfully",
         onSuccess: () => {
+          // Invalidate field workers query to refetch data
+          queryClient.invalidateQueries({ queryKey: ["fieldWorkers"] });
+
           if (!isEditMode) {
             form.reset();
           }
           onSuccess?.();
         },
-      },
+      }
     );
   };
 
@@ -387,14 +392,16 @@ export function FieldWorkerForm({
                                   ? field.onChange([...field.value, district])
                                   : field.onChange(
                                       field.value?.filter(
-                                        (value: string) => value !== district,
-                                      ),
+                                        (value: string) => value !== district
+                                      )
                                     );
                               }}
                             />
                           </FormControl>
                           <FormLabel
-                            className={`text-sm font-normal cursor-pointer ${isDisabled ? "text-muted-foreground" : ""}`}
+                            className={`text-sm font-normal cursor-pointer ${
+                              isDisabled ? "text-muted-foreground" : ""
+                            }`}
                           >
                             {district}
                           </FormLabel>
@@ -438,8 +445,8 @@ export function FieldWorkerForm({
               ? "Updating..."
               : "Registering..."
             : isEditMode
-              ? "Update Field Worker"
-              : "Register Field Worker"}
+            ? "Update Field Worker"
+            : "Register Field Worker"}
         </Button>
       </form>
     </Form>
