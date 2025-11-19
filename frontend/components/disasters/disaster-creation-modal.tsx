@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { DisasterForm } from "@/components/disasters/disaster-form";
 import {
   WideModal,
@@ -25,20 +24,14 @@ export function DisasterCreationModal({
   mode = "create",
   onSuccess,
 }: DisasterCreationModalProps) {
-  const router = useRouter();
-
   const handleSuccess = () => {
     // Close modal immediately
     onOpenChange(false);
-    // Call custom onSuccess if provided, otherwise refresh
+    // Call custom onSuccess if provided
     if (onSuccess) {
       onSuccess();
-    } else {
-      // Delay refresh slightly to ensure modal is fully closed
-      setTimeout(() => {
-        router.refresh();
-      }, 100);
     }
+    // No need for router.refresh() - query invalidation handles data refresh
   };
 
   const isEditMode = mode === "edit" && disaster;

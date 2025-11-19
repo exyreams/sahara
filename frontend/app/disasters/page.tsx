@@ -1,7 +1,15 @@
 "use client";
 
-import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertTriangle,
+  ArrowDownAZ,
+  ArrowUpAZ,
+  Grid3x3,
+  List,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";
 import { Header } from "@/components/layout/header";
@@ -37,6 +45,14 @@ export default function DisastersPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    | "newest"
+    | "oldest"
+    | "name-asc"
+    | "name-desc"
+    | "severity-high"
+    | "severity-low"
+  >("newest");
 
   // Check if user can create disasters (admin or verified NGO)
   const canCreateDisaster =
@@ -50,31 +66,110 @@ export default function DisastersPage() {
     }, 500);
   };
 
-  const filteredDisasters = disasters.filter((disaster) => {
-    const matchesSearch =
-      !searchQuery ||
-      disaster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      disaster.eventId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      disaster.location.district
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  // Public view filtered and sorted disasters
+  const publicFilteredAndSortedDisasters = useMemo(() => {
+    // Filter disasters
+    const filtered = disasters.filter((disaster) => {
+      const matchesSearch =
+        !searchQuery ||
+        disaster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        disaster.eventId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        disaster.location.district
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    const matchesStatus =
-      statusFilters.length === 0 ||
-      (statusFilters.includes("active") && disaster.isActive) ||
-      (statusFilters.includes("closed") && !disaster.isActive);
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        (statusFilters.includes("active") && disaster.isActive) ||
+        (statusFilters.includes("closed") && !disaster.isActive);
 
-    const matchesType =
-      typeFilters.length === 0 || typeFilters.includes(disaster.eventType);
+      const matchesType =
+        typeFilters.length === 0 || typeFilters.includes(disaster.eventType);
 
-    const matchesOwner =
-      ownerFilter === "all" ||
-      (ownerFilter === "mine" &&
-        wallet.publicKey &&
-        disaster.authority.equals(wallet.publicKey));
+      return matchesSearch && matchesStatus && matchesType;
+    });
 
-    return matchesSearch && matchesStatus && matchesType && matchesOwner;
-  });
+    // Sort disasters
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.createdAt - a.createdAt;
+        case "oldest":
+          return a.createdAt - b.createdAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "severity-high":
+          return b.severity - a.severity;
+        case "severity-low":
+          return a.severity - b.severity;
+        default:
+          return b.createdAt - a.createdAt;
+      }
+    });
+
+    return sorted;
+  }, [disasters, searchQuery, statusFilters, typeFilters, sortBy]);
+
+  const filteredAndSortedDisasters = useMemo(() => {
+    // Filter disasters
+    const filtered = disasters.filter((disaster) => {
+      const matchesSearch =
+        !searchQuery ||
+        disaster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        disaster.eventId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        disaster.location.district
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        (statusFilters.includes("active") && disaster.isActive) ||
+        (statusFilters.includes("closed") && !disaster.isActive);
+
+      const matchesType =
+        typeFilters.length === 0 || typeFilters.includes(disaster.eventType);
+
+      const matchesOwner =
+        ownerFilter === "all" ||
+        (ownerFilter === "mine" &&
+          wallet.publicKey &&
+          disaster.authority.equals(wallet.publicKey));
+
+      return matchesSearch && matchesStatus && matchesType && matchesOwner;
+    });
+
+    // Sort disasters
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.createdAt - a.createdAt;
+        case "oldest":
+          return a.createdAt - b.createdAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "severity-high":
+          return b.severity - a.severity;
+        case "severity-low":
+          return a.severity - b.severity;
+        default:
+          return b.createdAt - a.createdAt;
+      }
+    });
+
+    return sorted;
+  }, [
+    disasters,
+    searchQuery,
+    statusFilters,
+    typeFilters,
+    ownerFilter,
+    wallet.publicKey,
+    sortBy,
+  ]);
 
   // Wallet not connected - Show disasters publicly with particle hero
   if (!wallet.connected) {
@@ -180,6 +275,22 @@ export default function DisastersPage() {
                   onSelectionChange={setTypeFilters}
                 />
 
+                <FilterDropdown
+                  label="Sort By"
+                  options={[
+                    { value: "newest", label: "Newest First" },
+                    { value: "oldest", label: "Oldest First" },
+                    { value: "name-asc", label: "Name (A-Z)" },
+                    { value: "name-desc", label: "Name (Z-A)" },
+                    { value: "severity-high", label: "Severity (High)" },
+                    { value: "severity-low", label: "Severity (Low)" },
+                  ]}
+                  selectedValues={[sortBy]}
+                  onSelectionChange={(values) =>
+                    setSortBy(values[0] as typeof sortBy)
+                  }
+                />
+
                 <div className="flex gap-1 border border-theme-border rounded-lg p-1">
                   <Button
                     variant={viewMode === "grid" ? "default" : "ghost"}
@@ -205,8 +316,10 @@ export default function DisastersPage() {
             {!loading && (
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary">
-                  {filteredDisasters.length}{" "}
-                  {filteredDisasters.length === 1 ? "result" : "results"}
+                  {publicFilteredAndSortedDisasters.length}{" "}
+                  {publicFilteredAndSortedDisasters.length === 1
+                    ? "result"
+                    : "results"}
                 </Badge>
                 {(searchQuery ||
                   statusFilters.length > 0 ||
@@ -266,7 +379,7 @@ export default function DisastersPage() {
                   );
                 })}
               </div>
-            ) : filteredDisasters.length > 0 ? (
+            ) : publicFilteredAndSortedDisasters.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
@@ -274,7 +387,7 @@ export default function DisastersPage() {
                     : "flex flex-col gap-3"
                 }
               >
-                {filteredDisasters.map((disaster) => (
+                {publicFilteredAndSortedDisasters.map((disaster) => (
                   <DisasterCard
                     key={disaster.publicKey.toBase58()}
                     disaster={disaster}
@@ -355,6 +468,9 @@ export default function DisastersPage() {
         <DisasterCreationModal
           open={showCreateModal}
           onOpenChange={setShowCreateModal}
+          onSuccess={() => {
+            setShowCreateModal(false);
+          }}
         />
 
         {/* Filters */}
@@ -406,6 +522,22 @@ export default function DisastersPage() {
             onSelectionChange={setTypeFilters}
           />
 
+          <FilterDropdown
+            label="Sort By"
+            options={[
+              { value: "newest", label: "Newest First" },
+              { value: "oldest", label: "Oldest First" },
+              { value: "name-asc", label: "Name (A-Z)" },
+              { value: "name-desc", label: "Name (Z-A)" },
+              { value: "severity-high", label: "Severity (High)" },
+              { value: "severity-low", label: "Severity (Low)" },
+            ]}
+            selectedValues={[sortBy]}
+            onSelectionChange={(values) =>
+              setSortBy(values[0] as typeof sortBy)
+            }
+          />
+
           <div className="flex gap-1 border border-theme-border rounded-lg p-1">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
@@ -429,8 +561,8 @@ export default function DisastersPage() {
         {/* Results count */}
         <div className="flex items-center gap-2 mb-4">
           <Badge variant="secondary">
-            {filteredDisasters.length}{" "}
-            {filteredDisasters.length === 1 ? "result" : "results"}
+            {filteredAndSortedDisasters.length}{" "}
+            {filteredAndSortedDisasters.length === 1 ? "result" : "results"}
           </Badge>
           {(searchQuery ||
             statusFilters.length > 0 ||
@@ -499,7 +631,7 @@ export default function DisastersPage() {
               );
             })}
           </div>
-        ) : filteredDisasters.length > 0 ? (
+        ) : filteredAndSortedDisasters.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -507,7 +639,7 @@ export default function DisastersPage() {
                 : "flex flex-col gap-3"
             }
           >
-            {filteredDisasters.map((disaster) => (
+            {filteredAndSortedDisasters.map((disaster) => (
               <DisasterCard
                 key={disaster.publicKey.toBase58()}
                 disaster={disaster}
@@ -526,10 +658,10 @@ export default function DisastersPage() {
                 {ownerFilter === "mine"
                   ? "Create your first disaster event to get started"
                   : searchQuery ||
-                      statusFilters.length > 0 ||
-                      typeFilters.length > 0
-                    ? "Try adjusting your filters"
-                    : "No disaster events have been created yet"}
+                    statusFilters.length > 0 ||
+                    typeFilters.length > 0
+                  ? "Try adjusting your filters"
+                  : "No disaster events have been created yet"}
               </CardDescription>
               {canCreateDisaster && (
                 <div className="flex justify-center mt-4">
