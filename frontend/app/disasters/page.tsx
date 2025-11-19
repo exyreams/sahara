@@ -15,6 +15,7 @@ import { DisasterCreationModal } from "@/components/disasters/disaster-creation-
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
+import { SortDropdown } from "@/components/search/sort-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -275,7 +276,7 @@ export default function DisastersPage() {
                   onSelectionChange={setTypeFilters}
                 />
 
-                <FilterDropdown
+                <SortDropdown
                   label="Sort By"
                   options={[
                     { value: "newest", label: "Newest First" },
@@ -285,10 +286,8 @@ export default function DisastersPage() {
                     { value: "severity-high", label: "Severity (High)" },
                     { value: "severity-low", label: "Severity (Low)" },
                   ]}
-                  selectedValues={[sortBy]}
-                  onSelectionChange={(values) =>
-                    setSortBy(values[0] as typeof sortBy)
-                  }
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as typeof sortBy)}
                 />
 
                 <div className="flex gap-1 border border-theme-border rounded-lg p-1">
@@ -522,7 +521,7 @@ export default function DisastersPage() {
             onSelectionChange={setTypeFilters}
           />
 
-          <FilterDropdown
+          <SortDropdown
             label="Sort By"
             options={[
               { value: "newest", label: "Newest First" },
@@ -532,10 +531,8 @@ export default function DisastersPage() {
               { value: "severity-high", label: "Severity (High)" },
               { value: "severity-low", label: "Severity (Low)" },
             ]}
-            selectedValues={[sortBy]}
-            onSelectionChange={(values) =>
-              setSortBy(values[0] as typeof sortBy)
-            }
+            value={sortBy}
+            onValueChange={(value) => setSortBy(value as typeof sortBy)}
           />
 
           <div className="flex gap-1 border border-theme-border rounded-lg p-1">

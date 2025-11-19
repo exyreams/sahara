@@ -1,12 +1,13 @@
 "use client";
 
 import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { PoolCard } from "@/components/pools/pool-card";
 import { PoolCreationModal } from "@/components/pools/pool-creation-modal";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
+import { SortDropdown } from "@/components/search/sort-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,14 @@ export default function PoolsPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    | "newest"
+    | "oldest"
+    | "name-asc"
+    | "name-desc"
+    | "raised-high"
+    | "raised-low"
+  >("newest");
 
   // Only verified, active, non-blacklisted NGOs can create pools
   const canCreatePool = ngo?.isVerified && ngo?.isActive && !ngo?.isBlacklisted;
@@ -47,26 +56,100 @@ export default function PoolsPage() {
     }, 500);
   };
 
-  const filteredPools = pools.filter((pool) => {
-    const matchesSearch =
-      !searchQuery ||
-      pool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pool.poolId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pool.disasterId.toLowerCase().includes(searchQuery.toLowerCase());
+  // Public view filtered and sorted pools
+  const publicFilteredAndSortedPools = useMemo(() => {
+    // Filter pools
+    const filtered = pools.filter((pool) => {
+      const matchesSearch =
+        !searchQuery ||
+        pool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pool.poolId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pool.disasterId.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus =
-      statusFilters.length === 0 ||
-      (statusFilters.includes("active") && pool.isActive) ||
-      (statusFilters.includes("closed") && !pool.isActive);
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        (statusFilters.includes("active") && pool.isActive) ||
+        (statusFilters.includes("closed") && !pool.isActive);
 
-    const matchesOwner =
-      ownerFilter === "all" ||
-      (ownerFilter === "mine" &&
-        wallet.publicKey &&
-        pool.authority.equals(wallet.publicKey));
+      return matchesSearch && matchesStatus;
+    });
 
-    return matchesSearch && matchesStatus && matchesOwner;
-  });
+    // Sort pools
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.createdAt - a.createdAt;
+        case "oldest":
+          return a.createdAt - b.createdAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "raised-high":
+          return b.totalDeposited - a.totalDeposited;
+        case "raised-low":
+          return a.totalDeposited - b.totalDeposited;
+        default:
+          return b.createdAt - a.createdAt;
+      }
+    });
+
+    return sorted;
+  }, [pools, searchQuery, statusFilters, sortBy]);
+
+  // Authenticated view filtered and sorted pools
+  const filteredAndSortedPools = useMemo(() => {
+    // Filter pools
+    const filtered = pools.filter((pool) => {
+      const matchesSearch =
+        !searchQuery ||
+        pool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pool.poolId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pool.disasterId.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        (statusFilters.includes("active") && pool.isActive) ||
+        (statusFilters.includes("closed") && !pool.isActive);
+
+      const matchesOwner =
+        ownerFilter === "all" ||
+        (ownerFilter === "mine" &&
+          wallet.publicKey &&
+          pool.authority.equals(wallet.publicKey));
+
+      return matchesSearch && matchesStatus && matchesOwner;
+    });
+
+    // Sort pools
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.createdAt - a.createdAt;
+        case "oldest":
+          return a.createdAt - b.createdAt;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "raised-high":
+          return b.totalDeposited - a.totalDeposited;
+        case "raised-low":
+          return a.totalDeposited - b.totalDeposited;
+        default:
+          return b.createdAt - a.createdAt;
+      }
+    });
+
+    return sorted;
+  }, [
+    pools,
+    searchQuery,
+    statusFilters,
+    ownerFilter,
+    wallet.publicKey,
+    sortBy,
+  ]);
 
   // Wallet not connected - Show pools publicly with particle hero
   if (!wallet.connected) {
@@ -143,6 +226,19 @@ export default function PoolsPage() {
                   selectedValues={statusFilters}
                   onSelectionChange={setStatusFilters}
                 />
+                <SortDropdown
+                  label="Sort By"
+                  options={[
+                    { value: "newest", label: "Newest First" },
+                    { value: "oldest", label: "Oldest First" },
+                    { value: "name-asc", label: "Name (A-Z)" },
+                    { value: "name-desc", label: "Name (Z-A)" },
+                    { value: "raised-high", label: "Most Raised" },
+                    { value: "raised-low", label: "Least Raised" },
+                  ]}
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as typeof sortBy)}
+                />
                 <div className="flex gap-1 border border-theme-border rounded-lg p-1">
                   <Button
                     variant={viewMode === "grid" ? "default" : "ghost"}
@@ -215,7 +311,7 @@ export default function PoolsPage() {
                     );
                   })}
                 </div>
-              ) : filteredPools.length > 0 ? (
+              ) : publicFilteredAndSortedPools.length > 0 ? (
                 <div
                   className={
                     viewMode === "grid"
@@ -223,7 +319,7 @@ export default function PoolsPage() {
                       : "flex flex-col gap-3"
                   }
                 >
-                  {filteredPools.map((pool) => (
+                  {publicFilteredAndSortedPools.map((pool) => (
                     <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
                   ))}
                 </div>
@@ -300,6 +396,9 @@ export default function PoolsPage() {
         <PoolCreationModal
           open={showCreateModal}
           onOpenChange={setShowCreateModal}
+          onSuccess={() => {
+            setShowCreateModal(false);
+          }}
         />
 
         {/* Filters */}
@@ -341,6 +440,20 @@ export default function PoolsPage() {
             onSelectionChange={setStatusFilters}
           />
 
+          <SortDropdown
+            label="Sort By"
+            options={[
+              { value: "newest", label: "Newest First" },
+              { value: "oldest", label: "Oldest First" },
+              { value: "name-asc", label: "Name (A-Z)" },
+              { value: "name-desc", label: "Name (Z-A)" },
+              { value: "raised-high", label: "Most Raised" },
+              { value: "raised-low", label: "Least Raised" },
+            ]}
+            value={sortBy}
+            onValueChange={(value) => setSortBy(value as typeof sortBy)}
+          />
+
           <div className="flex gap-1 border border-theme-border rounded-lg p-1">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
@@ -364,8 +477,8 @@ export default function PoolsPage() {
         {/* Results count */}
         <div className="flex items-center gap-2 mb-4">
           <Badge variant="secondary">
-            {filteredPools.length}{" "}
-            {filteredPools.length === 1 ? "result" : "results"}
+            {filteredAndSortedPools.length}{" "}
+            {filteredAndSortedPools.length === 1 ? "result" : "results"}
           </Badge>
           {(searchQuery ||
             statusFilters.length > 0 ||
@@ -445,7 +558,7 @@ export default function PoolsPage() {
               );
             })}
           </div>
-        ) : filteredPools.length > 0 ? (
+        ) : filteredAndSortedPools.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -453,7 +566,7 @@ export default function PoolsPage() {
                 : "flex flex-col gap-3"
             }
           >
-            {filteredPools.map((pool) => (
+            {filteredAndSortedPools.map((pool) => (
               <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
             ))}
           </div>
@@ -469,8 +582,8 @@ export default function PoolsPage() {
                 {ownerFilter === "mine"
                   ? "Create your first pool to get started"
                   : searchQuery || statusFilters.length > 0
-                    ? "Try adjusting your filters"
-                    : "Create the first fund pool"}
+                  ? "Try adjusting your filters"
+                  : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
                 <div className="flex justify-center mt-6">

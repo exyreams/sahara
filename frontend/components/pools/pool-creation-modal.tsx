@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { PoolForm } from "@/components/pools/pool-form";
 import {
   WideModal,
@@ -16,6 +15,7 @@ interface PoolCreationModalProps {
   disasterId?: string;
   pool?: FundPool;
   mode?: "create" | "edit";
+  onSuccess?: () => void;
 }
 
 export function PoolCreationModal({
@@ -24,12 +24,16 @@ export function PoolCreationModal({
   disasterId,
   pool,
   mode = "create",
+  onSuccess,
 }: PoolCreationModalProps) {
-  const router = useRouter();
-
   const handleSuccess = () => {
+    // Close modal immediately
     onOpenChange(false);
-    router.refresh();
+    // Call custom onSuccess if provided
+    if (onSuccess) {
+      onSuccess();
+    }
+    // No need for router.refresh() - query invalidation handles data refresh
   };
 
   const isEditMode = mode === "edit" && pool;
