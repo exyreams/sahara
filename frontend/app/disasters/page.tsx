@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowDownAZ,
-  ArrowUpAZ,
-  Grid3x3,
-  List,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";

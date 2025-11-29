@@ -206,7 +206,6 @@ export function deriveNationalIdRegistryPDA(
 export function derivePoolRegistrationPDA(
   pool: PublicKey,
   beneficiary: PublicKey,
-  timestamp?: number,
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from("pool-registration"), pool.toBuffer(), beneficiary.toBuffer()],
