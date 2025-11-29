@@ -191,6 +191,11 @@ pub fn handler(
     pool.created_at = clock.unix_timestamp;
     pool.distributed_at = None;
     pool.closed_at = None;
+
+    pool.registration_locked = false;
+    pool.expected_beneficiary_count = None;
+    pool.registered_beneficiary_count = 0;
+
     pool.bump = ctx.bumps.pool;
 
     ngo.pools_created = ngo

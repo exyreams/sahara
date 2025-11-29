@@ -16,6 +16,10 @@ pub struct Distribution {
     pub allocation_weight: u16,
     pub notes: String,
     pub bump: u8,
+
+    pub claim_deadline: Option<i64>,
+    pub is_expired: bool,
+    pub expired_at: Option<i64>,
 }
 
 impl Distribution {
@@ -39,5 +43,10 @@ impl Distribution {
         + 2
         + 4
         + Self::MAX_NOTES_LEN
-        + 1;
+        + 1
+        + 1
+        + 8
+        + 1
+        + 1
+        + 8;
 }

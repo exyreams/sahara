@@ -29,6 +29,9 @@ pub struct FundPool {
     pub minimum_damage_severity: Option<u8>,
     pub target_amount: Option<u64>,
     pub description: String,
+    pub registration_locked: bool,
+    pub expected_beneficiary_count: Option<u32>,
+    pub registered_beneficiary_count: u32,
     pub bump: u8,
 }
 
@@ -77,5 +80,8 @@ impl FundPool {
         + 8
         + 4
         + Self::MAX_DESCRIPTION_LEN
+        + 1
+        + 1
+        + 4
         + 1;
 }

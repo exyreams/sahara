@@ -80,6 +80,33 @@ pub enum ErrorCode {
     #[msg("Distribution already claimed")]
     DistributionAlreadyClaimed,
 
+    #[msg("Pool registration phase is locked, cannot register more beneficiaries")]
+    RegistrationPhaseLocked,
+
+    #[msg("Distribution phase not active, pool registration must be locked first")]
+    DistributionPhaseNotActive,
+
+    #[msg("Beneficiary already registered for this pool")]
+    BeneficiaryAlreadyRegisteredForPool,
+
+    #[msg("Pool registration is not locked, must lock before distribution")]
+    PoolRegistrationNotLocked,
+
+    #[msg("Beneficiary not registered for this pool")]
+    BeneficiaryNotRegisteredForPool,
+
+    #[msg("Token is already in the allowed tokens list")]
+    TokenAlreadyAllowed,
+
+    #[msg("Maximum number of allowed tokens reached")]
+    MaxAllowedTokensReached,
+
+    #[msg("Cannot remove the primary token (USDC)")]
+    CannotRemovePrimaryToken,
+
+    #[msg("Token is not in the allowed tokens list")]
+    TokenNotInAllowedList,
+
     #[msg("Pool is not active")]
     PoolNotActive,
 
@@ -301,4 +328,13 @@ pub enum ErrorCode {
 
     #[msg("Unexpected error occurred")]
     UnexpectedError,
+
+    #[msg("Distribution has not expired yet")]
+    DistributionNotExpired,
+
+    #[msg("Distribution already expired/reclaimed")]
+    DistributionAlreadyExpired,
+
+    #[msg("Distribution has been partially claimed, cannot reclaim")]
+    DistributionPartiallyClaimed,
 }

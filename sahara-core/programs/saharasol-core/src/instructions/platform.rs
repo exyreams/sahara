@@ -262,3 +262,128 @@ pub fn update_platform_config_handler(
 
     Ok(())
 }
+
+#[derive(Accounts)]
+#[instruction(timestamp: i64)]
+pub struct ManageAllowedTokens<'info> {
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.bump,
+        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+    )]
+    pub config: Account<'info, PlatformConfig>,
+
+    #[account(
+        init,
+        payer = admin,
+        space = AdminAction::SPACE,
+        seeds = [
+            b"admin-action",
+            admin.key().as_ref(),
+            &timestamp.to_le_bytes()
+        ],
+        bump
+    )]
+    pub admin_action: Account<'info, AdminAction>,
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn add_allowed_token_handler(
+    ctx: Context<ManageAllowedTokens>,
+    _timestamp: i64,
+    token_mint: Pubkey,
+    reason: String,
+) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+    let admin_action = &mut ctx.accounts.admin_action;
+    let clock = Clock::get()?;
+
+    require!(
+        reason.len() <= AdminAction::MAX_REASON_LEN,
+        ErrorCode::StringTooLong
+    );
+
+    require!(
+        !config.allowed_tokens.contains(&token_mint),
+        ErrorCode::TokenAlreadyAllowed
+    );
+
+    require!(
+        config.allowed_tokens.len() < PlatformConfig::MAX_ALLOWED_TOKENS,
+        ErrorCode::MaxAllowedTokensReached
+    );
+
+    config.allowed_tokens.push(token_mint);
+    config.updated_at = clock.unix_timestamp;
+
+    admin_action.action_type = AdminActionType::AddAllowedToken;
+    admin_action.target = token_mint;
+    admin_action.admin = ctx.accounts.admin.key();
+    admin_action.reason = reason.clone();
+    admin_action.timestamp = clock.unix_timestamp;
+    admin_action.metadata = format!(
+        "Added token {} to allowed tokens list. Total allowed tokens: {}",
+        token_mint,
+        config.allowed_tokens.len()
+    );
+    admin_action.bump = ctx.bumps.admin_action;
+
+    msg!("Token added to whitelist: {}", token_mint);
+    msg!("Total allowed tokens: {}", config.allowed_tokens.len());
+    msg!("Reason: {}", reason);
+
+    Ok(())
+}
+
+pub fn remove_allowed_token_handler(
+    ctx: Context<ManageAllowedTokens>,
+    _timestamp: i64,
+    token_mint: Pubkey,
+    reason: String,
+) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+    let admin_action = &mut ctx.accounts.admin_action;
+    let clock = Clock::get()?;
+
+    require!(
+        reason.len() <= AdminAction::MAX_REASON_LEN,
+        ErrorCode::StringTooLong
+    );
+
+    require!(
+        token_mint != config.usdc_mint,
+        ErrorCode::CannotRemovePrimaryToken
+    );
+
+    let token_index = config
+        .allowed_tokens
+        .iter()
+        .position(|&t| t == token_mint)
+        .ok_or(ErrorCode::TokenNotInAllowedList)?;
+
+    config.allowed_tokens.remove(token_index);
+    config.updated_at = clock.unix_timestamp;
+
+    admin_action.action_type = AdminActionType::RemoveAllowedToken;
+    admin_action.target = token_mint;
+    admin_action.admin = ctx.accounts.admin.key();
+    admin_action.reason = reason.clone();
+    admin_action.timestamp = clock.unix_timestamp;
+    admin_action.metadata = format!(
+        "Removed token {} from allowed tokens list. Total allowed tokens: {}",
+        token_mint,
+        config.allowed_tokens.len()
+    );
+    admin_action.bump = ctx.bumps.admin_action;
+
+    msg!("Token removed from whitelist: {}", token_mint);
+    msg!("Total allowed tokens: {}", config.allowed_tokens.len());
+    msg!("Reason: {}", reason);
+
+    Ok(())
+}

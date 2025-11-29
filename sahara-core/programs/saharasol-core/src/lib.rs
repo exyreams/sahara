@@ -12,7 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("6Ke32uyhxtjAPP7BBRD2SjzmpATL6sAdNg9v7rxyvmU1");
+declare_id!("26jJKQHuNdAKc71J6fU6oV1UtXt5RDMamp4FpAbWyagJ");
 
 #[allow(deprecated)]
 #[program]
@@ -32,6 +32,24 @@ pub mod saharasol_core {
         params: UpdatePlatformConfigWithAuditParams,
     ) -> Result<()> {
         instructions::platform::update_platform_config_handler(ctx, timestamp, params)
+    }
+
+    pub fn add_allowed_token(
+        ctx: Context<ManageAllowedTokens>,
+        timestamp: i64,
+        token_mint: Pubkey,
+        reason: String,
+    ) -> Result<()> {
+        instructions::platform::add_allowed_token_handler(ctx, timestamp, token_mint, reason)
+    }
+
+    pub fn remove_allowed_token(
+        ctx: Context<ManageAllowedTokens>,
+        timestamp: i64,
+        token_mint: Pubkey,
+        reason: String,
+    ) -> Result<()> {
+        instructions::platform::remove_allowed_token_handler(ctx, timestamp, token_mint, reason)
     }
 
     pub fn initialize_disaster(
@@ -221,6 +239,50 @@ pub mod saharasol_core {
         pool_id: String,
     ) -> Result<()> {
         instructions::distribution::claim_distribution_handler(ctx, disaster_id, pool_id)
+    }
+
+    pub fn reclaim_expired_distribution(
+        ctx: Context<ReclaimExpiredDistribution>,
+        disaster_id: String,
+        pool_id: String,
+        beneficiary_authority: Pubkey,
+    ) -> Result<()> {
+        instructions::distribution::reclaim_expired_distribution_handler(
+            ctx,
+            disaster_id,
+            pool_id,
+            beneficiary_authority,
+        )
+    }
+
+    pub fn register_beneficiary_for_pool(
+        ctx: Context<RegisterBeneficiaryForPool>,
+        disaster_id: String,
+        pool_id: String,
+        params: RegisterBeneficiaryForPoolParams,
+        timestamp: i64,
+    ) -> Result<()> {
+        instructions::pool_registration::register_beneficiary_for_pool_handler(
+            ctx,
+            disaster_id,
+            pool_id,
+            params,
+            timestamp,
+        )
+    }
+
+    pub fn lock_pool_registration(
+        ctx: Context<LockPoolRegistration>,
+        disaster_id: String,
+        pool_id: String,
+        timestamp: i64,
+    ) -> Result<()> {
+        instructions::pool_registration::lock_pool_registration_handler(
+            ctx,
+            disaster_id,
+            pool_id,
+            timestamp,
+        )
     }
 
     pub fn verify_ngo(

@@ -11,6 +11,7 @@ pub mod fund_pool;
 pub mod location;
 pub mod ngo;
 pub mod platform_config;
+pub mod pool_registration;
 
 pub use activity_log::*;
 pub use admin_action::*;
@@ -25,3 +26,4 @@ pub use fund_pool::*;
 pub use location::*;
 pub use ngo::*;
 pub use platform_config::*;
+pub use pool_registration::*;

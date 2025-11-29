@@ -1,7 +1,7 @@
 use crate::errors::ErrorCode;
 use crate::state::{
-    ActivityLog, ActivityType, Beneficiary, DisasterEvent, Distribution, DistributionType,
-    FundPool, VerificationStatus,
+    ActivityLog, ActivityType, Beneficiary, DisasterEvent, Distribution, FundPool,
+    PoolRegistration, VerificationStatus,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
@@ -77,6 +77,17 @@ pub struct DistributeFromPool<'info> {
     )]
     pub authority: Signer<'info>,
 
+    #[account(
+        seeds = [
+            b"pool-registration",
+            pool.key().as_ref(),
+            params.beneficiary_authority.as_ref()
+        ],
+        bump = pool_registration.bump,
+        constraint = !pool_registration.is_distributed @ ErrorCode::DistributionAlreadyCompleted
+    )]
+    pub pool_registration: Account<'info, PoolRegistration>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -92,27 +103,14 @@ pub fn handler(
     let distribution = &mut ctx.accounts.distribution;
     let beneficiary = &ctx.accounts.beneficiary;
     let disaster = &mut ctx.accounts.disaster;
+    let pool_registration = &ctx.accounts.pool_registration;
 
-    if let Some(min_family_size) = pool.minimum_family_size {
-        require!(
-            beneficiary.family_size >= min_family_size,
-            ErrorCode::InvalidEligibilityCriteria
-        );
-    }
+    require!(
+        pool.registration_locked,
+        ErrorCode::PoolRegistrationNotLocked
+    );
 
-    if let Some(min_damage) = pool.minimum_damage_severity {
-        require!(
-            beneficiary.damage_severity >= min_damage,
-            ErrorCode::InvalidEligibilityCriteria
-        );
-    }
-
-    let allocation_weight: u64 = match pool.distribution_type {
-        DistributionType::Equal => 1,
-        DistributionType::WeightedFamily => beneficiary.family_size as u64,
-        DistributionType::WeightedDamage => beneficiary.damage_severity as u64,
-        DistributionType::Milestone => 1,
-    };
+    let allocation_weight = pool_registration.allocation_weight;
 
     let total_allocation = if pool.total_allocation_weight > 0 {
         let numerator = (pool.total_deposited as u128)
@@ -126,7 +124,7 @@ pub fn handler(
         allocation
     } else {
         pool.total_deposited
-            .checked_div(pool.beneficiary_count.max(1) as u64)
+            .checked_div(pool.registered_beneficiary_count.max(1) as u64)
             .ok_or(ErrorCode::DivisionByZero)?
     };
 
@@ -162,14 +160,15 @@ pub fn handler(
     distribution.notes = String::new();
     distribution.bump = ctx.bumps.distribution;
 
+    distribution.claim_deadline = Some(clock.unix_timestamp + 90 * 24 * 60 * 60);
+    distribution.is_expired = false;
+    distribution.expired_at = None;
+
     pool.total_distributed = pool
         .total_distributed
         .checked_add(total_allocation)
         .ok_or(ErrorCode::ArithmeticOverflow)?;
-    pool.total_allocation_weight = pool
-        .total_allocation_weight
-        .checked_add(allocation_weight)
-        .ok_or(ErrorCode::ArithmeticOverflow)?;
+
     pool.beneficiary_count = pool
         .beneficiary_count
         .checked_add(1)
@@ -302,17 +301,20 @@ pub fn claim_distribution_handler(
     }
 
     if distribution.locked_claimed_at.is_none() && distribution.amount_locked > 0 {
-        if let Some(unlock_time) = distribution.unlock_time {
-            require!(
-                clock.unix_timestamp >= unlock_time,
-                ErrorCode::TimeLockNotExpired
-            );
+        let can_claim_locked = match distribution.unlock_time {
+            Some(unlock_time) => clock.unix_timestamp >= unlock_time,
+            None => true,
+        };
+
+        if can_claim_locked {
+            amount_to_claim = amount_to_claim
+                .checked_add(distribution.amount_locked)
+                .ok_or(ErrorCode::ArithmeticOverflow)?;
+            distribution.locked_claimed_at = Some(clock.unix_timestamp);
+            msg!("Claiming locked amount: {}", distribution.amount_locked);
+        } else {
+            msg!("Locked amount not yet available, skipping");
         }
-        amount_to_claim = amount_to_claim
-            .checked_add(distribution.amount_locked)
-            .ok_or(ErrorCode::ArithmeticOverflow)?;
-        distribution.locked_claimed_at = Some(clock.unix_timestamp);
-        msg!("Claiming locked amount: {}", distribution.amount_locked);
     }
 
     require!(amount_to_claim > 0, ErrorCode::DistributionAlreadyClaimed);
@@ -379,4 +381,110 @@ pub fn claim_distribution_handler(
 pub fn batch_claim_distributions_handler() -> Result<()> {
     msg!("Batch claims should be implemented by calling claim_distribution multiple times");
     Err(ErrorCode::NotImplemented.into())
+}
+
+#[derive(Accounts)]
+#[instruction(disaster_id: String, pool_id: String, beneficiary_authority: Pubkey)]
+pub struct ReclaimExpiredDistribution<'info> {
+    #[account(
+        mut,
+        seeds = [
+            b"distribution",
+            beneficiary_authority.as_ref(),
+            pool.key().as_ref()
+        ],
+        bump = distribution.bump,
+        constraint = distribution.pool == pool.key() @ ErrorCode::AccountDataMismatch
+    )]
+    pub distribution: Account<'info, Distribution>,
+
+    #[account(
+        mut,
+        seeds = [
+            b"pool",
+            disaster_id.as_bytes(),
+            pool_id.as_bytes()
+        ],
+        bump = pool.bump,
+        constraint = pool.authority == authority.key() @ ErrorCode::UnauthorizedModification
+    )]
+    pub pool: Account<'info, FundPool>,
+
+    #[account(
+        init,
+        payer = authority,
+        space = ActivityLog::SPACE,
+        seeds = [
+            b"activity",
+            pool.key().as_ref(),
+            distribution.key().as_ref(),
+            b"reclaim"
+        ],
+        bump
+    )]
+    pub activity_log: Account<'info, ActivityLog>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn reclaim_expired_distribution_handler(
+    ctx: Context<ReclaimExpiredDistribution>,
+    _disaster_id: String,
+    _pool_id: String,
+    _beneficiary_authority: Pubkey,
+) -> Result<()> {
+    let clock = Clock::get()?;
+    let distribution = &mut ctx.accounts.distribution;
+    let pool = &mut ctx.accounts.pool;
+
+    require!(
+        !distribution.is_expired,
+        ErrorCode::DistributionAlreadyExpired
+    );
+
+    require!(
+        distribution.amount_claimed == 0,
+        ErrorCode::DistributionPartiallyClaimed
+    );
+
+    if let Some(deadline) = distribution.claim_deadline {
+        require!(
+            clock.unix_timestamp > deadline,
+            ErrorCode::DistributionNotExpired
+        );
+    } else {
+        return Err(ErrorCode::DistributionNotExpired.into());
+    }
+
+    let unclaimed_amount = distribution.amount_allocated;
+
+    distribution.is_expired = true;
+    distribution.expired_at = Some(clock.unix_timestamp);
+    distribution.is_fully_claimed = true;
+
+    pool.total_distributed = pool
+        .total_distributed
+        .checked_sub(unclaimed_amount)
+        .ok_or(ErrorCode::ArithmeticUnderflow)?;
+
+    let activity_log = &mut ctx.accounts.activity_log;
+    activity_log.action_type = ActivityType::FundsDistributed;
+    activity_log.actor = ctx.accounts.authority.key();
+    activity_log.target = distribution.beneficiary;
+    activity_log.amount = Some(unclaimed_amount);
+    activity_log.timestamp = clock.unix_timestamp;
+    activity_log.metadata = format!(
+        "Reclaimed expired distribution | Pool: {} | Amount: {} | Original deadline: {:?}",
+        pool.name, unclaimed_amount, distribution.claim_deadline
+    );
+    activity_log.bump = ctx.bumps.activity_log;
+
+    msg!("Expired distribution reclaimed successfully");
+    msg!("Reclaimed amount: {}", unclaimed_amount);
+    msg!("Funds returned to pool available balance");
+
+    Ok(())
 }

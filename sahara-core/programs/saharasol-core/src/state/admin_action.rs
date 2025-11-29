@@ -44,6 +44,9 @@ pub enum AdminActionType {
 
     DonateToPool,
     DirectDonation,
+
+    AddAllowedToken,
+    RemoveAllowedToken,
 }
 
 impl AdminAction {
