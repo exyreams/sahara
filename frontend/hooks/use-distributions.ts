@@ -21,6 +21,10 @@ export interface Distribution {
   allocationWeight: number;
   notes: string;
   bump: number;
+  // Expiration fields
+  claimDeadline: number | null;
+  isExpired: boolean;
+  expiredAt: number | null;
   // Extended fields (fetched separately)
   poolData?: {
     disasterId: string;
@@ -82,6 +86,14 @@ export function useDistributions(): UseDistributionsReturn {
           allocationWeight: account.account.allocationWeight,
           notes: account.account.notes,
           bump: account.account.bump,
+          // Expiration fields
+          claimDeadline: account.account.claimDeadline
+            ? account.account.claimDeadline.toNumber()
+            : null,
+          isExpired: account.account.isExpired ?? false,
+          expiredAt: account.account.expiredAt
+            ? account.account.expiredAt.toNumber()
+            : null,
         }),
       );
 

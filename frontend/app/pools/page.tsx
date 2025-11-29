@@ -26,7 +26,7 @@ import { useProgram } from "@/hooks/use-program";
 
 export default function PoolsPage() {
   const { wallet } = useProgram();
-  const { pools, loading, refetch: refetchPools } = usePools();
+  const { pools, loading, error, refetch: refetchPools } = usePools();
   const { config } = usePlatformConfig();
   const { ngo } = useNGO();
   const { isAdmin } = useAdmin();
@@ -365,6 +365,21 @@ export default function PoolsPage() {
           </Card>
         )}
 
+        {/* Error Alert */}
+        {error && (
+          <Card className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-red-600 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Error Loading Pools
+              </CardTitle>
+              <CardDescription className="text-red-600/90">
+                {error.message}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Fund Pools</h1>
@@ -582,8 +597,8 @@ export default function PoolsPage() {
                 {ownerFilter === "mine"
                   ? "Create your first pool to get started"
                   : searchQuery || statusFilters.length > 0
-                  ? "Try adjusting your filters"
-                  : "Create the first fund pool"}
+                    ? "Try adjusting your filters"
+                    : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
                 <div className="flex justify-center mt-6">

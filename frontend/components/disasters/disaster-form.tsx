@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { type PublicKey, SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import BN from "bn.js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,7 +57,7 @@ export function DisasterForm({
 
   // Local state for affected areas text input
   const [affectedAreasText, setAffectedAreasText] = useState(
-    disaster?.affectedAreas.join(", ") || ""
+    disaster?.affectedAreas.join(", ") || "",
   );
 
   const form = useForm({
@@ -155,7 +155,7 @@ export function DisasterForm({
 
             if (!ngoAccount.isVerified) {
               throw new Error(
-                "Your NGO is not verified yet. Please wait for admin verification."
+                "Your NGO is not verified yet. Please wait for admin verification.",
               );
             }
             if (!ngoAccount.isActive) {
@@ -199,7 +199,7 @@ export function DisasterForm({
               description: data.description,
               estimatedAffectedPopulation: data.estimatedAffectedPopulation,
             },
-            new BN(timestamp)
+            new BN(timestamp),
           )
           .accounts({
             disaster: disasterPDA,
@@ -226,7 +226,7 @@ export function DisasterForm({
           }
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -545,8 +545,8 @@ export function DisasterForm({
               ? "Updating..."
               : "Creating..."
             : isEditMode
-            ? "Update Disaster Event"
-            : "Create Disaster Event"}
+              ? "Update Disaster Event"
+              : "Create Disaster Event"}
         </Button>
       </form>
     </Form>

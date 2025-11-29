@@ -47,6 +47,8 @@ export function useTransaction(): UseTransactionReturn {
         return null;
       }
 
+      let loadingToastId: string | number | undefined;
+
       try {
         setIsSubmitting(true);
         setStatus("pending");
@@ -54,7 +56,7 @@ export function useTransaction(): UseTransactionReturn {
         setSignature(null);
 
         // Show loading toast
-        const loadingToastId = toast.loading("Processing transaction...", {
+        loadingToastId = toast.loading("Processing transaction...", {
           description:
             "Please confirm in your wallet and wait for confirmation",
         });
@@ -62,7 +64,9 @@ export function useTransaction(): UseTransactionReturn {
         const result = await fn();
 
         // Dismiss loading toast
-        toast.dismiss(loadingToastId);
+        if (loadingToastId) {
+          toast.dismiss(loadingToastId);
+        }
 
         // Extract signature if result is a string (transaction signature)
         if (typeof result === "string") {
@@ -86,11 +90,12 @@ export function useTransaction(): UseTransactionReturn {
         options?.onSuccess?.(result);
         return result;
       } catch (err) {
-        setIsSubmitting(false);
         const error = err as Error;
 
-        // Dismiss any loading toasts
-        toast.dismiss();
+        // Dismiss loading toast explicitly by ID
+        if (loadingToastId) {
+          toast.dismiss(loadingToastId);
+        }
 
         // Check if this is a post-success error (transaction already processed)
         // This happens when the transaction succeeded but confirmation failed

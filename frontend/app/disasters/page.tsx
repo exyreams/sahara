@@ -655,10 +655,10 @@ export default function DisastersPage() {
                 {ownerFilter === "mine"
                   ? "Create your first disaster event to get started"
                   : searchQuery ||
-                    statusFilters.length > 0 ||
-                    typeFilters.length > 0
-                  ? "Try adjusting your filters"
-                  : "No disaster events have been created yet"}
+                      statusFilters.length > 0 ||
+                      typeFilters.length > 0
+                    ? "Try adjusting your filters"
+                    : "No disaster events have been created yet"}
               </CardDescription>
               {canCreateDisaster && (
                 <div className="flex justify-center mt-4">

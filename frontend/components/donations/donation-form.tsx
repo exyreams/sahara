@@ -7,9 +7,10 @@ import {
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import BN from "bn.js";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,7 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAllowedTokens } from "@/hooks/use-allowed-tokens";
 import { useProgram } from "@/hooks/use-program";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { useTransaction } from "@/hooks/use-transaction";
 import {
   deriveActivityLogPDA,
@@ -51,6 +54,7 @@ interface DonationFormProps {
   recipientType: "beneficiary" | "pool";
   disasterId: string;
   poolId?: string;
+  tokenMint?: string; // Optional: specific token mint required by pool
   onSuccess?: () => void;
 }
 
@@ -59,27 +63,60 @@ export function DonationForm({
   recipientType,
   disasterId,
   poolId,
+  tokenMint,
   onSuccess,
 }: DonationFormProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
   const queryClient = useQueryClient();
 
+  // Fetch metadata if a specific token mint is required (for pool donations)
+  const { data: tokenMetadata, isLoading: isMetadataLoading } =
+    useTokenMetadata(tokenMint);
+
+  // Fetch allowed tokens for beneficiary donations
+  const { tokens: allowedTokens, isLoading: isAllowedTokensLoading } =
+    useAllowedTokens();
+
   const form = useForm({
     resolver: zodResolver(donationFormSchema),
     defaultValues: {
       amount: 0,
-      token: "USDC",
+      token: "USDC", // Default, will be updated if tokenMint is present
       message: "",
       isAnonymous: false,
     },
   });
 
+  // Update form token symbol when allowed tokens load (only once)
+  const hasSetToken = useRef(false);
+  useEffect(() => {
+    if (hasSetToken.current || allowedTokens.length === 0) return;
+
+    // Set default token - prefer USDC if available, otherwise first allowed token
+    const hasUSDC = allowedTokens.some((t) => t.symbol === "USDC");
+    if (!hasUSDC && allowedTokens.length > 0) {
+      form.setValue("token", allowedTokens[0].symbol);
+    }
+    hasSetToken.current = true;
+  }, [allowedTokens, form]);
+
   const onSubmit = async (data: DonationFormData) => {
     if (!program || !wallet.publicKey) return;
 
-    const amountInSmallestUnit =
-      data.token === "USDC" ? parseUSDC(data.amount) : parseSOL(data.amount);
+    // Calculate amount based on decimals from allowed tokens
+    const selectedToken = allowedTokens.find((t) => t.symbol === data.token);
+    let amountInSmallestUnit: number;
+
+    if (selectedToken) {
+      amountInSmallestUnit = Math.floor(
+        data.amount * 10 ** selectedToken.decimals,
+      );
+    } else {
+      // Fallback to USDC decimals (6)
+      amountInSmallestUnit = parseUSDC(data.amount);
+    }
+
     const timestamp = Math.floor(Date.now() / 1000);
 
     await submit(
@@ -87,36 +124,32 @@ export function DonationForm({
         if (!wallet.publicKey) throw new Error("Wallet not connected");
 
         if (recipientType === "beneficiary") {
-          // Get platform config first to get the correct USDC mint (same as pools)
+          // Get platform config
           const [configPDA] = derivePlatformConfigPDA();
           const configAccount =
             await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
             (program.account as any).platformConfig.fetch(configPDA);
 
-          // Use the USDC mint from platform config (same as pools use)
-          const tokenMint = configAccount.usdcMint;
+          // Find the selected token from allowed tokens
+          const selectedToken = allowedTokens.find(
+            (t) => t.symbol === data.token,
+          );
 
-          console.log("=== Beneficiary Donation Debug ===");
-          console.log("Token Mint:", tokenMint.toBase58());
-          console.log("Donor:", wallet.publicKey.toBase58());
-          console.log("Timestamp:", timestamp);
-          console.log("Timestamp BN:", new BN(timestamp).toString());
+          // Use selected token mint, or fallback to USDC mint from config
+          const tokenMint = selectedToken?.mint || configAccount.usdcMint;
 
           // Direct donation to beneficiary
           const beneficiaryAuthority = new PublicKey(recipientAddress);
           const [beneficiaryPDA] = deriveBeneficiaryPDA(
             beneficiaryAuthority,
-            disasterId
+            disasterId,
           );
           const [disasterPDA] = deriveDisasterPDA(disasterId);
           const [donationRecordPDA] = deriveDonationRecordPDA(
             wallet.publicKey,
             beneficiaryPDA,
-            timestamp
+            timestamp,
           );
-
-          console.log("Beneficiary PDA:", beneficiaryPDA.toBase58());
-          console.log("Donation Record PDA:", donationRecordPDA.toBase58());
 
           // Get connection
           const connection = program.provider.connection;
@@ -124,61 +157,39 @@ export function DonationForm({
           // Get token accounts
           const donorTokenAccount = await getAssociatedTokenAddress(
             tokenMint,
-            wallet.publicKey
+            wallet.publicKey,
           );
           const beneficiaryTokenAccount = await getAssociatedTokenAddress(
             tokenMint,
-            beneficiaryAuthority
-          );
-
-          console.log("Donor Token Account:", donorTokenAccount.toBase58());
-          console.log(
-            "Beneficiary Token Account:",
-            beneficiaryTokenAccount.toBase58()
+            beneficiaryAuthority,
           );
 
           // Check if donor token account exists
-          const donorTokenAccountInfo = await connection.getAccountInfo(
-            donorTokenAccount
-          );
-
-          console.log("Donor Token Account Exists:", !!donorTokenAccountInfo);
+          const donorTokenAccountInfo =
+            await connection.getAccountInfo(donorTokenAccount);
 
           if (!donorTokenAccountInfo) {
             throw new Error(
-              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`
+              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`,
             );
           }
 
           // Check if beneficiary token account exists
           const beneficiaryTokenAccountInfo = await connection.getAccountInfo(
-            beneficiaryTokenAccount
-          );
-
-          console.log(
-            "Beneficiary Token Account Exists:",
-            !!beneficiaryTokenAccountInfo
+            beneficiaryTokenAccount,
           );
 
           // Get platform fee recipient
           const platformFeeRecipient = await getAssociatedTokenAddress(
             tokenMint,
-            configAccount.platformFeeRecipient
-          );
-
-          console.log(
-            "Platform Fee Recipient:",
-            platformFeeRecipient.toBase58()
+            configAccount.platformFeeRecipient,
           );
 
           // Derive activity log PDA
           const [activityLogPDA] = deriveActivityLogPDA(
             wallet.publicKey,
-            timestamp
+            timestamp,
           );
-
-          console.log("Activity Log PDA:", activityLogPDA.toBase58());
-          console.log("=== End Debug ===");
 
           // Build the transaction
           const txBuilder = program.methods
@@ -190,7 +201,7 @@ export function DonationForm({
                 message: data.message || "",
                 isAnonymous: data.isAnonymous,
               },
-              new BN(timestamp)
+              new BN(timestamp),
             )
             .accounts({
               beneficiary: beneficiaryPDA,
@@ -207,7 +218,6 @@ export function DonationForm({
 
           // If beneficiary token account doesn't exist, add instruction to create it
           if (!beneficiaryTokenAccountInfo) {
-            console.log("Creating beneficiary token account...");
             txBuilder.preInstructions([
               createAssociatedTokenAccountInstruction(
                 wallet.publicKey, // payer
@@ -215,7 +225,7 @@ export function DonationForm({
                 beneficiaryAuthority, // owner
                 tokenMint, // mint
                 TOKEN_PROGRAM_ID,
-                ASSOCIATED_TOKEN_PROGRAM_ID
+                ASSOCIATED_TOKEN_PROGRAM_ID,
               ),
             ]);
           }
@@ -231,13 +241,13 @@ export function DonationForm({
           const [poolPDA] = deriveFundPoolPDA(disasterId, poolId);
           const [poolTokenAccountPDA] = derivePoolTokenAccountPDA(
             disasterId,
-            poolId
+            poolId,
           );
           const [_disasterPDA] = deriveDisasterPDA(disasterId);
           const [donationRecordPDA] = deriveDonationRecordPDA(
             wallet.publicKey,
             poolPDA,
-            timestamp
+            timestamp,
           );
           const [configPDA] = derivePlatformConfigPDA();
 
@@ -247,12 +257,12 @@ export function DonationForm({
           // Get pool data to find the token mint it uses
           // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
           const poolAccount = await (program.account as any).fundPool.fetch(
-            poolPDA
+            poolPDA,
           );
-          const tokenMint = poolAccount.tokenMint;
+          const poolTokenMint = poolAccount.tokenMint;
 
           // Fetch the mint account to determine which token program it uses
-          const mintInfo = await connection.getAccountInfo(tokenMint);
+          const mintInfo = await connection.getAccountInfo(poolTokenMint);
           if (!mintInfo) {
             throw new Error("Token mint not found");
           }
@@ -262,21 +272,20 @@ export function DonationForm({
 
           // Get donor token account using the correct token program
           const donorTokenAccount = await getAssociatedTokenAddress(
-            tokenMint,
+            poolTokenMint,
             wallet.publicKey,
             false, // allowOwnerOffCurve
-            mintTokenProgram // programId
+            mintTokenProgram, // programId
           );
 
           // Check if donor token account exists
-          const donorTokenAccountInfo = await connection.getAccountInfo(
-            donorTokenAccount
-          );
+          const donorTokenAccountInfo =
+            await connection.getAccountInfo(donorTokenAccount);
 
           // Derive activity log PDA
           const [activityLogPDA] = deriveActivityLogPDA(
             wallet.publicKey,
-            timestamp
+            timestamp,
           );
 
           // Derive NGO PDA from pool authority (we already fetched poolAccount above)
@@ -287,14 +296,15 @@ export function DonationForm({
             await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
             (program.account as any).platformConfig.fetch(configPDA);
           const platformFeeRecipient = await getAssociatedTokenAddress(
-            tokenMint,
-            configAccount.platformFeeRecipient
+            poolTokenMint,
+            configAccount.platformFeeRecipient,
           );
 
           // Check if donor token account exists
           if (!donorTokenAccountInfo) {
+            const tokenSymbol = selectedToken?.symbol || data.token || "token";
             throw new Error(
-              `You don't have a ${data.token} token account yet. Please receive some ${data.token} first to create your token account, then try donating again.`
+              `You don't have a ${tokenSymbol} token account yet. Please receive some ${tokenSymbol} first.`,
             );
           }
 
@@ -308,7 +318,7 @@ export function DonationForm({
                 message: data.message || "",
                 isAnonymous: data.isAnonymous,
               },
-              new BN(timestamp.toString())
+              new BN(timestamp.toString()),
             )
             .accounts({
               pool: poolPDA,
@@ -334,9 +344,7 @@ export function DonationForm({
         }
       },
       {
-        successMessage: `Donated ${data.amount} ${
-          data.token === "SOL" ? "wSOL" : data.token
-        } successfully`,
+        successMessage: `Donated ${data.amount} ${data.token} successfully`,
         onSuccess: () => {
           // Invalidate donations and pools queries to refetch data
           queryClient.invalidateQueries({ queryKey: ["donations"] });
@@ -345,7 +353,7 @@ export function DonationForm({
           form.reset();
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -363,8 +371,8 @@ export function DonationForm({
                   <FormControl>
                     <Input
                       type="number"
-                      step="0.01"
-                      min="0.01"
+                      step="0.000001" // Allow more precision for tokens
+                      min="0.000001"
                       placeholder="10.00"
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -378,29 +386,67 @@ export function DonationForm({
             <FormField
               control={form.control}
               name="token"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Token</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue placeholder="Select token" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="USDC">USDC</SelectItem>
-                      <SelectItem value="SOL">wSOL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                // For pool donations, the pool's token is enforced by the smart contract
+                // For beneficiary donations, user can choose any allowed token
+                const isPoolDonation = recipientType === "pool";
+
+                return (
+                  <FormItem>
+                    <FormLabel>Token</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isAllowedTokensLoading || isPoolDonation}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue
+                            placeholder={
+                              isAllowedTokensLoading
+                                ? "Loading..."
+                                : "Select token"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {allowedTokens.length > 0 ? (
+                          allowedTokens.map((token) => (
+                            <SelectItem
+                              key={token.mintAddress}
+                              value={token.symbol}
+                            >
+                              {token.symbol}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="USDC">USDC</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {isPoolDonation && (
+                      <FormDescription className="text-xs">
+                        This pool only accepts the token it was created with
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
-          <p className="text-sm text-muted-foreground">Minimum: 0.01</p>
+          <p className="text-sm text-muted-foreground">
+            {(() => {
+              const selectedSymbol = form.watch("token");
+              const selectedToken = allowedTokens.find(
+                (t) => t.symbol === selectedSymbol,
+              );
+              return selectedToken
+                ? `Token: ${selectedToken.name} (${selectedToken.symbol})`
+                : "Minimum: 0.01";
+            })()}
+          </p>
         </div>
 
         <FormField
@@ -441,12 +487,14 @@ export function DonationForm({
           )}
         />
 
-        <Button type="submit" disabled={isLoading} className="w-full">
+        <Button
+          type="submit"
+          disabled={isLoading || isAllowedTokensLoading}
+          className="w-full"
+        >
           {isLoading
             ? "Processing..."
-            : `Donate ${form.watch("amount") || 0} ${
-                form.watch("token") === "SOL" ? "wSOL" : form.watch("token")
-              }`}
+            : `Donate ${form.watch("amount") || 0} ${form.watch("token")}`}
         </Button>
       </form>
     </Form>

@@ -51,7 +51,6 @@ export const DISTRIBUTION_TYPES = [
   { value: "Equal", label: "Equal Distribution" },
   { value: "WeightedFamily", label: "Weighted by Family Size" },
   { value: "WeightedDamage", label: "Weighted by Damage Severity" },
-  { value: "Milestone", label: "Milestone-based" },
 ] as const;
 
 // Verification Status

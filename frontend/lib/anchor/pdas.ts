@@ -198,3 +198,60 @@ export function deriveNationalIdRegistryPDA(
     PROGRAM_ID,
   );
 }
+
+/**
+ * Derive Pool Registration PDA
+ * Seeds: ["pool_registration", pool, beneficiary]
+ */
+export function derivePoolRegistrationPDA(
+  pool: PublicKey,
+  beneficiary: PublicKey,
+  timestamp?: number,
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("pool-registration"), pool.toBuffer(), beneficiary.toBuffer()],
+    PROGRAM_ID,
+  );
+}
+
+/**
+ * Derive Pool Registration Activity Log PDA
+ * Seeds: ["activity", pool, beneficiary, timestamp]
+ */
+export function derivePoolRegistrationActivityLogPDA(
+  pool: PublicKey,
+  beneficiary: PublicKey,
+  timestamp: number,
+): [PublicKey, number] {
+  const timestampBuffer = new Uint8Array(8);
+  const view = new DataView(timestampBuffer.buffer);
+  view.setBigInt64(0, BigInt(timestamp), true); // true = little-endian
+
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("activity"),
+      pool.toBuffer(),
+      beneficiary.toBuffer(),
+      Buffer.from(timestampBuffer),
+    ],
+    PROGRAM_ID,
+  );
+}
+
+/**
+ * Derive Pool Activity Log PDA (for lock registration, etc.)
+ * Seeds: ["activity", pool, timestamp]
+ */
+export function derivePoolActivityLogPDA(
+  pool: PublicKey,
+  timestamp: number,
+): [PublicKey, number] {
+  const timestampBuffer = new Uint8Array(8);
+  const view = new DataView(timestampBuffer.buffer);
+  view.setBigInt64(0, BigInt(timestamp), true); // true = little-endian
+
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("activity"), pool.toBuffer(), Buffer.from(timestampBuffer)],
+    PROGRAM_ID,
+  );
+}

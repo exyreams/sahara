@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import BN from "bn.js";
 import { AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -125,10 +125,10 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
               Buffer.from("activity"),
               wallet.publicKey.toBuffer(),
               Buffer.from(
-                new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer)
+                new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer),
               ),
             ],
-            program.programId
+            program.programId,
           );
 
           tx = await program.methods
@@ -148,7 +148,7 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                 bankAccountInfo: data.bankAccountInfo || null,
                 taxId: data.taxId || null,
               },
-              new BN(timestamp)
+              new BN(timestamp),
             )
             .accounts({
               ngo: ngoPDA,
@@ -206,7 +206,7 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
             onSuccess?.();
           }, 50);
         },
-      }
+      },
     );
   };
 
@@ -426,8 +426,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                                     ? field.onChange([...field.value, district])
                                     : field.onChange(
                                         field.value?.filter(
-                                          (value: string) => value !== district
-                                        )
+                                          (value: string) => value !== district,
+                                        ),
                                       );
                                 }}
                               />
@@ -490,8 +490,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                                     ? field.onChange([...field.value, area])
                                     : field.onChange(
                                         field.value?.filter(
-                                          (value: string) => value !== area
-                                        )
+                                          (value: string) => value !== area,
+                                        ),
                                       );
                                 }}
                               />
@@ -564,8 +564,8 @@ export function NGOForm({ onSuccess, ngo, mode = "create" }: NGOFormProps) {
                 ? "Updating..."
                 : "Registering..."
               : mode === "edit"
-              ? "Update NGO"
-              : "Register NGO"}
+                ? "Update NGO"
+                : "Register NGO"}
           </Button>
         </form>
       </Form>

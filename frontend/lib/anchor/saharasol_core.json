@@ -1,5 +1,5 @@
 {
-  "address": "6Ke32uyhxtjAPP7BBRD2SjzmpATL6sAdNg9v7rxyvmU1",
+  "address": "26jJKQHuNdAKc71J6fU6oV1UtXt5RDMamp4FpAbWyagJ",
   "metadata": {
     "name": "saharasol_core",
     "version": "0.1.0",
@@ -67,6 +67,69 @@
         {
           "name": "action_id",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "add_allowed_token",
+      "discriminator": [251, 246, 10, 17, 107, 5, 197, 69],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [99, 111, 110, 102, 105, 103]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_action",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97, 100, 109, 105, 110, 45, 97, 99, 116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "arg",
+                "path": "timestamp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "timestamp",
+          "type": "i64"
+        },
+        {
+          "name": "token_mint",
+          "type": "pubkey"
+        },
+        {
+          "name": "reason",
+          "type": "string"
         }
       ]
     },
@@ -806,6 +869,28 @@
           "signer": true
         },
         {
+          "name": "pool_registration",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112, 111, 111, 108, 45, 114, 101, 103, 105, 115, 116, 114, 97,
+                  116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "params.beneficiary_authority"
+              }
+            ]
+          }
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
@@ -1339,6 +1424,170 @@
       ]
     },
     {
+      "name": "lock_pool_registration",
+      "discriminator": [86, 0, 224, 189, 255, 71, 167, 203],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 111, 111, 108]
+              },
+              {
+                "kind": "arg",
+                "path": "disaster_id"
+              },
+              {
+                "kind": "arg",
+                "path": "pool_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "activity_log",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 99, 116, 105, 118, 105, 116, 121]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "timestamp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "disaster_id",
+          "type": "string"
+        },
+        {
+          "name": "pool_id",
+          "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "reclaim_expired_distribution",
+      "discriminator": [8, 217, 156, 96, 48, 215, 215, 222],
+      "accounts": [
+        {
+          "name": "distribution",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100, 105, 115, 116, 114, 105, 98, 117, 116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "beneficiary_authority"
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 111, 111, 108]
+              },
+              {
+                "kind": "arg",
+                "path": "disaster_id"
+              },
+              {
+                "kind": "arg",
+                "path": "pool_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "activity_log",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 99, 116, 105, 118, 105, 116, 121]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "distribution"
+              },
+              {
+                "kind": "const",
+                "value": [114, 101, 99, 108, 97, 105, 109]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "disaster_id",
+          "type": "string"
+        },
+        {
+          "name": "pool_id",
+          "type": "string"
+        },
+        {
+          "name": "beneficiary_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "register_beneficiary",
       "discriminator": [126, 226, 62, 150, 95, 91, 39, 0],
       "accounts": [
@@ -1506,6 +1755,150 @@
       ]
     },
     {
+      "name": "register_beneficiary_for_pool",
+      "discriminator": [90, 151, 16, 66, 147, 36, 244, 10],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 111, 111, 108]
+              },
+              {
+                "kind": "arg",
+                "path": "disaster_id"
+              },
+              {
+                "kind": "arg",
+                "path": "pool_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool_registration",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112, 111, 111, 108, 45, 114, 101, 103, 105, 115, 116, 114, 97,
+                  116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "params.beneficiary_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [98, 101, 110, 101, 102, 105, 99, 105, 97, 114, 121]
+              },
+              {
+                "kind": "arg",
+                "path": "params.beneficiary_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "disaster_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "disaster",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [100, 105, 115, 97, 115, 116, 101, 114]
+              },
+              {
+                "kind": "arg",
+                "path": "disaster_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "activity_log",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 99, 116, 105, 118, 105, 116, 121]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "params.beneficiary_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "timestamp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "disaster_id",
+          "type": "string"
+        },
+        {
+          "name": "pool_id",
+          "type": "string"
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RegisterBeneficiaryForPoolParams"
+            }
+          }
+        },
+        {
+          "name": "timestamp",
+          "type": "i64"
+        }
+      ]
+    },
+    {
       "name": "register_field_worker",
       "discriminator": [156, 213, 94, 251, 193, 207, 145, 84],
       "accounts": [
@@ -1633,6 +2026,69 @@
               "name": "RegisterNGOParams"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "remove_allowed_token",
+      "discriminator": [109, 15, 23, 186, 219, 68, 215, 200],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [99, 111, 110, 102, 105, 103]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_action",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97, 100, 109, 105, 110, 45, 97, 99, 116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "arg",
+                "path": "timestamp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "timestamp",
+          "type": "i64"
+        },
+        {
+          "name": "token_mint",
+          "type": "pubkey"
+        },
+        {
+          "name": "reason",
+          "type": "string"
         }
       ]
     },
@@ -2663,6 +3119,10 @@
     {
       "name": "PlatformConfig",
       "discriminator": [160, 78, 128, 0, 248, 83, 230, 160]
+    },
+    {
+      "name": "PoolRegistration",
+      "discriminator": [38, 117, 200, 191, 185, 3, 163, 31]
     }
   ],
   "errors": [
@@ -2798,373 +3258,433 @@
     },
     {
       "code": 6026,
+      "name": "RegistrationPhaseLocked",
+      "msg": "Pool registration phase is locked, cannot register more beneficiaries"
+    },
+    {
+      "code": 6027,
+      "name": "DistributionPhaseNotActive",
+      "msg": "Distribution phase not active, pool registration must be locked first"
+    },
+    {
+      "code": 6028,
+      "name": "BeneficiaryAlreadyRegisteredForPool",
+      "msg": "Beneficiary already registered for this pool"
+    },
+    {
+      "code": 6029,
+      "name": "PoolRegistrationNotLocked",
+      "msg": "Pool registration is not locked, must lock before distribution"
+    },
+    {
+      "code": 6030,
+      "name": "BeneficiaryNotRegisteredForPool",
+      "msg": "Beneficiary not registered for this pool"
+    },
+    {
+      "code": 6031,
+      "name": "TokenAlreadyAllowed",
+      "msg": "Token is already in the allowed tokens list"
+    },
+    {
+      "code": 6032,
+      "name": "MaxAllowedTokensReached",
+      "msg": "Maximum number of allowed tokens reached"
+    },
+    {
+      "code": 6033,
+      "name": "CannotRemovePrimaryToken",
+      "msg": "Cannot remove the primary token (USDC)"
+    },
+    {
+      "code": 6034,
+      "name": "TokenNotInAllowedList",
+      "msg": "Token is not in the allowed tokens list"
+    },
+    {
+      "code": 6035,
       "name": "PoolNotActive",
       "msg": "Pool is not active"
     },
     {
-      "code": 6027,
+      "code": 6036,
       "name": "PoolClosed",
       "msg": "Pool is closed"
     },
     {
-      "code": 6028,
+      "code": 6037,
       "name": "InvalidDistributionType",
       "msg": "Invalid distribution type"
     },
     {
-      "code": 6029,
+      "code": 6038,
       "name": "DonationBelowMinimum",
       "msg": "Donation amount below minimum"
     },
     {
-      "code": 6030,
+      "code": 6039,
       "name": "DonationExceedsMaximum",
       "msg": "Donation amount exceeds maximum"
     },
     {
-      "code": 6031,
+      "code": 6040,
       "name": "InvalidTokenMint",
       "msg": "Invalid token mint"
     },
     {
-      "code": 6032,
+      "code": 6041,
       "name": "TokenAccountMismatch",
       "msg": "Token account mismatch"
     },
     {
-      "code": 6033,
+      "code": 6042,
       "name": "PlatformFeeError",
       "msg": "Platform fee calculation error"
     },
     {
-      "code": 6034,
+      "code": 6043,
       "name": "NoBeneficiariesForDistribution",
       "msg": "Cannot distribute to zero beneficiaries"
     },
     {
-      "code": 6035,
+      "code": 6044,
       "name": "DisasterNotActive",
       "msg": "Disaster event is not active"
     },
     {
-      "code": 6036,
+      "code": 6045,
       "name": "DisasterNotFound",
       "msg": "Disaster event not found"
     },
     {
-      "code": 6037,
+      "code": 6046,
       "name": "DisasterAlreadyExists",
       "msg": "Disaster event already exists"
     },
     {
-      "code": 6038,
+      "code": 6047,
       "name": "CannotModifyClosedDisaster",
       "msg": "Cannot modify closed disaster"
     },
     {
-      "code": 6039,
+      "code": 6048,
       "name": "InvalidDisasterSeverity",
       "msg": "Invalid disaster severity (must be 1-10)"
     },
     {
-      "code": 6040,
+      "code": 6049,
       "name": "DisasterHasActivePools",
       "msg": "Disaster has active pools, cannot close"
     },
     {
-      "code": 6041,
+      "code": 6050,
       "name": "UnauthorizedDisasterCreation",
       "msg": "Only admin or verified NGO can create disasters"
     },
     {
-      "code": 6042,
+      "code": 6051,
       "name": "DuplicateRegistration",
       "msg": "Duplicate beneficiary registration detected"
     },
     {
-      "code": 6043,
+      "code": 6052,
       "name": "DuplicatePhoneNumber",
       "msg": "Phone number already registered for this disaster"
     },
     {
-      "code": 6044,
+      "code": 6053,
       "name": "DuplicateNationalId",
       "msg": "National ID already registered for this disaster"
     },
     {
-      "code": 6045,
+      "code": 6054,
       "name": "HouseholdMaxMembersReached",
       "msg": "Household ID already has maximum members"
     },
     {
-      "code": 6046,
+      "code": 6055,
       "name": "BeneficiaryAlreadyRegistered",
       "msg": "Beneficiary already registered for this disaster"
     },
     {
-      "code": 6047,
+      "code": 6056,
       "name": "SimilarAddressDetected",
       "msg": "Similar address detected, manual review required"
     },
     {
-      "code": 6048,
+      "code": 6057,
       "name": "InvalidFamilySize",
       "msg": "Invalid family size (must be 1-50)"
     },
     {
-      "code": 6049,
+      "code": 6058,
       "name": "InvalidDamageSeverity",
       "msg": "Invalid damage severity (must be 1-10)"
     },
     {
-      "code": 6050,
+      "code": 6059,
       "name": "InvalidPhoneNumber",
       "msg": "Invalid phone number format"
     },
     {
-      "code": 6051,
+      "code": 6060,
       "name": "InvalidNationalId",
       "msg": "Invalid national ID format"
     },
     {
-      "code": 6052,
+      "code": 6061,
       "name": "InvalidLocationCoordinates",
       "msg": "Invalid location coordinates"
     },
     {
-      "code": 6053,
+      "code": 6062,
       "name": "InvalidIpfsHash",
       "msg": "Invalid IPFS hash format"
     },
     {
-      "code": 6054,
+      "code": 6063,
       "name": "InvalidTimeLockDuration",
       "msg": "Invalid time lock duration"
     },
     {
-      "code": 6055,
+      "code": 6064,
       "name": "InvalidDistributionPercentages",
       "msg": "Invalid distribution percentages (must sum to 100)"
     },
     {
-      "code": 6056,
+      "code": 6065,
       "name": "InvalidPoolConfiguration",
       "msg": "Invalid pool configuration"
     },
     {
-      "code": 6057,
+      "code": 6066,
       "name": "InvalidEligibilityCriteria",
       "msg": "Invalid eligibility criteria"
     },
     {
-      "code": 6058,
+      "code": 6067,
       "name": "StringTooLong",
       "msg": "String exceeds maximum length"
     },
     {
-      "code": 6059,
+      "code": 6068,
       "name": "VectorTooLong",
       "msg": "Vector exceeds maximum capacity"
     },
     {
-      "code": 6060,
+      "code": 6069,
       "name": "InvalidAge",
       "msg": "Invalid age (must be 0-150)"
     },
     {
-      "code": 6061,
+      "code": 6070,
       "name": "InvalidEmail",
       "msg": "Invalid email format"
     },
     {
-      "code": 6062,
+      "code": 6071,
       "name": "AccountAlreadyInitialized",
       "msg": "Account already initialized"
     },
     {
-      "code": 6063,
+      "code": 6072,
       "name": "AccountNotInitialized",
       "msg": "Account not initialized"
     },
     {
-      "code": 6064,
+      "code": 6073,
       "name": "InvalidAccountOwner",
       "msg": "Invalid account owner"
     },
     {
-      "code": 6065,
+      "code": 6074,
       "name": "AccountDataMismatch",
       "msg": "Account data mismatch"
     },
     {
-      "code": 6066,
+      "code": 6075,
       "name": "PDADerivationFailed",
       "msg": "PDA derivation failed"
     },
     {
-      "code": 6067,
+      "code": 6076,
       "name": "InvalidBumpSeed",
       "msg": "Invalid bump seed"
     },
     {
-      "code": 6068,
+      "code": 6077,
       "name": "PlatformPaused",
       "msg": "Platform is paused"
     },
     {
-      "code": 6069,
+      "code": 6078,
       "name": "PlatformNotInitialized",
       "msg": "Platform configuration not initialized"
     },
     {
-      "code": 6070,
+      "code": 6079,
       "name": "InvalidPlatformFee",
       "msg": "Invalid platform fee percentage"
     },
     {
-      "code": 6071,
+      "code": 6080,
       "name": "PlatformFeeRecipientNotSet",
       "msg": "Platform fee recipient not set"
     },
     {
-      "code": 6072,
+      "code": 6081,
       "name": "TransferAlreadyPending",
       "msg": "Admin transfer already pending"
     },
     {
-      "code": 6073,
+      "code": 6082,
       "name": "NoTransferPending",
       "msg": "No admin transfer pending"
     },
     {
-      "code": 6074,
+      "code": 6083,
       "name": "TransferExpired",
       "msg": "Admin transfer has expired"
     },
     {
-      "code": 6075,
+      "code": 6084,
       "name": "NotPendingAdmin",
       "msg": "Only pending admin can accept transfer"
     },
     {
-      "code": 6076,
+      "code": 6085,
       "name": "BatchSizeTooLarge",
       "msg": "Batch size exceeds maximum of 20"
     },
     {
-      "code": 6077,
+      "code": 6086,
       "name": "SuspiciousActivity",
       "msg": "Beneficiary flagged for suspicious activity"
     },
     {
-      "code": 6078,
+      "code": 6087,
       "name": "TooManyRegistrationsFromLocation",
       "msg": "Too many registrations from same location"
     },
     {
-      "code": 6079,
+      "code": 6088,
       "name": "RegistrationVelocityExceeded",
       "msg": "Registration velocity exceeded"
     },
     {
-      "code": 6080,
+      "code": 6089,
       "name": "BiometricMismatch",
       "msg": "Biometric hash mismatch"
     },
     {
-      "code": 6081,
+      "code": 6090,
       "name": "DocumentVerificationFailed",
       "msg": "Document verification failed"
     },
     {
-      "code": 6082,
+      "code": 6091,
       "name": "FlaggedReasonRequired",
       "msg": "Flagged reason required"
     },
     {
-      "code": 6083,
+      "code": 6092,
       "name": "CannotUnflagWithoutReview",
       "msg": "Cannot unflag without admin review"
     },
     {
-      "code": 6084,
+      "code": 6093,
       "name": "ActionTimeLocked",
       "msg": "Action not allowed yet (time-locked)"
     },
     {
-      "code": 6085,
+      "code": 6094,
       "name": "ActionDeadlinePassed",
       "msg": "Action deadline passed"
     },
     {
-      "code": 6086,
+      "code": 6095,
       "name": "InvalidTimestamp",
       "msg": "Invalid timestamp"
     },
     {
-      "code": 6087,
+      "code": 6096,
       "name": "TimeLockNotExpired",
       "msg": "Time lock not expired"
     },
     {
-      "code": 6088,
+      "code": 6097,
       "name": "DistributionWindowClosed",
       "msg": "Distribution window closed"
     },
     {
-      "code": 6089,
+      "code": 6098,
       "name": "ArithmeticOverflow",
       "msg": "Arithmetic overflow"
     },
     {
-      "code": 6090,
+      "code": 6099,
       "name": "ArithmeticUnderflow",
       "msg": "Arithmetic underflow"
     },
     {
-      "code": 6091,
+      "code": 6100,
       "name": "DivisionByZero",
       "msg": "Division by zero"
     },
     {
-      "code": 6092,
+      "code": 6101,
       "name": "InvalidCalculation",
       "msg": "Invalid calculation result"
     },
     {
-      "code": 6093,
+      "code": 6102,
       "name": "OperationNotAllowed",
       "msg": "Operation not allowed"
     },
     {
-      "code": 6094,
+      "code": 6103,
       "name": "InvalidOperation",
       "msg": "Invalid operation for current state"
     },
     {
-      "code": 6095,
+      "code": 6104,
       "name": "NotImplemented",
       "msg": "Feature not implemented"
     },
     {
-      "code": 6096,
+      "code": 6105,
       "name": "InvalidInput",
       "msg": "Invalid input parameter"
     },
     {
-      "code": 6097,
+      "code": 6106,
       "name": "ResourceNotFound",
       "msg": "Resource not found"
     },
     {
-      "code": 6098,
+      "code": 6107,
       "name": "OperationFailed",
       "msg": "Operation failed"
     },
     {
-      "code": 6099,
+      "code": 6108,
       "name": "UnexpectedError",
       "msg": "Unexpected error occurred"
+    },
+    {
+      "code": 6109,
+      "name": "DistributionNotExpired",
+      "msg": "Distribution has not expired yet"
+    },
+    {
+      "code": 6110,
+      "name": "DistributionAlreadyExpired",
+      "msg": "Distribution already expired/reclaimed"
+    },
+    {
+      "code": 6111,
+      "name": "DistributionPartiallyClaimed",
+      "msg": "Distribution has been partially claimed, cannot reclaim"
     }
   ],
   "types": [
@@ -3430,6 +3950,12 @@
           },
           {
             "name": "DirectDonation"
+          },
+          {
+            "name": "AddAllowedToken"
+          },
+          {
+            "name": "RemoveAllowedToken"
           }
         ]
       }
@@ -3882,6 +4408,22 @@
           {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "claim_deadline",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "is_expired",
+            "type": "bool"
+          },
+          {
+            "name": "expired_at",
+            "type": {
+              "option": "i64"
+            }
           }
         ]
       }
@@ -4277,6 +4819,20 @@
           {
             "name": "description",
             "type": "string"
+          },
+          {
+            "name": "registration_locked",
+            "type": "bool"
+          },
+          {
+            "name": "expected_beneficiary_count",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "registered_beneficiary_count",
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -4749,6 +5305,50 @@
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolRegistration",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "allocation_weight",
+            "type": "u64"
+          },
+          {
+            "name": "registered_at",
+            "type": "i64"
+          },
+          {
+            "name": "is_distributed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterBeneficiaryForPoolParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "beneficiary_authority",
+            "type": "pubkey"
           }
         ]
       }

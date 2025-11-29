@@ -452,44 +452,178 @@ export default function WalletProfilePage() {
                     Pending Distributions
                   </CardTitle>
                   <CardDescription className="text-theme-text/60 mt-1">
-                    Claim your allocated funds
+                    Claim your allocated funds from disaster relief pools
                   </CardDescription>
                 </div>
-                <Badge variant="default">{pendingDistributions.length}</Badge>
+                <Badge
+                  variant="default"
+                  className="bg-theme-primary/20 text-theme-primary"
+                >
+                  {pendingDistributions.length} pending
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {pendingDistributions.map((distribution) => {
-                  const pending =
+                  const totalPending =
                     (distribution.amountAllocated -
                       distribution.amountClaimed) /
                     1_000_000;
+                  const immediateAmount =
+                    distribution.amountImmediate / 1_000_000;
+                  const lockedAmount = distribution.amountLocked / 1_000_000;
+                  const immediateClaimed = distribution.claimedAt !== null;
+                  const lockedClaimed = distribution.lockedClaimedAt !== null;
+                  const immediateUnclaimed = immediateClaimed
+                    ? 0
+                    : immediateAmount;
+                  const lockedUnclaimed = lockedClaimed ? 0 : lockedAmount;
+
+                  // Check if locked funds are available
+                  const now = Math.floor(Date.now() / 1000);
+                  const isLocked = distribution.unlockTime
+                    ? distribution.unlockTime > now
+                    : false;
+                  const timeRemaining = distribution.unlockTime
+                    ? Math.max(0, distribution.unlockTime - now)
+                    : 0;
+                  const days = Math.floor(timeRemaining / 86400);
+                  const hours = Math.floor((timeRemaining % 86400) / 3600);
+                  const minutes = Math.floor((timeRemaining % 3600) / 60);
+
+                  // Determine what can be claimed now
+                  const canClaimImmediate = immediateUnclaimed > 0;
+                  const canClaimLocked = lockedUnclaimed > 0 && !isLocked;
+                  const claimableNow =
+                    (canClaimImmediate ? immediateUnclaimed : 0) +
+                    (canClaimLocked ? lockedUnclaimed : 0);
 
                   return (
                     <div
                       key={distribution.publicKey.toString()}
-                      className="border border-theme-border rounded-lg p-3 hover:border-theme-primary/50 transition-colors"
+                      className="border border-theme-border rounded-lg overflow-hidden hover:border-theme-primary/50 transition-colors"
                     >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <DollarSign className="h-4 w-4 text-theme-primary shrink-0" />
-                          <span className="font-semibold text-theme-primary">
-                            ${pending.toFixed(2)} USDC
-                          </span>
-                          <span className="text-theme-text/60">allocated</span>
-                          <span className="text-xs text-theme-text/60">
-                            {new Date(
-                              distribution.createdAt * 1000,
-                            ).toLocaleDateString()}
-                          </span>
+                      {/* Main Info */}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <FundIcon className="h-5 w-5 text-theme-primary" />
+                              <span className="font-semibold text-theme-text-highlight">
+                                Pool Distribution
+                              </span>
+                            </div>
+                            <p className="text-xs text-theme-text/60">
+                              Allocated on {formatDate(distribution.createdAt)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-theme-primary">
+                              ${totalPending.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-theme-text/60">
+                              USDC total
+                            </p>
+                          </div>
                         </div>
+
+                        {/* Breakdown */}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="w-2 h-2 rounded-full bg-green-500" />
+                              <span className="text-xs text-theme-text/60">
+                                Immediate
+                              </span>
+                            </div>
+                            <p
+                              className={`text-lg font-semibold ${immediateUnclaimed > 0 ? "text-green-500" : "text-theme-text/40"}`}
+                            >
+                              ${immediateUnclaimed.toFixed(2)}
+                              {immediateClaimed && (
+                                <span className="text-xs ml-1">✓</span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div
+                                className={`w-2 h-2 rounded-full ${isLocked ? "bg-yellow-500" : "bg-green-500"}`}
+                              />
+                              <span className="text-xs text-theme-text/60">
+                                {isLocked ? "Locked" : "Unlocked"}
+                              </span>
+                            </div>
+                            <p
+                              className={`text-lg font-semibold ${lockedUnclaimed > 0 ? (isLocked ? "text-yellow-500" : "text-green-500") : "text-theme-text/40"}`}
+                            >
+                              ${lockedUnclaimed.toFixed(2)}
+                              {lockedClaimed && (
+                                <span className="text-xs ml-1">✓</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Countdown Timer for Locked Funds */}
+                        {isLocked && lockedUnclaimed > 0 && (
+                          <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-medium text-yellow-500">
+                                  ⏱️ Locked funds unlock in
+                                </p>
+                                <p className="text-xs text-yellow-500/70 mt-1">
+                                  {formatDate(distribution.unlockTime!, true)}
+                                </p>
+                              </div>
+                              <div className="flex gap-2 text-center">
+                                {days > 0 && (
+                                  <div className="px-2">
+                                    <p className="text-xl font-bold text-yellow-500">
+                                      {days}
+                                    </p>
+                                    <p className="text-xs text-yellow-500/70">
+                                      days
+                                    </p>
+                                  </div>
+                                )}
+                                <div className="px-2">
+                                  <p className="text-xl font-bold text-yellow-500">
+                                    {hours}
+                                  </p>
+                                  <p className="text-xs text-yellow-500/70">
+                                    hrs
+                                  </p>
+                                </div>
+                                <div className="px-2">
+                                  <p className="text-xl font-bold text-yellow-500">
+                                    {minutes}
+                                  </p>
+                                  <p className="text-xs text-yellow-500/70">
+                                    min
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Claim Button */}
                         <Button
                           onClick={() => handleClaim(distribution)}
-                          disabled={isClaimingLoading}
-                          size="sm"
+                          disabled={isClaimingLoading || claimableNow === 0}
+                          className="w-full"
+                          size="lg"
                         >
-                          {isClaimingLoading ? "Claiming..." : "Claim"}
+                          {isClaimingLoading
+                            ? "Processing..."
+                            : claimableNow > 0
+                              ? `Claim $${claimableNow.toFixed(2)} USDC`
+                              : isLocked
+                                ? "Funds Locked - Not Yet Available"
+                                : "Nothing to Claim"}
                         </Button>
                       </div>
                     </div>

@@ -23,7 +23,10 @@ import { FundIcon } from "@/components/icons/fund-icon";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
 import { DistributionForm } from "@/components/pools/distribution-form";
 import { DonateModal } from "@/components/pools/donate-modal";
+import { LockRegistrationButton } from "@/components/pools/lock-registration-button";
 import { PoolCreationModal } from "@/components/pools/pool-creation-modal";
+import { ReclaimExpiredButton } from "@/components/pools/reclaim-expired-button";
+import { RegisterBeneficiaryModal } from "@/components/pools/register-beneficiary-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +46,7 @@ import { useAllNGOs } from "@/hooks/use-all-ngos";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
 import { useDistributions } from "@/hooks/use-distributions";
 import { useDonations } from "@/hooks/use-donations";
+import { usePoolRegistrations } from "@/hooks/use-pool-registrations";
 import { usePools } from "@/hooks/use-pools";
 import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
@@ -102,6 +106,11 @@ export default function PoolDetailPage({ params }: PageProps) {
     loading: distributionsLoading,
     refetch: refetchDistributions,
   } = useDistributions();
+  const {
+    registrations,
+    loading: registrationsLoading,
+    refetch: refetchRegistrations,
+  } = usePoolRegistrations();
   const { beneficiaries } = useBeneficiaries();
   const [expandedDonations, setExpandedDonations] = useState<Set<string>>(
     new Set(),
@@ -144,6 +153,13 @@ export default function PoolDetailPage({ params }: PageProps) {
         .sort((a, b) => b.createdAt - a.createdAt)
     : [];
 
+  // Filter registrations for this pool
+  const poolRegistrations = pool
+    ? registrations
+        .filter((r) => r.pool.equals(pool.publicKey))
+        .sort((a, b) => b.registeredAt - a.registeredAt)
+    : [];
+
   const toggleExpanded = (donationKey: string) => {
     setExpandedDonations((prev) => {
       const next = new Set(prev);
@@ -170,7 +186,12 @@ export default function PoolDetailPage({ params }: PageProps) {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refetch(), refetchDonations(), refetchDistributions()]);
+    await Promise.all([
+      refetch(),
+      refetchDonations(),
+      refetchDistributions(),
+      refetchRegistrations(),
+    ]);
     setTimeout(() => {
       setIsRefreshing(false);
     }, 500);
@@ -405,6 +426,18 @@ export default function PoolDetailPage({ params }: PageProps) {
                 <Badge variant={pool.isActive ? "default" : "log_action"}>
                   {pool.isActive ? "Active" : "Closed"}
                 </Badge>
+                <Badge
+                  variant={pool.registrationLocked ? "secondary" : "outline"}
+                  className={
+                    pool.registrationLocked
+                      ? "bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200"
+                      : "text-blue-600 border-blue-200 bg-blue-50"
+                  }
+                >
+                  {pool.registrationLocked
+                    ? "Registration Locked"
+                    : "Registration Open"}
+                </Badge>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground mb-3">
                 <span className="text-sm">
@@ -437,14 +470,34 @@ export default function PoolDetailPage({ params }: PageProps) {
               <DonateModal pool={pool} onSuccess={handleRefresh} />
               {isPoolManager && (
                 <>
-                  <Button
-                    variant="default"
-                    size="lg"
-                    onClick={() => setShowDistributeModal(true)}
-                  >
-                    <SendHorizontal className="mr-2 h-4 w-4" />
-                    Distribute
-                  </Button>
+                  {!pool.registrationLocked && (
+                    <>
+                      <RegisterBeneficiaryModal
+                        pool={pool}
+                        onSuccess={handleRefresh}
+                      />
+                      <LockRegistrationButton
+                        pool={pool}
+                        onSuccess={handleRefresh}
+                      />
+                    </>
+                  )}
+                  {pool.registrationLocked && (
+                    <>
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={() => setShowDistributeModal(true)}
+                      >
+                        <SendHorizontal className="mr-2 h-4 w-4" />
+                        Distribute
+                      </Button>
+                      <ReclaimExpiredButton
+                        pool={pool}
+                        onSuccess={handleRefresh}
+                      />
+                    </>
+                  )}
                   <Button
                     variant="outline"
                     size="lg"
@@ -695,6 +748,12 @@ export default function PoolDetailPage({ params }: PageProps) {
               Overview
             </TabsTrigger>
             <TabsTrigger
+              value="registered"
+              className="text-base px-6 cursor-pointer"
+            >
+              Registered ({poolRegistrations.length})
+            </TabsTrigger>
+            <TabsTrigger
               value="donations"
               className="text-base px-6 cursor-pointer"
             >
@@ -917,6 +976,118 @@ export default function PoolDetailPage({ params }: PageProps) {
             </Card>
           </TabsContent>
 
+          {/* Registered Beneficiaries Tab */}
+          <TabsContent value="registered" className="space-y-4">
+            <Card className="bg-theme-card-bg border-theme-border">
+              <CardHeader>
+                <CardTitle className="text-theme-text-highlight">
+                  Registered Beneficiaries
+                </CardTitle>
+                <CardDescription className="text-theme-text/60">
+                  Beneficiaries registered to receive funds from this pool
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {registrationsLoading || (isRefreshing && !loading) ? (
+                  <div className="space-y-2">
+                    {Array.from(
+                      { length: 3 },
+                      (_, i) => `registration-skeleton-${i}`,
+                    ).map((key) => (
+                      <div
+                        key={key}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-theme-border"
+                      >
+                        <div className="h-10 w-10 rounded-full bg-theme-border animate-pulse shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 w-32 bg-theme-border rounded animate-pulse" />
+                          <div className="h-3 w-48 bg-theme-border rounded animate-pulse" />
+                        </div>
+                        <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                ) : poolRegistrations.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-theme-text-highlight mb-2">
+                      No beneficiaries registered yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      {pool.registrationLocked
+                        ? "Registration is locked for this pool"
+                        : "Register verified beneficiaries to this pool before distribution"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {poolRegistrations.map((registration) => {
+                      const beneficiary = beneficiaries.find((b) =>
+                        b.publicKey.equals(registration.beneficiary),
+                      );
+
+                      return (
+                        <a
+                          key={registration.publicKey.toString()}
+                          href={`/beneficiaries/${registration.beneficiary.toBase58()}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push(
+                              `/beneficiaries/${registration.beneficiary.toBase58()}`,
+                            );
+                          }}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-theme-border hover:border-theme-primary/50 hover:bg-theme-primary/5 transition-all cursor-pointer"
+                        >
+                          <div className="h-10 w-10 rounded-full bg-theme-primary/10 flex items-center justify-center shrink-0">
+                            <Users className="h-5 w-5 text-theme-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {beneficiary?.name || "Unnamed Beneficiary"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {beneficiary
+                                ? `Family: ${beneficiary.familySize} | Damage: ${beneficiary.damageSeverity}/10`
+                                : `${registration.beneficiary
+                                    .toBase58()
+                                    .slice(0, 16)}...`}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-theme-text">
+                                Weight: {registration.allocationWeight}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(
+                                  registration.registeredAt * 1000,
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Badge
+                              variant={
+                                registration.isDistributed
+                                  ? "default"
+                                  : "pending"
+                              }
+                            >
+                              {registration.isDistributed
+                                ? "Distributed"
+                                : "Pending"}
+                            </Badge>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Donations Tab */}
           <TabsContent value="donations" className="space-y-4">
             <Card className="bg-theme-card-bg border-theme-border">
@@ -1119,14 +1290,174 @@ export default function PoolDetailPage({ params }: PageProps) {
 
           {/* Distributions Tab */}
           <TabsContent value="distributions" className="space-y-4">
-            {/* Distributions Section */}
+            {/* Distribution Status Summary */}
+            {poolDistributions.length > 0 && (
+              <Card className="bg-theme-card-bg border-theme-border">
+                <CardHeader>
+                  <CardTitle className="text-theme-text-highlight">
+                    Distribution Status
+                  </CardTitle>
+                  <CardDescription className="text-theme-text/60">
+                    Overview of all fund allocations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const now = Math.floor(Date.now() / 1000);
+                    const totalAllocated =
+                      poolDistributions.reduce(
+                        (sum, d) => sum + d.amountAllocated,
+                        0,
+                      ) / 1_000_000;
+                    const totalClaimed =
+                      poolDistributions.reduce(
+                        (sum, d) => sum + d.amountClaimed,
+                        0,
+                      ) / 1_000_000;
+                    const totalImmediate =
+                      poolDistributions.reduce(
+                        (sum, d) => sum + d.amountImmediate,
+                        0,
+                      ) / 1_000_000;
+                    const totalLocked =
+                      poolDistributions.reduce(
+                        (sum, d) => sum + d.amountLocked,
+                        0,
+                      ) / 1_000_000;
+                    const fullyClaimed = poolDistributions.filter(
+                      (d) => d.isFullyClaimed,
+                    ).length;
+                    const pendingClaim = poolDistributions.filter(
+                      (d) => !d.isFullyClaimed,
+                    ).length;
+                    const lockedDistributions = poolDistributions.filter(
+                      (d) =>
+                        d.unlockTime &&
+                        d.unlockTime > now &&
+                        !d.lockedClaimedAt,
+                    );
+                    const nextUnlock =
+                      lockedDistributions.length > 0
+                        ? Math.min(
+                            ...lockedDistributions.map((d) => d.unlockTime!),
+                          )
+                        : null;
+                    const timeToNextUnlock = nextUnlock ? nextUnlock - now : 0;
+                    const days = Math.floor(timeToNextUnlock / 86400);
+                    const hours = Math.floor((timeToNextUnlock % 86400) / 3600);
+
+                    return (
+                      <div className="space-y-4">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <p className="text-xs text-theme-text/60 mb-1">
+                              Total Allocated
+                            </p>
+                            <p className="text-xl font-bold text-theme-primary">
+                              ${totalAllocated.toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <p className="text-xs text-theme-text/60 mb-1">
+                              Total Claimed
+                            </p>
+                            <p className="text-xl font-bold text-green-500">
+                              ${totalClaimed.toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <p className="text-xs text-theme-text/60 mb-1">
+                              Immediate Funds
+                            </p>
+                            <p className="text-xl font-bold text-theme-text">
+                              ${totalImmediate.toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
+                            <p className="text-xs text-theme-text/60 mb-1">
+                              Locked Funds
+                            </p>
+                            <p className="text-xl font-bold text-yellow-500">
+                              ${totalLocked.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Claim Status */}
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500" />
+                            <span className="text-sm text-theme-text">
+                              {fullyClaimed} Fully Claimed
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                            <span className="text-sm text-theme-text">
+                              {pendingClaim} Pending Claim
+                            </span>
+                          </div>
+                          {lockedDistributions.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-orange-500" />
+                              <span className="text-sm text-theme-text">
+                                {lockedDistributions.length} Time-Locked
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Next Unlock Timer */}
+                        {nextUnlock && timeToNextUnlock > 0 && (
+                          <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-yellow-500">
+                                  ⏱️ Next Unlock
+                                </p>
+                                <p className="text-xs text-yellow-500/70 mt-1">
+                                  {formatDate(nextUnlock, true)}
+                                </p>
+                              </div>
+                              <div className="flex gap-3 text-center">
+                                {days > 0 && (
+                                  <div>
+                                    <p className="text-2xl font-bold text-yellow-500">
+                                      {days}
+                                    </p>
+                                    <p className="text-xs text-yellow-500/70">
+                                      days
+                                    </p>
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="text-2xl font-bold text-yellow-500">
+                                    {hours}
+                                  </p>
+                                  <p className="text-xs text-yellow-500/70">
+                                    hours
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Distributions List */}
             <Card className="bg-theme-card-bg border-theme-border">
               <CardHeader>
                 <CardTitle className="text-theme-text-highlight">
-                  Distributions
+                  Distribution History
                 </CardTitle>
                 <CardDescription className="text-theme-text/60">
-                  Fund allocations to beneficiaries
+                  Individual fund allocations to beneficiaries
                 </CardDescription>
               </CardHeader>
               <CardContent>

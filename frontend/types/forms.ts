@@ -155,7 +155,7 @@ export type FieldWorkerFormData = z.infer<typeof fieldWorkerFormSchema>;
 // Donation Form Schema
 export const donationFormSchema = z.object({
   amount: z.number().min(0.01, "Minimum donation is 0.01"),
-  token: z.enum(["USDC", "SOL"]),
+  token: z.string().min(1, "Token is required"),
   message: z.string().max(200).default(""),
   isAnonymous: z.boolean().default(false),
 });
@@ -163,24 +163,73 @@ export const donationFormSchema = z.object({
 export type DonationFormData = z.infer<typeof donationFormSchema>;
 
 // Fund Pool Form Schema
-export const fundPoolFormSchema = z.object({
-  poolId: z.string().min(1, "Pool ID is required").max(32),
-  disasterId: z.string().min(1, "Disaster ID is required").max(32),
-  name: z.string().min(1, "Name is required").max(100),
-  description: z.string().max(500).default(""),
-  distributionType: z.enum([
-    "Equal",
-    "WeightedFamily",
-    "WeightedDamage",
-    "Milestone",
-  ]),
-  eligibilityCriteria: z.string().max(500).default(""),
-  minimumFamilySize: z.number().min(1).optional(),
-  minimumDamageSeverity: z.number().min(1).max(10).optional(),
-  targetAmount: z.number().min(0).optional(),
-  timeLockDuration: z.number().min(0).optional(),
-  distributionPercentageImmediate: z.number().min(0).max(100).default(100),
-  distributionPercentageLocked: z.number().min(0).max(100).default(0),
-});
+export const fundPoolFormSchema = z
+  .object({
+    poolId: z
+      .string()
+      .min(1, "Pool ID is required")
+      .max(32, "Pool ID must be 32 characters or less")
+      .regex(
+        /^[a-z0-9-]+$/,
+        "Pool ID can only contain lowercase letters, numbers, and hyphens",
+      ),
+    disasterId: z
+      .string()
+      .min(1, "Please select a disaster event")
+      .max(32, "Disaster ID must be 32 characters or less"),
+    name: z
+      .string()
+      .min(1, "Pool name is required")
+      .max(100, "Pool name must be 100 characters or less"),
+    description: z
+      .string()
+      .max(500, "Description must be 500 characters or less")
+      .default(""),
+    distributionType: z.enum(["Equal", "WeightedFamily", "WeightedDamage"], {
+      message: "Please select a distribution type",
+    }),
+    tokenMint: z.string().min(1, "Please select a token"),
+    eligibilityCriteria: z
+      .string()
+      .max(500, "Eligibility criteria must be 500 characters or less")
+      .default(""),
+    minimumFamilySize: z
+      .number()
+      .min(1, "Minimum family size must be at least 1")
+      .optional(),
+    minimumDamageSeverity: z
+      .number()
+      .min(1, "Minimum damage severity must be at least 1")
+      .max(10, "Maximum damage severity is 10")
+      .optional(),
+    targetAmount: z
+      .number()
+      .min(0, "Target amount cannot be negative")
+      .optional(),
+    timeLockDuration: z
+      .number()
+      .min(0, "Time lock duration cannot be negative")
+      .optional(),
+    distributionPercentageImmediate: z
+      .number()
+      .min(0, "Immediate distribution must be between 0-100%")
+      .max(100, "Immediate distribution must be between 0-100%")
+      .default(100),
+    distributionPercentageLocked: z
+      .number()
+      .min(0, "Locked distribution must be between 0-100%")
+      .max(100, "Locked distribution must be between 0-100%")
+      .default(0),
+  })
+  .refine(
+    (data) =>
+      data.distributionPercentageImmediate +
+        data.distributionPercentageLocked ===
+      100,
+    {
+      message: "Immediate and locked distribution must add up to 100%",
+      path: ["distributionPercentageLocked"],
+    },
+  );
 
 export type FundPoolFormData = z.infer<typeof fundPoolFormSchema>;

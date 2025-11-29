@@ -225,6 +225,9 @@ export interface FundPool {
   minimumDamageSeverity: number | null;
   targetAmount: number | null;
   description: string;
+  registrationLocked: boolean;
+  expectedBeneficiaryCount: number | null;
+  registeredBeneficiaryCount: number;
   bump: number;
 }
 
@@ -245,6 +248,10 @@ export interface Distribution {
   allocationWeight: number;
   notes: string;
   bump: number;
+  // Expiration fields
+  claimDeadline: number | null;
+  isExpired: boolean;
+  expiredAt: number | null;
 }
 
 // Donation Record
@@ -266,5 +273,16 @@ export interface DonationRecord {
   donorName: string | null;
   donorEmail: string | null;
   receiptSent: boolean;
+  bump: number;
+}
+
+// Pool Registration
+export interface PoolRegistration {
+  publicKey: PublicKey;
+  pool: PublicKey;
+  beneficiary: PublicKey;
+  allocationWeight: number;
+  registeredAt: number;
+  isDistributed: boolean;
   bump: number;
 }

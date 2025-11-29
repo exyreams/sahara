@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { EmergencyPauseToggle } from "@/components/admin/emergency-pause-toggle";
 import { PlatformConfigForm } from "@/components/admin/platform-config-form";
+import { TokenManagement } from "@/components/admin/token-management";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -472,12 +473,15 @@ export default function AdminSettingsPage() {
         onValueChange={handleTabChange}
         className="space-y-6"
       >
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="administration" className="cursor-pointer">
             Administration
           </TabsTrigger>
           <TabsTrigger value="configuration" className="cursor-pointer">
             Configuration
+          </TabsTrigger>
+          <TabsTrigger value="tokens" className="cursor-pointer">
+            Token Management
           </TabsTrigger>
         </TabsList>
 
@@ -809,6 +813,17 @@ export default function AdminSettingsPage() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Tokens Tab */}
+        <TabsContent value="tokens" className="space-y-6">
+          <TokenManagement
+            config={config}
+            isRefreshing={isRefreshing}
+            onSuccess={() => {
+              refetch();
+            }}
+          />
         </TabsContent>
       </Tabs>
     </>

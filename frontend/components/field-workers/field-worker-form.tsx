@@ -2,8 +2,8 @@
 
 import { BN } from "@coral-xyz/anchor";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -126,7 +126,7 @@ export function FieldWorkerForm({
             throw error;
           }
           throw new Error(
-            "NGO account not found. Please register your NGO first."
+            "NGO account not found. Please register your NGO first.",
           );
         }
 
@@ -149,7 +149,7 @@ export function FieldWorkerForm({
               wallet.publicKey.toBuffer(),
               timestampBuffer,
             ],
-            program.programId
+            program.programId,
           );
 
           const updateParams = {
@@ -178,7 +178,7 @@ export function FieldWorkerForm({
             // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
             await (program.account as any).fieldWorker.fetch(fieldWorkerPDA);
             throw new Error(
-              "A field worker with this wallet address is already registered"
+              "A field worker with this wallet address is already registered",
             );
           } catch (error) {
             // If account doesn't exist, that's good - we can proceed
@@ -225,7 +225,7 @@ export function FieldWorkerForm({
             }
             if (error instanceof Error) {
               throw new Error(
-                `Failed to register field worker: ${error.message}`
+                `Failed to register field worker: ${error.message}`,
               );
             }
             throw error;
@@ -247,7 +247,7 @@ export function FieldWorkerForm({
           }
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -392,8 +392,8 @@ export function FieldWorkerForm({
                                   ? field.onChange([...field.value, district])
                                   : field.onChange(
                                       field.value?.filter(
-                                        (value: string) => value !== district
-                                      )
+                                        (value: string) => value !== district,
+                                      ),
                                     );
                               }}
                             />
@@ -445,8 +445,8 @@ export function FieldWorkerForm({
               ? "Updating..."
               : "Registering..."
             : isEditMode
-            ? "Update Field Worker"
-            : "Register Field Worker"}
+              ? "Update Field Worker"
+              : "Register Field Worker"}
         </Button>
       </form>
     </Form>

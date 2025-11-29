@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import BN from "bn.js";
 import { AlertTriangle } from "lucide-react";
 import * as React from "react";
@@ -61,7 +61,7 @@ export function BeneficiaryForm({
   const { disasters } = useDisasters();
   const queryClient = useQueryClient();
   const [isFieldWorker, setIsFieldWorker] = React.useState<boolean | null>(
-    null
+    null,
   );
 
   // Check if user is a field worker
@@ -194,7 +194,7 @@ export function BeneficiaryForm({
             .updateBeneficiary(
               beneficiary.authority,
               beneficiary.disasterId,
-              params
+              params,
             )
             .accounts({
               beneficiary: beneficiary.publicKey,
@@ -213,7 +213,7 @@ export function BeneficiaryForm({
 
             onSuccess?.();
           },
-        }
+        },
       );
       return;
     }
@@ -229,7 +229,7 @@ export function BeneficiaryForm({
           beneficiaryAuthority = new PublicKey(data.walletAddress);
         } catch (_error) {
           throw new Error(
-            "Invalid wallet address. Please enter a valid Solana wallet address."
+            "Invalid wallet address. Please enter a valid Solana wallet address.",
           );
         }
 
@@ -237,16 +237,15 @@ export function BeneficiaryForm({
         try {
           const beneficiaryAccountInfo =
             await program.provider.connection.getAccountInfo(
-              beneficiaryAuthority
+              beneficiaryAuthority,
             );
           if (!beneficiaryAccountInfo) {
             throw new Error(
-              "Beneficiary wallet address does not exist on the blockchain. The wallet must be created first (by receiving SOL or tokens)."
+              "Beneficiary wallet address does not exist on the blockchain. The wallet must be created first (by receiving SOL or tokens).",
             );
           }
-          const balance = await program.provider.connection.getBalance(
-            beneficiaryAuthority
-          );
+          const balance =
+            await program.provider.connection.getBalance(beneficiaryAuthority);
           console.log("Beneficiary wallet balance:", balance / 1e9, "SOL");
           if (balance === 0) {
             console.warn("Warning: Beneficiary wallet has 0 SOL balance");
@@ -268,20 +267,20 @@ export function BeneficiaryForm({
         try {
           // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
           fieldWorkerAccount = await (program.account as any).fieldWorker.fetch(
-            fieldWorkerPDA
+            fieldWorkerPDA,
           );
           console.log("Field Worker Account:", fieldWorkerAccount);
         } catch (error) {
           console.error("Field Worker fetch error:", error);
           throw new Error(
-            "Field worker account not found. Please register as a field worker first."
+            "Field worker account not found. Please register as a field worker first.",
           );
         }
 
         // Check if field worker is active
         if (!fieldWorkerAccount.isActive) {
           throw new Error(
-            "Your field worker account is not active. Please contact your NGO administrator."
+            "Your field worker account is not active. Please contact your NGO administrator.",
           );
         }
 
@@ -290,26 +289,26 @@ export function BeneficiaryForm({
           try {
             // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
             const ngoAccount = await (program.account as any).ngo.fetch(
-              fieldWorkerAccount.ngo
+              fieldWorkerAccount.ngo,
             );
             console.log("NGO Account:", ngoAccount);
 
             if (!ngoAccount.isVerified) {
               throw new Error(
-                "Your NGO is not verified. Only verified NGOs can register beneficiaries."
+                "Your NGO is not verified. Only verified NGOs can register beneficiaries.",
               );
             }
           } catch (error) {
             console.error("NGO fetch error:", error);
             throw new Error(
-              "Field worker's NGO account not found. Please contact your administrator."
+              "Field worker's NGO account not found. Please contact your administrator.",
             );
           }
         }
 
         const [beneficiaryPDA] = deriveBeneficiaryPDA(
           beneficiaryAuthority,
-          data.disasterId
+          data.disasterId,
         );
         const [disasterPDA] = deriveDisasterPDA(data.disasterId);
         const [configPDA] = derivePlatformConfigPDA();
@@ -320,19 +319,19 @@ export function BeneficiaryForm({
         try {
           // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
           disasterAccount = await (program.account as any).disasterEvent.fetch(
-            disasterPDA
+            disasterPDA,
           );
           console.log("Disaster Account:", disasterAccount);
         } catch (error) {
           console.error("Disaster fetch error:", error);
           throw new Error(
-            `Disaster "${data.disasterId}" not found on blockchain. Please select a valid disaster.`
+            `Disaster "${data.disasterId}" not found on blockchain. Please select a valid disaster.`,
           );
         }
 
         if (!disasterAccount.isActive) {
           throw new Error(
-            `Disaster "${data.disasterId}" is not active. Please select an active disaster.`
+            `Disaster "${data.disasterId}" is not active. Please select an active disaster.`,
           );
         }
 
@@ -343,7 +342,7 @@ export function BeneficiaryForm({
         } catch (error) {
           console.error("Platform config fetch error:", error);
           throw new Error(
-            "Platform configuration not found. Please contact the administrator."
+            "Platform configuration not found. Please contact the administrator.",
           );
         }
 
@@ -354,7 +353,7 @@ export function BeneficiaryForm({
             (program.account as any).beneficiary.fetch(beneficiaryPDA);
           if (existingBeneficiary) {
             throw new Error(
-              `A beneficiary with this wallet address already exists for disaster "${data.disasterId}".`
+              `A beneficiary with this wallet address already exists for disaster "${data.disasterId}".`,
             );
           }
         } catch (error) {
@@ -370,15 +369,15 @@ export function BeneficiaryForm({
         const timestamp = Math.floor(Date.now() / 1000);
         const [activityLogPDA] = deriveActivityLogPDA(
           wallet.publicKey,
-          timestamp
+          timestamp,
         );
         const [phoneRegistryPDA] = derivePhoneRegistryPDA(
           data.disasterId,
-          data.phone
+          data.phone,
         );
         const [nationalIdRegistryPDA] = deriveNationalIdRegistryPDA(
           data.disasterId,
-          data.nationalId
+          data.nationalId,
         );
 
         console.log("All accounts verified. Proceeding with registration...");
@@ -390,7 +389,7 @@ export function BeneficiaryForm({
         console.log("Phone Registry PDA:", phoneRegistryPDA.toString());
         console.log(
           "National ID Registry PDA:",
-          nationalIdRegistryPDA.toString()
+          nationalIdRegistryPDA.toString(),
         );
 
         const params = {
@@ -431,8 +430,8 @@ export function BeneficiaryForm({
               payer: wallet.publicKey.toString(),
             },
             null,
-            2
-          )
+            2,
+          ),
         );
 
         // If field worker has an NGO, we need to pass the NGO PDA as a remaining account
@@ -441,7 +440,7 @@ export function BeneficiaryForm({
           // The field worker's 'ngo' field is already the NGO PDA
           console.log(
             "Adding NGO PDA as remaining account:",
-            fieldWorkerAccount.ngo.toString()
+            fieldWorkerAccount.ngo.toString(),
           );
           remainingAccounts.push({
             pubkey: fieldWorkerAccount.ngo,
@@ -474,7 +473,7 @@ export function BeneficiaryForm({
           console.error("Transaction error:", error);
           console.error(
             "Error logs:",
-            error instanceof Error ? error : "Unknown error"
+            error instanceof Error ? error : "Unknown error",
           );
           throw error;
         }
@@ -488,7 +487,7 @@ export function BeneficiaryForm({
           form.reset();
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -907,8 +906,8 @@ export function BeneficiaryForm({
               ? "Updating..."
               : "Registering..."
             : isEditMode
-            ? "Update Beneficiary"
-            : "Register Beneficiary"}
+              ? "Update Beneficiary"
+              : "Register Beneficiary"}
         </Button>
       </form>
     </Form>

@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { useQueryClient } from "@tanstack/react-query";
-import { SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { Sparkles } from "lucide-react";
 import { useCallback, useEffect } from "react";
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAllowedTokens } from "@/hooks/use-allowed-tokens";
 import { useDisasters } from "@/hooks/use-disasters";
 import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
@@ -58,6 +59,8 @@ export function PoolForm({
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
   const { disasters } = useDisasters();
+  const { tokens: allowedTokens, isLoading: isTokensLoading } =
+    useAllowedTokens();
   const queryClient = useQueryClient();
 
   const isEditMode = mode === "edit" && !!pool;
@@ -65,15 +68,31 @@ export function PoolForm({
   // Filter only active disasters
   const activeDisasters = disasters.filter((d) => d.isActive);
 
+  // Map distribution type for edit mode (handle legacy Milestone as Equal)
+  const getDistributionType = (
+    type: string,
+  ): "Equal" | "WeightedFamily" | "WeightedDamage" => {
+    if (type === "WeightedFamily" || type === "WeightedDamage") {
+      return type;
+    }
+    return "Equal"; // Default for Equal or legacy Milestone
+  };
+
+  // Get default token mint (first allowed token or empty)
+  const defaultTokenMint =
+    allowedTokens.length > 0 ? allowedTokens[0].mintAddress : "";
+
   const form = useForm({
     resolver: zodResolver(fundPoolFormSchema),
+    mode: "onBlur",
     defaultValues: isEditMode
       ? {
           poolId: pool.poolId,
           disasterId: pool.disasterId,
           name: pool.name,
           description: pool.description,
-          distributionType: pool.distributionType,
+          distributionType: getDistributionType(pool.distributionType),
+          tokenMint: pool.tokenMint.toBase58(),
           eligibilityCriteria: pool.eligibilityCriteria,
           distributionPercentageImmediate: pool.distributionPercentageImmediate,
           distributionPercentageLocked: pool.distributionPercentageLocked,
@@ -86,12 +105,24 @@ export function PoolForm({
           disasterId: disasterId || "",
           name: "",
           description: "",
-          distributionType: "Equal",
+          distributionType: "Equal" as const,
+          tokenMint: "",
           eligibilityCriteria: "",
           distributionPercentageImmediate: 100,
           distributionPercentageLocked: 0,
         },
   });
+
+  // Set default token when allowed tokens load
+  useEffect(() => {
+    if (
+      !isEditMode &&
+      allowedTokens.length > 0 &&
+      !form.getValues("tokenMint")
+    ) {
+      form.setValue("tokenMint", allowedTokens[0].mintAddress);
+    }
+  }, [allowedTokens, form, isEditMode]);
 
   const onSubmit = async (data: FundPoolFormData) => {
     if (!program || !wallet.publicKey) return;
@@ -126,26 +157,33 @@ export function PoolForm({
         // Generate timestamp for activity log
         const timestamp = Math.floor(Date.now() / 1000);
 
-        // Get platform config to get USDC mint
+        // Get platform config
         const [platformConfigPDA] = derivePlatformConfigPDA();
-        const platformConfig =
-          await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
-          (program.account as any).platformConfig.fetch(platformConfigPDA);
+
+        // Use the selected token mint from the form
+        const selectedTokenMint = new PublicKey(data.tokenMint);
 
         // Derive PDAs
         const [poolPDA] = deriveFundPoolPDA(data.disasterId, data.poolId);
         const [poolTokenAccountPDA] = derivePoolTokenAccountPDA(
           data.disasterId,
-          data.poolId
+          data.poolId,
         );
         const [disasterPDA] = deriveDisasterPDA(data.disasterId);
         const [ngoPDA] = deriveNGOPDA(walletPubkey);
         const [activityLogPDA] = deriveActivityLogPDA(walletPubkey, timestamp);
 
         // Build instruction params
+        // Convert distribution type to Anchor enum format (camelCase)
+        const distributionTypeMap: Record<string, object> = {
+          Equal: { equal: {} },
+          WeightedFamily: { weightedFamily: {} },
+          WeightedDamage: { weightedDamage: {} },
+        };
+
         const params = {
           name: data.name.trim(),
-          distributionType: { [data.distributionType.toLowerCase()]: {} }, // Convert to lowercase for enum
+          distributionType: distributionTypeMap[data.distributionType],
           timeLockDuration: data.timeLockDuration
             ? new BN(data.timeLockDuration)
             : null,
@@ -167,7 +205,7 @@ export function PoolForm({
             data.disasterId,
             data.poolId,
             new BN(timestamp),
-            params
+            params,
           )
           .accounts({
             pool: poolPDA,
@@ -175,7 +213,7 @@ export function PoolForm({
             disaster: disasterPDA,
             ngo: ngoPDA,
             config: platformConfigPDA,
-            tokenMint: platformConfig.usdcMint,
+            tokenMint: selectedTokenMint,
             activityLog: activityLogPDA,
             ngoAuthority: walletPubkey,
             payer: walletPubkey,
@@ -199,7 +237,7 @@ export function PoolForm({
           }
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -228,7 +266,6 @@ export function PoolForm({
       Equal: "equal",
       WeightedFamily: "family",
       WeightedDamage: "damage",
-      Milestone: "milestone",
     };
     const distType = distTypeMap[distributionType] || "pool";
 
@@ -308,6 +345,42 @@ export function PoolForm({
                     {DISTRIBUTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="tokenMint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Token</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isTokensLoading || isEditMode}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          isTokensLoading ? "Loading tokens..." : "Select token"
+                        }
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {allowedTokens.map((token) => (
+                      <SelectItem
+                        key={token.mintAddress}
+                        value={token.mintAddress}
+                      >
+                        {token.symbol} - {token.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -421,7 +494,21 @@ export function PoolForm({
                     min={0}
                     max={100}
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const value = Math.min(
+                        100,
+                        Math.max(0, Number(e.target.value) || 0),
+                      );
+                      field.onChange(value);
+                      // Auto-adjust locked percentage
+                      form.setValue(
+                        "distributionPercentageLocked",
+                        100 - value,
+                        {
+                          shouldValidate: true,
+                        },
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -441,7 +528,21 @@ export function PoolForm({
                     min={0}
                     max={100}
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const value = Math.min(
+                        100,
+                        Math.max(0, Number(e.target.value) || 0),
+                      );
+                      field.onChange(value);
+                      // Auto-adjust immediate percentage
+                      form.setValue(
+                        "distributionPercentageImmediate",
+                        100 - value,
+                        {
+                          shouldValidate: true,
+                        },
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -467,7 +568,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
+                        e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
                   />
@@ -493,7 +594,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
+                        e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
                   />
@@ -509,27 +610,34 @@ export function PoolForm({
           <FormField
             control={form.control}
             name="targetAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Target Amount (USDC, Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    placeholder="e.g., 10000"
-                    {...field}
-                    value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const selectedTokenMint = form.watch("tokenMint");
+              const selectedToken = allowedTokens.find(
+                (t) => t.mintAddress === selectedTokenMint,
+              );
+              const tokenSymbol = selectedToken?.symbol || "Token";
+              return (
+                <FormItem>
+                  <FormLabel>Target Amount ({tokenSymbol}, Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder="e.g., 10000"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
@@ -547,7 +655,7 @@ export function PoolForm({
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
+                        e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
                   />
@@ -589,8 +697,8 @@ export function PoolForm({
               ? "Updating..."
               : "Creating..."
             : isEditMode
-            ? "Update Fund Pool"
-            : "Create Fund Pool"}
+              ? "Update Fund Pool"
+              : "Create Fund Pool"}
         </Button>
       </form>
     </Form>

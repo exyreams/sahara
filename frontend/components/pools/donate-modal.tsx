@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { DonationForm } from "@/components/donations/donation-form";
 import { DonationIcon } from "@/components/icons/donation-icon";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useProgram } from "@/hooks/use-program";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import type { FundPool } from "@/types/program";
 
 interface DonateModalProps {
@@ -25,6 +27,10 @@ interface DonateModalProps {
 export function DonateModal({ pool, onSuccess }: DonateModalProps) {
   const [open, setOpen] = useState(false);
   const { wallet } = useProgram();
+  const { data: tokenMetadata } = useTokenMetadata(pool.tokenMint.toBase58());
+
+  const tokenSymbol = tokenMetadata?.symbol || "Token";
+  const tokenName = tokenMetadata?.name || "Unknown Token";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -46,10 +52,20 @@ export function DonateModal({ pool, onSuccess }: DonateModalProps) {
         </Button>
 
         <DialogHeader>
-          <DialogTitle>Make a Donation</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Make a Donation
+            <Badge variant="secondary" className="text-xs font-normal">
+              {tokenSymbol}
+            </Badge>
+          </DialogTitle>
           <DialogDescription>
-            Support this relief effort by donating to the fund pool. Your
-            donation will be recorded on the blockchain for full transparency.
+            Support this relief effort by donating to the fund pool. This pool
+            accepts{" "}
+            <span className="font-medium text-foreground">
+              {tokenName} ({tokenSymbol})
+            </span>
+            . Your donation will be recorded on the blockchain for full
+            transparency.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
@@ -72,6 +88,7 @@ export function DonateModal({ pool, onSuccess }: DonateModalProps) {
               recipientType="pool"
               disasterId={pool.disasterId}
               poolId={pool.poolId}
+              tokenMint={pool.tokenMint.toBase58()}
               onSuccess={() => {
                 setOpen(false);
                 onSuccess?.();

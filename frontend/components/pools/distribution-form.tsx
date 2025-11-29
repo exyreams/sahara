@@ -1,7 +1,7 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { SystemProgram } from "@solana/web3.js";
+import { useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -50,33 +50,95 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
   const availableFunds =
     (pool.totalDeposited - pool.totalDistributed) / 1_000_000; // Convert from microUSDC
 
-  // Filter verified beneficiaries for this disaster and check for existing distributions
+  // Get distribution type as string (it's already a string from the hook)
+  const distributionType = (pool.distributionType as string).toLowerCase() as
+    | "equal"
+    | "weightedfamily"
+    | "weighteddamage";
+
+  // Calculate allocation for each beneficiary based on distribution type
+  const calculateAllocation = (
+    beneficiary: Beneficiary,
+    allBeneficiaries: BeneficiaryAllocation[],
+  ): { amount: number; weight: number; percentage: number } => {
+    const eligibleBeneficiaries = allBeneficiaries.filter(
+      (a) => !a.hasDistribution,
+    );
+    if (eligibleBeneficiaries.length === 0) {
+      return { amount: 0, weight: 0, percentage: 0 };
+    }
+
+    let weight: number;
+    let totalWeight: number;
+
+    // Check distribution type (case-insensitive)
+    if (distributionType === "weightedfamily") {
+      weight = beneficiary.familySize;
+      totalWeight = eligibleBeneficiaries.reduce(
+        (sum, a) => sum + a.beneficiary.familySize,
+        0,
+      );
+    } else if (distributionType === "weighteddamage") {
+      weight = beneficiary.damageSeverity;
+      totalWeight = eligibleBeneficiaries.reduce(
+        (sum, a) => sum + a.beneficiary.damageSeverity,
+        0,
+      );
+    } else {
+      // Equal distribution (default)
+      weight = 1;
+      totalWeight = eligibleBeneficiaries.length;
+    }
+
+    const percentage = totalWeight > 0 ? (weight / totalWeight) * 100 : 0;
+    const amount =
+      totalWeight > 0 ? (availableFunds * weight) / totalWeight : 0;
+
+    return { amount, weight, percentage };
+  };
+
+  // Filter REGISTERED beneficiaries for this pool and check for existing distributions
   useEffect(() => {
-    const loadBeneficiaries = async () => {
+    const loadRegisteredBeneficiaries = async () => {
       if (!loadingBeneficiaries && program) {
-        const eligibleBeneficiaries = beneficiaries.filter(
-          (b) =>
-            b.disasterId === pool.disasterId &&
-            b.verificationStatus === "Verified" &&
-            (!pool.minimumFamilySize ||
-              b.familySize >= pool.minimumFamilySize) &&
-            (!pool.minimumDamageSeverity ||
-              b.damageSeverity >= pool.minimumDamageSeverity)
+        const [poolPDA] = deriveFundPoolPDA(pool.disasterId, pool.poolId);
+
+        // Fetch all pool registrations for this pool
+        const registrationAccounts = await (
+          program.account as any
+        ).poolRegistration.all([
+          {
+            memcmp: {
+              offset: 8, // After discriminator
+              bytes: poolPDA.toBase58(),
+            },
+          },
+        ]);
+
+        // Get registered beneficiary public keys
+        const registeredBeneficiaryKeys = new Set(
+          registrationAccounts.map((r: any) =>
+            r.account.beneficiary.toBase58(),
+          ),
+        );
+
+        // Filter beneficiaries to only those registered for this pool
+        const registeredBeneficiaries = beneficiaries.filter((b) =>
+          registeredBeneficiaryKeys.has(b.publicKey.toBase58()),
         );
 
         // Check which beneficiaries already have distributions
-        const [poolPDA] = deriveFundPoolPDA(pool.disasterId, pool.poolId);
         const allocationsWithStatus = await Promise.all(
-          eligibleBeneficiaries.map(async (b) => {
+          registeredBeneficiaries.map(async (b) => {
             const [distributionPDA] = deriveDistributionPDA(
               b.authority,
-              poolPDA
+              poolPDA,
             );
 
             try {
               const accountInfo =
                 await program.provider.connection.getAccountInfo(
-                  distributionPDA
+                  distributionPDA,
                 );
               return {
                 beneficiary: b,
@@ -90,19 +152,19 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                 hasDistribution: false,
               };
             }
-          })
+          }),
         );
 
         setAllocations(allocationsWithStatus);
       }
     };
 
-    loadBeneficiaries();
+    loadRegisteredBeneficiaries();
   }, [beneficiaries, loadingBeneficiaries, pool, program]);
 
   const handleSelectChange = (index: number, checked: boolean) => {
     setAllocations((prev) =>
-      prev.map((a, i) => (i === index ? { ...a, selected: checked } : a))
+      prev.map((a, i) => (i === index ? { ...a, selected: checked } : a)),
     );
   };
 
@@ -111,8 +173,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
     const allSelected = selectableAllocations.every((a) => a.selected);
     setAllocations((prev) =>
       prev.map((a) =>
-        a.hasDistribution ? a : { ...a, selected: !allSelected }
-      )
+        a.hasDistribution ? a : { ...a, selected: !allSelected },
+      ),
     );
   };
 
@@ -141,8 +203,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         `Warning: With ${formatAmount(availableFunds)} USDC available and ${
           selectedAllocations.length
         } beneficiaries selected, each would receive approximately ${formatAmount(
-          estimatedPerBeneficiary
-        )} USDC.\n\nThis may be too small. Do you want to continue?`
+          estimatedPerBeneficiary,
+        )} USDC.\n\nThis may be too small. Do you want to continue?`,
       );
       if (!confirmed) return;
     }
@@ -163,11 +225,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         for (const allocation of selectedAllocations) {
           const [beneficiaryPDA] = deriveBeneficiaryPDA(
             allocation.beneficiary.authority,
-            pool.disasterId
+            pool.disasterId,
           );
           const [distributionPDA] = deriveDistributionPDA(
             allocation.beneficiary.authority,
-            poolPDA
+            poolPDA,
           );
 
           // Check if distribution already exists by trying to fetch account info
@@ -176,7 +238,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
               await program.provider.connection.getAccountInfo(distributionPDA);
             if (accountInfo) {
               console.log(
-                `Distribution already exists for ${allocation.beneficiary.name}`
+                `Distribution already exists for ${allocation.beneficiary.name}`,
               );
               skipped.push(allocation.beneficiary.name);
               continue;
@@ -206,7 +268,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           } catch (err) {
             console.error(
               `Failed to create distribution for ${allocation.beneficiary.name}:`,
-              err
+              err,
             );
             const errorMessage =
               err instanceof Error ? err.message : "Unknown error";
@@ -234,11 +296,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         if (signatures.length === 0) {
           if (skipped.length > 0 && failed.length === 0) {
             throw new Error(
-              `All selected beneficiaries already have distributions for this pool.`
+              `All selected beneficiaries already have distributions for this pool.`,
             );
           } else {
             throw new Error(
-              `Failed to create distributions:\n${failed.join("\n")}`
+              `Failed to create distributions:\n${failed.join("\n")}`,
             );
           }
         }
@@ -263,11 +325,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           // biome-ignore lint/suspicious/noExplicitAny: Cleaning up window temporary storage
           delete (window as any).__distributionResult;
           setAllocations((prev) =>
-            prev.map((a) => ({ ...a, selected: false }))
+            prev.map((a) => ({ ...a, selected: false })),
           );
           onSuccess?.();
         },
-      }
+      },
     );
   };
 
@@ -288,10 +350,13 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-semibold text-theme-text-highlight mb-2">
-          No Eligible Beneficiaries
+          No Registered Beneficiaries
         </h3>
         <p className="text-sm text-muted-foreground">
-          There are no verified beneficiaries eligible for this pool
+          No beneficiaries have been registered to this pool yet.
+          <br />
+          Register beneficiaries first, then lock registration before
+          distributing.
         </p>
       </div>
     );
@@ -305,7 +370,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         a.beneficiary.authority
           .toBase58()
           .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+          .includes(searchQuery.toLowerCase()),
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -341,8 +406,12 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         </div>
         <div className="p-4 rounded-lg bg-theme-background border border-theme-border">
           <p className="text-xs text-theme-text/60 mb-1">Distribution Type</p>
-          <p className="text-2xl font-bold text-theme-text capitalize">
-            {Object.keys(pool.distributionType)[0]}
+          <p className="text-2xl font-bold text-theme-text">
+            {pool.distributionType === "WeightedFamily"
+              ? "By Family"
+              : pool.distributionType === "WeightedDamage"
+                ? "By Damage"
+                : "Equal"}
           </p>
         </div>
       </div>
@@ -359,9 +428,29 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           approximately {formatAmount(availableFunds / selectedCount)} USDC.
         </div>
       ) : (
-        <div className="bg-blue-500/10 text-blue-500 p-3 rounded-md text-sm">
-          Amounts will be calculated automatically based on the pool's
-          distribution type and rules
+        <div className="bg-theme-primary/10 text-theme-primary p-3 rounded-md text-sm">
+          {distributionType === "equal" && (
+            <>
+              <span className="font-semibold">Equal Distribution:</span> Each
+              beneficiary receives an equal share of the pool funds.
+            </>
+          )}
+          {distributionType === "weightedfamily" && (
+            <>
+              <span className="font-semibold">Weighted by Family Size:</span>{" "}
+              Larger families receive proportionally more funds based on their
+              family size.
+            </>
+          )}
+          {distributionType === "weighteddamage" && (
+            <>
+              <span className="font-semibold">
+                Weighted by Damage Severity:
+              </span>{" "}
+              Beneficiaries with higher damage severity receive proportionally
+              more funds.
+            </>
+          )}
         </div>
       )}
 
@@ -370,8 +459,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-theme-text-highlight">
-              Eligible Beneficiaries (
-              {allocations.filter((a) => !a.hasDistribution).length} available)
+              Registered Beneficiaries (
+              {allocations.filter((a) => !a.hasDistribution).length} pending)
             </h3>
             <p className="text-sm text-muted-foreground">
               {allocations.filter((a) => a.hasDistribution).length > 0 && (
@@ -421,14 +510,18 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
           {filteredAllocations.map((allocation) => {
             const index = allocations.findIndex((a) =>
-              a.beneficiary.publicKey.equals(allocation.beneficiary.publicKey)
+              a.beneficiary.publicKey.equals(allocation.beneficiary.publicKey),
             );
             const isDisabled = allocation.hasDistribution;
+            const { amount, weight, percentage } = calculateAllocation(
+              allocation.beneficiary,
+              allocations,
+            );
 
             return (
               <div
                 key={allocation.beneficiary.publicKey.toString()}
-                className={`flex items-center gap-4 p-3 border rounded-lg transition-all ${
+                className={`flex items-center gap-4 p-4 border rounded-lg transition-all ${
                   isDisabled
                     ? "border-theme-border/50 bg-theme-background/30 opacity-60 cursor-not-allowed"
                     : "border-theme-border hover:border-theme-primary/50"
@@ -444,7 +537,7 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                   onCheckedChange={(checked) => {
                     if (isDisabled) {
                       alert(
-                        `${allocation.beneficiary.name} has already received a distribution from this pool and cannot receive another one.`
+                        `${allocation.beneficiary.name} has already received a distribution from this pool and cannot receive another one.`,
                       );
                       return;
                     }
@@ -473,15 +566,46 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                   <p className="text-sm text-muted-foreground font-mono break-all">
                     {allocation.beneficiary.authority.toBase58()}
                   </p>
-                  <div className="flex gap-2 mt-1">
-                    <Badge variant="outline" className="text-xs">
-                      Family: {allocation.beneficiary.familySize}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      Damage: {allocation.beneficiary.damageSeverity}/10
-                    </Badge>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {distributionType === "weightedfamily" ? (
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-theme-primary/10 text-theme-primary border-theme-primary/30"
+                      >
+                        Family Size: {allocation.beneficiary.familySize}{" "}
+                        (Weight)
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        Family: {allocation.beneficiary.familySize}
+                      </Badge>
+                    )}
+                    {distributionType === "weighteddamage" ? (
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-theme-primary/10 text-theme-primary border-theme-primary/30"
+                      >
+                        Damage: {allocation.beneficiary.damageSeverity}/10
+                        (Weight)
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        Damage: {allocation.beneficiary.damageSeverity}/10
+                      </Badge>
+                    )}
                   </div>
                 </div>
+                {/* Allocation Preview */}
+                {!isDisabled && availableFunds > 0 && (
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-bold text-theme-primary">
+                      {formatAmount(amount)} USDC
+                    </p>
+                    <p className="text-xs text-theme-text/60">
+                      {percentage.toFixed(1)}% of pool
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}

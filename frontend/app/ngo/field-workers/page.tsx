@@ -112,7 +112,7 @@ export default function FieldWorkersPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from(
             { length: 6 },
-            (_, i) => `field-worker-card-skeleton-${i}`
+            (_, i) => `field-worker-card-skeleton-${i}`,
           ).map((key) => (
             <Card key={key} className="bg-theme-card-bg border-theme-border">
               <CardHeader>
@@ -385,8 +385,8 @@ export default function FieldWorkersPage() {
                 {searchQuery || statusFilters.length > 0
                   ? "Try adjusting your filters"
                   : ngo.isVerified
-                  ? "Register your first field worker to start verifying beneficiaries"
-                  : "Wait for NGO verification to register field workers"}
+                    ? "Register your first field worker to start verifying beneficiaries"
+                    : "Wait for NGO verification to register field workers"}
               </CardDescription>
               {ngo.isVerified && !searchQuery && statusFilters.length === 0 && (
                 <div className="flex justify-center">

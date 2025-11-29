@@ -84,6 +84,12 @@ export function usePools(): UsePoolsReturn {
             ? account.account.targetAmount.toNumber()
             : null,
           description: account.account.description,
+          registrationLocked: account.account.registrationLocked,
+          expectedBeneficiaryCount: account.account.expectedBeneficiaryCount
+            ? account.account.expectedBeneficiaryCount
+            : null,
+          registeredBeneficiaryCount:
+            account.account.registeredBeneficiaryCount,
           bump: account.account.bump,
         }),
       );
