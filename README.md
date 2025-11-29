@@ -22,7 +22,6 @@
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
-- [Known Bugs & Limitations](#known-bugs--limitations)
 - [Contributing](#contributing)
 - [Code of Conduct](#code-of-conduct)
 - [License](#license)
@@ -408,38 +407,12 @@ sahara/
 ├── assets/                   # Project assets
 ├── CODE_OF_CONDUCT.md        # Community guidelines
 ├── CONTRIBUTING.md           # Contribution guidelines
-├── Issues.md                 # Known issues documentation
 ├── LICENSE                   # MIT License
 ├── README.md                 # Project documentation
 └── SETUP.md                  # Setup instructions
 ```
 
 </details>
-
-## Known Bugs & Limitations
-
-### Current Known Issues
-
-1. **Distribution Calculation Bug**: The current implementation has a critical bug with weighted distribution calculations when beneficiaries are added incrementally. This can cause incorrect fund allocations and negative pool balances. For production use, we recommend:
-
-   - Using Equal distribution type for most reliable results
-   - Pre-registering all beneficiaries before creating distributions
-   - Testing distribution calculations thoroughly before mainnet deployment
-   - See [Issues.md](Issues.md) for technical details
-
-2. **Pool Editing Restrictions**: Once a pool has distributions, certain fields (distribution type, eligibility criteria, percentages) should not be modified. UI validation for this is pending implementation.
-
-3. **Partial Claim Logic**: The claim function may fail when trying to claim only the immediate portion before the time lock expires. This needs to be fixed to allow partial claims.
-
-4. **Devnet Only**: Currently deployed on Solana Devnet for testing. Mainnet deployment requires additional security audits and bug fixes.
-
-### Security Considerations
-
-- **Smart Contract Audits**: Not yet audited - use at your own risk
-- **Test Thoroughly**: Always test on Devnet before mainnet deployment
-- **Private Keys**: Never share private keys or use test keys on mainnet
-- **Fund Safety**: Start with small amounts when testing distributions
-- **Known Bugs**: Review the bugs document before using in production
 
 ## Contributing
 
