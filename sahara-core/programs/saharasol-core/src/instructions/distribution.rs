@@ -201,7 +201,7 @@ pub fn handler(
 }
 
 #[derive(Accounts)]
-#[instruction(disaster_id: String, pool_id: String)]
+#[instruction(disaster_id: String, pool_id: String, timestamp: i64)]
 pub struct ClaimDistribution<'info> {
     #[account(
         mut,
@@ -223,7 +223,7 @@ pub struct ClaimDistribution<'info> {
             b"activity",
             pool.key().as_ref(),
             beneficiary.key().as_ref(),
-            b"claim"
+            &timestamp.to_le_bytes()
         ],
         bump
     )]
@@ -275,6 +275,7 @@ pub fn claim_distribution_handler(
     ctx: Context<ClaimDistribution>,
     _disaster_id: String,
     _pool_id: String,
+    _timestamp: i64,
 ) -> Result<()> {
     let clock = Clock::get()?;
 

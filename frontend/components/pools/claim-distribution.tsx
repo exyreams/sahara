@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import BN from "bn.js";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
   deriveDistributionPDA,
   deriveFundPoolPDA,
   derivePlatformConfigPDA,
+  derivePoolRegistrationActivityLogPDA,
   derivePoolTokenAccountPDA,
 } from "@/lib/anchor/pdas";
 import {
@@ -113,11 +115,22 @@ export function ClaimDistribution({ onSuccess }: ClaimDistributionProps) {
           platformConfig.usdcMint,
         );
 
+        // Generate timestamp for unique activity log
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        // Derive activity log PDA with pool, beneficiary, and timestamp
+        const [activityLogPDA] = derivePoolRegistrationActivityLogPDA(
+          poolPDA,
+          beneficiaryPDA,
+          timestamp,
+        );
+
         // Call claim_distribution instruction
         const tx = await program.methods
-          .claimDistribution(pool.disasterId, pool.poolId)
+          .claimDistribution(pool.disasterId, pool.poolId, new BN(timestamp))
           .accounts({
             distribution: distributionPDA,
+            activityLog: activityLogPDA,
             pool: poolPDA,
             poolTokenAccount: poolTokenAccountPDA,
             beneficiary: beneficiaryPDA,

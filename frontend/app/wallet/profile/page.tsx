@@ -1,11 +1,11 @@
 "use client";
 
+import BN from "bn.js";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
   ChevronDown,
   Clock,
-  DollarSign,
   ExternalLink,
   MapPin,
   Phone,
@@ -37,6 +37,7 @@ import {
   deriveBeneficiaryPDA,
   deriveDistributionPDA,
   deriveFundPoolPDA,
+  derivePoolRegistrationActivityLogPDA,
 } from "@/lib/anchor/pdas";
 import {
   formatCurrency,
@@ -192,11 +193,22 @@ export default function WalletProfilePage() {
           disasterId,
         );
 
+        // Generate timestamp for unique activity log
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        // Derive activity log PDA
+        const [activityLogPDA] = derivePoolRegistrationActivityLogPDA(
+          poolPDA,
+          beneficiaryPDA,
+          timestamp,
+        );
+
         // Build the transaction
         const txBuilder = program.methods
-          .claimDistribution(disasterId, poolId)
+          .claimDistribution(disasterId, poolId, new BN(timestamp))
           .accounts({
             distribution: distributionPDA,
+            activityLog: activityLogPDA,
             pool: poolPDA,
             poolTokenAccount: poolTokenAccount,
             beneficiary: beneficiaryPDA,

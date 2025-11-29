@@ -237,8 +237,9 @@ pub mod saharasol_core {
         ctx: Context<ClaimDistribution>,
         disaster_id: String,
         pool_id: String,
+        timestamp: i64,
     ) -> Result<()> {
-        instructions::distribution::claim_distribution_handler(ctx, disaster_id, pool_id)
+        instructions::distribution::claim_distribution_handler(ctx, disaster_id, pool_id, timestamp)
     }
 
     pub fn reclaim_expired_distribution(

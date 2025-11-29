@@ -402,8 +402,8 @@
                 "path": "beneficiary"
               },
               {
-                "kind": "const",
-                "value": [99, 108, 97, 105, 109]
+                "kind": "arg",
+                "path": "timestamp"
               }
             ]
           }
@@ -478,6 +478,10 @@
         {
           "name": "pool_id",
           "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "type": "i64"
         }
       ]
     },
