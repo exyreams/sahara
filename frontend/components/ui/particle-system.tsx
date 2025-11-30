@@ -23,8 +23,9 @@ class Particle {
   constructor(targetX: number, targetY: number, color: string) {
     this.targetX = targetX;
     this.targetY = targetY;
-    this.x = Math.random() * window.innerWidth;
-    this.y = Math.random() * window.innerHeight;
+    // Start at target position - no entry animation, text is immediately visible
+    this.x = targetX;
+    this.y = targetY;
     this.vx = 0;
     this.vy = 0;
     this.radius = 1.8;
