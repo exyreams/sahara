@@ -52,3 +52,51 @@ export function createMockFieldWorkerParams(overrides?: Partial<any>): any {
     credentials: overrides?.credentials ?? "Field Worker Certification #12345",
   };
 }
+
+/**
+ * Create mock params for disaster initialization
+ */
+export function createMockDisasterParams(overrides?: Partial<any>): any {
+  return {
+    eventId: overrides?.eventId ?? `DISASTER-${Date.now()}`,
+    name: overrides?.name ?? "Test Disaster Event",
+    eventType: overrides?.eventType ?? { earthquake: {} },
+    location: overrides?.location ?? {
+      district: "Kathmandu",
+      ward: 1,
+      latitude: 27.7172,
+      longitude: 85.3240,
+    },
+    severity: overrides?.severity ?? 7,
+    affectedAreas: overrides?.affectedAreas ?? ["Kathmandu", "Bhaktapur"],
+    description: overrides?.description ?? "A test disaster event for testing purposes",
+    estimatedAffectedPopulation: overrides?.estimatedAffectedPopulation ?? 10000,
+  };
+}
+
+/**
+ * Create mock params for beneficiary registration
+ */
+export function createMockBeneficiaryParams(overrides?: Partial<any>): any {
+  return {
+    disasterId: overrides?.disasterId ?? "TEST-DISASTER",
+    name: overrides?.name ?? "Test Beneficiary",
+    phoneNumber: overrides?.phoneNumber ?? "+977-9800000000",
+    location: overrides?.location ?? {
+      district: "Kathmandu",
+      ward: 5,
+      latitude: 27.7172,
+      longitude: 85.3240,
+    },
+    familySize: overrides?.familySize ?? 4,
+    damageSeverity: overrides?.damageSeverity ?? 7,
+    ipfsDocumentHash: overrides?.ipfsDocumentHash ?? "QmTestHash123456789",
+    householdId: overrides?.householdId ?? null,
+    nationalId: overrides?.nationalId ?? "1234567890",
+    age: overrides?.age ?? 35,
+    gender: overrides?.gender ?? "Male",
+    occupation: overrides?.occupation ?? "Farmer",
+    damageDescription: overrides?.damageDescription ?? "House partially damaged",
+    specialNeeds: overrides?.specialNeeds ?? "None",
+  };
+}

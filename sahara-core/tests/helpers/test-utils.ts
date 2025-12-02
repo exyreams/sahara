@@ -73,3 +73,55 @@ export function getCurrentTimestamp(): number {
   const base = Math.floor(Date.now() / 1000);
   return base + timestampCounter++;
 }
+
+/**
+ * Derive Disaster PDA
+ */
+export function deriveDisasterPDA(eventId: string, programId: PublicKey): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("disaster"), Buffer.from(eventId)],
+    programId
+  );
+}
+
+/**
+ * Derive Beneficiary PDA
+ */
+export function deriveBeneficiaryPDA(
+  authority: PublicKey,
+  disasterId: string,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("beneficiary"), authority.toBuffer(), Buffer.from(disasterId)],
+    programId
+  );
+}
+
+/**
+ * Derive Phone Registry PDA
+ */
+export function derivePhoneRegistryPDA(
+  disasterId: string,
+  phoneNumber: string,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("phone-registry"), Buffer.from(disasterId), Buffer.from(phoneNumber)],
+    programId
+  );
+}
+
+/**
+ * Derive National ID Registry PDA
+ */
+export function deriveNationalIdRegistryPDA(
+  disasterId: string,
+  nationalId: string,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("national-id-registry"), Buffer.from(disasterId), Buffer.from(nationalId)],
+    programId
+  );
+}

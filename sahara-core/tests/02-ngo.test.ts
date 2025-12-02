@@ -431,6 +431,10 @@ describe("02 - NGO Management", () => {
     });
   });
 
+  // NOTE: batch_verify_ngos and batch_update_ngo_status are skipped
+  // The contract expects pre-initialized AdminAction accounts in remaining_accounts
+  // which is a design issue - batch operations should either skip audit logging
+  // or use a different pattern for creating admin actions on the fly
 
   describe("register_field_worker", () => {
     let fieldWorkerAuthority: Keypair;
