@@ -168,7 +168,9 @@ export default function NGOManagementPage() {
     }
   };
 
-  // Sequential verification with progress modal
+  // Bundled verification - groups NGOs into batches of 5 for fewer wallet popups
+  const BATCH_SIZE = 5;
+
   const handleSequentialVerification = async (ngosToVerify: NGO[]) => {
     if (!program || !program.provider.publicKey || ngosToVerify.length === 0) {
       return;
@@ -177,94 +179,99 @@ export default function NGOManagementPage() {
     const adminPublicKey = program.provider.publicKey;
     const [configPDA] = derivePlatformConfigPDA();
 
+    // Filter out already verified NGOs
+    const unverifiedNgos = ngosToVerify.filter((ngo) => !ngo.isVerified);
+    if (unverifiedNgos.length === 0) {
+      alert("All selected NGOs are already verified");
+      return;
+    }
+
     // Pre-generate all action IDs at once
-    const actionIds = generateActionIds(adminPublicKey, ngosToVerify.length);
+    const actionIds = generateActionIds(adminPublicKey, unverifiedNgos.length);
+
+    // Split into batches of BATCH_SIZE
+    const batches: NGO[][] = [];
+    for (let i = 0; i < unverifiedNgos.length; i += BATCH_SIZE) {
+      batches.push(unverifiedNgos.slice(i, i + BATCH_SIZE));
+    }
 
     // Initialize progress modal
-    const items = ngosToVerify.map((ngo) => ({
+    const items = unverifiedNgos.map((ngo) => ({
       name: ngo.name,
       status: "pending" as const,
     }));
     setModalTitle("Verifying NGOs");
     setModalDescription(
-      `Processing ${ngosToVerify.length} NGO${
-        ngosToVerify.length > 1 ? "s" : ""
-      } sequentially...`,
+      `Processing ${unverifiedNgos.length} NGO${unverifiedNgos.length > 1 ? "s" : ""} in ${batches.length} batch${batches.length > 1 ? "es" : ""} (${BATCH_SIZE} per transaction)...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
     setShowProgressModal(true);
 
-    // Process each NGO sequentially
-    for (let i = 0; i < ngosToVerify.length; i++) {
-      const ngo = ngosToVerify[i];
-      const actionId = actionIds[i];
+    let globalIndex = 0;
 
-      // Update status to processing
-      setCurrentVerificationIndex(i);
+    // Process each batch
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batch = batches[batchIdx];
+      const batchStartIndex = globalIndex;
+
+      // Mark batch items as processing
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
+          idx >= batchStartIndex && idx < batchStartIndex + batch.length
+            ? { ...item, status: "processing" }
+            : item,
         ),
       );
+      setCurrentVerificationIndex(batchStartIndex);
 
-      // Check if NGO is already verified
-      if (ngo.isVerified) {
+      try {
+        // Build bundled transaction with multiple instructions
+        const tx = new (await import("@solana/web3.js")).Transaction();
+
+        for (let i = 0; i < batch.length; i++) {
+          const ngo = batch[i];
+          const actionId = actionIds[globalIndex + i];
+
+          // Derive admin action PDA
+          const [adminActionPDA] = PublicKey.findProgramAddressSync(
+            [
+              Buffer.from("admin-action"),
+              adminPublicKey.toBuffer(),
+              actionId.toArrayLike(Buffer, "le", 8),
+            ],
+            program.programId,
+          );
+
+          // Build instruction (not execute yet)
+          const instruction = await program.methods
+            .verifyNgo(ngo.authority, { reason: "" }, actionId)
+            .accounts({
+              ngo: ngo.publicKey,
+              config: configPDA,
+              adminAction: adminActionPDA,
+              admin: adminPublicKey,
+            })
+            .instruction();
+
+          tx.add(instruction);
+        }
+
+        // Send bundled transaction - 1 wallet popup for entire batch
+        if (!program.provider.sendAndConfirm) {
+          throw new Error("Provider does not support sendAndConfirm");
+        }
+        await program.provider.sendAndConfirm(tx);
+
+        // Mark all items in batch as success
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i
-              ? {
-                  ...item,
-                  status: "success",
-                  error: "Already verified",
-                }
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: "success" }
               : item,
           ),
         );
-
-        // Small delay before next item
-        if (i < ngosToVerify.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
-        continue;
-      }
-
-      try {
-        // Derive admin action PDA
-        const [adminActionPDA] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("admin-action"),
-            adminPublicKey.toBuffer(),
-            actionId.toArrayLike(Buffer, "le", 8),
-          ],
-          program.programId,
-        );
-
-        // Execute transaction and wait for confirmation
-        const txSignature = await program.methods
-          .verifyNgo(ngo.authority, { reason: "" }, actionId)
-          .accounts({
-            ngo: ngo.publicKey,
-            config: configPDA,
-            adminAction: adminActionPDA,
-            admin: adminPublicKey,
-          })
-          .rpc();
-
-        // Wait for transaction to be confirmed
-        await program.provider.connection.confirmTransaction(
-          txSignature,
-          "confirmed",
-        );
-
-        // Update status to success
-        setVerificationItems((prev) =>
-          prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
-        );
       } catch (error: unknown) {
-        // Check if error is actually a success (transaction already processed)
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed =
@@ -272,31 +279,31 @@ export default function NGOManagementPage() {
           errorMessage.includes("AlreadyProcessed");
 
         if (isAlreadyProcessed) {
-          // Mark as success since it's already verified
+          // Mark batch as success
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
+              idx >= batchStartIndex && idx < batchStartIndex + batch.length
+                ? { ...item, status: "success" }
+                : item,
             ),
           );
         } else {
-          // Actual error - mark as failed
+          // Mark batch as failed
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i
-                ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
+              idx >= batchStartIndex && idx < batchStartIndex + batch.length
+                ? { ...item, status: "error", error: errorMessage }
                 : item,
             ),
           );
         }
       }
 
-      // Delay between transactions to ensure proper confirmation
-      if (i < ngosToVerify.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      globalIndex += batch.length;
+
+      // Small delay between batches
+      if (batchIdx < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
@@ -304,7 +311,7 @@ export default function NGOManagementPage() {
     await refetch();
   };
 
-  // Sequential revoke verification with progress modal
+  // Bundled revoke verification - groups NGOs into batches of 5
   const handleSequentialRevokeVerification = async (ngosToRevoke: NGO[]) => {
     if (!program || !program.provider.publicKey || ngosToRevoke.length === 0) {
       return;
@@ -313,94 +320,96 @@ export default function NGOManagementPage() {
     const adminPublicKey = program.provider.publicKey;
     const [configPDA] = derivePlatformConfigPDA();
 
+    // Filter out already unverified NGOs
+    const verifiedNgos = ngosToRevoke.filter((ngo) => ngo.isVerified);
+    if (verifiedNgos.length === 0) {
+      alert("All selected NGOs are already unverified");
+      return;
+    }
+
     // Pre-generate all action IDs at once
-    const actionIds = generateActionIds(adminPublicKey, ngosToRevoke.length);
+    const actionIds = generateActionIds(adminPublicKey, verifiedNgos.length);
+
+    // Split into batches of BATCH_SIZE
+    const batches: NGO[][] = [];
+    for (let i = 0; i < verifiedNgos.length; i += BATCH_SIZE) {
+      batches.push(verifiedNgos.slice(i, i + BATCH_SIZE));
+    }
 
     // Initialize progress modal
-    const items = ngosToRevoke.map((ngo) => ({
+    const items = verifiedNgos.map((ngo) => ({
       name: ngo.name,
       status: "pending" as const,
     }));
     setModalTitle("Revoking Verification");
     setModalDescription(
-      `Processing ${ngosToRevoke.length} NGO${
-        ngosToRevoke.length > 1 ? "s" : ""
-      } sequentially...`,
+      `Processing ${verifiedNgos.length} NGO${verifiedNgos.length > 1 ? "s" : ""} in ${batches.length} batch${batches.length > 1 ? "es" : ""}...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
     setShowProgressModal(true);
 
-    // Process each NGO sequentially
-    for (let i = 0; i < ngosToRevoke.length; i++) {
-      const ngo = ngosToRevoke[i];
-      const actionId = actionIds[i];
+    let globalIndex = 0;
 
-      // Update status to processing
-      setCurrentVerificationIndex(i);
+    // Process each batch
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batch = batches[batchIdx];
+      const batchStartIndex = globalIndex;
+
+      // Mark batch items as processing
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
+          idx >= batchStartIndex && idx < batchStartIndex + batch.length
+            ? { ...item, status: "processing" }
+            : item,
         ),
       );
+      setCurrentVerificationIndex(batchStartIndex);
 
-      // Check if NGO is already unverified
-      if (!ngo.isVerified) {
+      try {
+        // Build bundled transaction
+        const tx = new (await import("@solana/web3.js")).Transaction();
+
+        for (let i = 0; i < batch.length; i++) {
+          const ngo = batch[i];
+          const actionId = actionIds[globalIndex + i];
+
+          const [adminActionPDA] = PublicKey.findProgramAddressSync(
+            [
+              Buffer.from("admin-action"),
+              adminPublicKey.toBuffer(),
+              actionId.toArrayLike(Buffer, "le", 8),
+            ],
+            program.programId,
+          );
+
+          const instruction = await program.methods
+            .revokeNgoVerification(ngo.authority, { reason: "" }, actionId)
+            .accounts({
+              ngo: ngo.publicKey,
+              config: configPDA,
+              adminAction: adminActionPDA,
+              admin: adminPublicKey,
+            })
+            .instruction();
+
+          tx.add(instruction);
+        }
+
+        if (!program.provider.sendAndConfirm) {
+          throw new Error("Provider does not support sendAndConfirm");
+        }
+        await program.provider.sendAndConfirm(tx);
+
+        // Mark batch as success
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i
-              ? {
-                  ...item,
-                  status: "success",
-                  error: "Already unverified",
-                }
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: "success" }
               : item,
           ),
         );
-
-        // Small delay before next item
-        if (i < ngosToRevoke.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
-        continue;
-      }
-
-      try {
-        // Derive admin action PDA
-        const [adminActionPDA] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("admin-action"),
-            adminPublicKey.toBuffer(),
-            actionId.toArrayLike(Buffer, "le", 8),
-          ],
-          program.programId,
-        );
-
-        // Execute transaction and wait for confirmation
-        const txSignature = await program.methods
-          .revokeNgoVerification(ngo.authority, { reason: "" }, actionId)
-          .accounts({
-            ngo: ngo.publicKey,
-            config: configPDA,
-            adminAction: adminActionPDA,
-            admin: adminPublicKey,
-          })
-          .rpc();
-
-        // Wait for transaction to be confirmed
-        await program.provider.connection.confirmTransaction(
-          txSignature,
-          "confirmed",
-        );
-
-        // Update status to success
-        setVerificationItems((prev) =>
-          prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
-          ),
-        );
       } catch (error: unknown) {
-        // Check if error is actually a success (transaction already processed)
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const isAlreadyProcessed =
@@ -408,309 +417,256 @@ export default function NGOManagementPage() {
           errorMessage.includes("AlreadyProcessed");
 
         if (isAlreadyProcessed) {
-          // Mark as success since it's already processed
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
+              idx >= batchStartIndex && idx < batchStartIndex + batch.length
+                ? { ...item, status: "success" }
+                : item,
             ),
           );
         } else {
-          // Actual error - mark as failed
           setVerificationItems((prev) =>
             prev.map((item, idx) =>
-              idx === i
-                ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
+              idx >= batchStartIndex && idx < batchStartIndex + batch.length
+                ? { ...item, status: "error", error: errorMessage }
                 : item,
             ),
           );
         }
       }
 
-      // Delay between transactions to ensure proper confirmation
-      if (i < ngosToRevoke.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      globalIndex += batch.length;
+
+      if (batchIdx < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
-    // Refresh data after all revocations
     await refetch();
   };
 
-  // Sequential deactivation with progress modal
+  // Bundled deactivation - groups NGOs into batches of 5
   const handleSequentialDeactivation = async (ngosToDeactivate: NGO[]) => {
-    if (
-      !program ||
-      !program.provider.publicKey ||
-      ngosToDeactivate.length === 0
-    ) {
+    if (!program || !program.provider.publicKey || ngosToDeactivate.length === 0) {
       return;
     }
 
     const adminPublicKey = program.provider.publicKey;
     const [configPDA] = derivePlatformConfigPDA();
 
-    // Pre-generate all action IDs at once
-    const actionIds = generateActionIds(
-      adminPublicKey,
-      ngosToDeactivate.length,
-    );
+    // Filter out already inactive NGOs
+    const activeNgos = ngosToDeactivate.filter((ngo) => ngo.isActive);
+    if (activeNgos.length === 0) {
+      alert("All selected NGOs are already deactivated");
+      return;
+    }
 
-    // Initialize progress modal
-    const items = ngosToDeactivate.map((ngo) => ({
+    const actionIds = generateActionIds(adminPublicKey, activeNgos.length);
+
+    // Split into batches
+    const batches: NGO[][] = [];
+    for (let i = 0; i < activeNgos.length; i += BATCH_SIZE) {
+      batches.push(activeNgos.slice(i, i + BATCH_SIZE));
+    }
+
+    const items = activeNgos.map((ngo) => ({
       name: ngo.name,
       status: "pending" as const,
     }));
     setModalTitle("Deactivating NGOs");
     setModalDescription(
-      `Processing ${ngosToDeactivate.length} NGO${
-        ngosToDeactivate.length > 1 ? "s" : ""
-      } sequentially...`,
+      `Processing ${activeNgos.length} NGO${activeNgos.length > 1 ? "s" : ""} in ${batches.length} batch${batches.length > 1 ? "es" : ""}...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
     setShowProgressModal(true);
 
-    // Process each NGO sequentially
-    for (let i = 0; i < ngosToDeactivate.length; i++) {
-      const ngo = ngosToDeactivate[i];
-      const actionId = actionIds[i];
+    let globalIndex = 0;
 
-      setCurrentVerificationIndex(i);
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batch = batches[batchIdx];
+      const batchStartIndex = globalIndex;
+
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
+          idx >= batchStartIndex && idx < batchStartIndex + batch.length
+            ? { ...item, status: "processing" }
+            : item,
         ),
       );
+      setCurrentVerificationIndex(batchStartIndex);
 
-      // Check if NGO is already inactive
-      if (!ngo.isActive) {
+      try {
+        const tx = new (await import("@solana/web3.js")).Transaction();
+
+        for (let i = 0; i < batch.length; i++) {
+          const ngo = batch[i];
+          const actionId = actionIds[globalIndex + i];
+
+          const [adminActionPDA] = PublicKey.findProgramAddressSync(
+            [
+              Buffer.from("admin-action"),
+              adminPublicKey.toBuffer(),
+              actionId.toArrayLike(Buffer, "le", 8),
+            ],
+            program.programId,
+          );
+
+          const instruction = await program.methods
+            .updateNgoStatus(ngo.authority, { isActive: false, reason: "" }, actionId)
+            .accounts({
+              ngo: ngo.publicKey,
+              config: configPDA,
+              adminAction: adminActionPDA,
+              admin: adminPublicKey,
+            })
+            .instruction();
+
+          tx.add(instruction);
+        }
+
+        if (!program.provider.sendAndConfirm) {
+          throw new Error("Provider does not support sendAndConfirm");
+        }
+        await program.provider.sendAndConfirm(tx);
+
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i
-              ? {
-                  ...item,
-                  status: "success",
-                  error: "Already deactivated",
-                }
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: "success" }
               : item,
           ),
         );
-
-        // Small delay before next item
-        if (i < ngosToDeactivate.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
-        continue;
-      }
-
-      try {
-        const [adminActionPDA] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("admin-action"),
-            adminPublicKey.toBuffer(),
-            actionId.toArrayLike(Buffer, "le", 8),
-          ],
-          program.programId,
-        );
-
-        const txSignature = await program.methods
-          .updateNgoStatus(
-            ngo.authority,
-            {
-              isActive: false,
-              reason: "",
-            },
-            actionId,
-          )
-          .accounts({
-            ngo: ngo.publicKey,
-            config: configPDA,
-            adminAction: adminActionPDA,
-            admin: adminPublicKey,
-          })
-          .rpc();
-
-        await program.provider.connection.confirmTransaction(
-          txSignature,
-          "confirmed",
-        );
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isAlreadyProcessed = errorMessage.includes("already been processed");
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: isAlreadyProcessed ? "success" : "error", error: isAlreadyProcessed ? undefined : errorMessage }
+              : item,
           ),
         );
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
-        );
-
-        if (isAlreadyProcessed) {
-          setVerificationItems((prev) =>
-            prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
-          );
-        } else {
-          setVerificationItems((prev) =>
-            prev.map((item, idx) =>
-              idx === i
-                ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
-                : item,
-            ),
-          );
-        }
       }
 
-      if (i < ngosToDeactivate.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      globalIndex += batch.length;
+
+      if (batchIdx < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
     await refetch();
   };
 
-  // Sequential activation with progress modal
+  // Bundled activation - groups NGOs into batches of 5
   const handleSequentialActivation = async (ngosToActivate: NGO[]) => {
-    if (
-      !program ||
-      !program.provider.publicKey ||
-      ngosToActivate.length === 0
-    ) {
+    if (!program || !program.provider.publicKey || ngosToActivate.length === 0) {
       return;
     }
 
     const adminPublicKey = program.provider.publicKey;
     const [configPDA] = derivePlatformConfigPDA();
 
-    // Pre-generate all action IDs at once
-    const actionIds = generateActionIds(adminPublicKey, ngosToActivate.length);
+    const inactiveNgos = ngosToActivate.filter((ngo) => !ngo.isActive);
+    if (inactiveNgos.length === 0) {
+      alert("All selected NGOs are already active");
+      return;
+    }
 
-    // Initialize progress modal
-    const items = ngosToActivate.map((ngo) => ({
+    const actionIds = generateActionIds(adminPublicKey, inactiveNgos.length);
+
+    const batches: NGO[][] = [];
+    for (let i = 0; i < inactiveNgos.length; i += BATCH_SIZE) {
+      batches.push(inactiveNgos.slice(i, i + BATCH_SIZE));
+    }
+
+    const items = inactiveNgos.map((ngo) => ({
       name: ngo.name,
       status: "pending" as const,
     }));
     setModalTitle("Activating NGOs");
     setModalDescription(
-      `Processing ${ngosToActivate.length} NGO${
-        ngosToActivate.length > 1 ? "s" : ""
-      } sequentially...`,
+      `Processing ${inactiveNgos.length} NGO${inactiveNgos.length > 1 ? "s" : ""} in ${batches.length} batch${batches.length > 1 ? "es" : ""}...`,
     );
     setVerificationItems(items);
     setCurrentVerificationIndex(0);
     setShowProgressModal(true);
 
-    // Process each NGO sequentially
-    for (let i = 0; i < ngosToActivate.length; i++) {
-      const ngo = ngosToActivate[i];
-      const actionId = actionIds[i];
+    let globalIndex = 0;
 
-      setCurrentVerificationIndex(i);
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batch = batches[batchIdx];
+      const batchStartIndex = globalIndex;
+
       setVerificationItems((prev) =>
         prev.map((item, idx) =>
-          idx === i ? { ...item, status: "processing" } : item,
+          idx >= batchStartIndex && idx < batchStartIndex + batch.length
+            ? { ...item, status: "processing" }
+            : item,
         ),
       );
+      setCurrentVerificationIndex(batchStartIndex);
 
-      // Check if NGO is already active
-      if (ngo.isActive) {
+      try {
+        const tx = new (await import("@solana/web3.js")).Transaction();
+
+        for (let i = 0; i < batch.length; i++) {
+          const ngo = batch[i];
+          const actionId = actionIds[globalIndex + i];
+
+          const [adminActionPDA] = PublicKey.findProgramAddressSync(
+            [
+              Buffer.from("admin-action"),
+              adminPublicKey.toBuffer(),
+              actionId.toArrayLike(Buffer, "le", 8),
+            ],
+            program.programId,
+          );
+
+          const instruction = await program.methods
+            .updateNgoStatus(ngo.authority, { isActive: true, reason: "" }, actionId)
+            .accounts({
+              ngo: ngo.publicKey,
+              config: configPDA,
+              adminAction: adminActionPDA,
+              admin: adminPublicKey,
+            })
+            .instruction();
+
+          tx.add(instruction);
+        }
+
+        if (!program.provider.sendAndConfirm) {
+          throw new Error("Provider does not support sendAndConfirm");
+        }
+        await program.provider.sendAndConfirm(tx);
+
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i
-              ? {
-                  ...item,
-                  status: "success",
-                  error: "Already active",
-                }
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: "success" }
               : item,
           ),
         );
-
-        // Small delay before next item
-        if (i < ngosToActivate.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
-        continue;
-      }
-
-      try {
-        const [adminActionPDA] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("admin-action"),
-            adminPublicKey.toBuffer(),
-            actionId.toArrayLike(Buffer, "le", 8),
-          ],
-          program.programId,
-        );
-
-        const txSignature = await program.methods
-          .updateNgoStatus(
-            ngo.authority,
-            {
-              isActive: true,
-              reason: "",
-            },
-            actionId,
-          )
-          .accounts({
-            ngo: ngo.publicKey,
-            config: configPDA,
-            adminAction: adminActionPDA,
-            admin: adminPublicKey,
-          })
-          .rpc();
-
-        await program.provider.connection.confirmTransaction(
-          txSignature,
-          "confirmed",
-        );
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isAlreadyProcessed = errorMessage.includes("already been processed");
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
-            idx === i ? { ...item, status: "success" } : item,
+            idx >= batchStartIndex && idx < batchStartIndex + batch.length
+              ? { ...item, status: isAlreadyProcessed ? "success" : "error", error: isAlreadyProcessed ? undefined : errorMessage }
+              : item,
           ),
         );
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        const isAlreadyProcessed = errorMessage.includes(
-          "already been processed",
-        );
-
-        if (isAlreadyProcessed) {
-          setVerificationItems((prev) =>
-            prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success" } : item,
-            ),
-          );
-        } else {
-          setVerificationItems((prev) =>
-            prev.map((item, idx) =>
-              idx === i
-                ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
-                : item,
-            ),
-          );
-        }
       }
 
-      if (i < ngosToActivate.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      globalIndex += batch.length;
+
+      if (batchIdx < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
@@ -740,8 +696,7 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Blacklisting NGOs");
     setModalDescription(
-      `Processing ${ngosToBlacklist.length} NGO${
-        ngosToBlacklist.length > 1 ? "s" : ""
+      `Processing ${ngosToBlacklist.length} NGO${ngosToBlacklist.length > 1 ? "s" : ""
       } sequentially...`,
     );
     setVerificationItems(items);
@@ -766,10 +721,10 @@ export default function NGOManagementPage() {
           prev.map((item, idx) =>
             idx === i
               ? {
-                  ...item,
-                  status: "success",
-                  error: "Already blacklisted",
-                }
+                ...item,
+                status: "success",
+                error: "Already blacklisted",
+              }
               : item,
           ),
         );
@@ -829,10 +784,10 @@ export default function NGOManagementPage() {
             prev.map((item, idx) =>
               idx === i
                 ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
+                  ...item,
+                  status: "error",
+                  error: errorMessage,
+                }
                 : item,
             ),
           );
@@ -875,8 +830,7 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Removing Blacklist");
     setModalDescription(
-      `Processing ${ngosToRemoveBlacklist.length} NGO${
-        ngosToRemoveBlacklist.length > 1 ? "s" : ""
+      `Processing ${ngosToRemoveBlacklist.length} NGO${ngosToRemoveBlacklist.length > 1 ? "s" : ""
       } sequentially...`,
     );
     setVerificationItems(items);
@@ -901,10 +855,10 @@ export default function NGOManagementPage() {
           prev.map((item, idx) =>
             idx === i
               ? {
-                  ...item,
-                  status: "success",
-                  error: "Not blacklisted",
-                }
+                ...item,
+                status: "success",
+                error: "Not blacklisted",
+              }
               : item,
           ),
         );
@@ -964,10 +918,10 @@ export default function NGOManagementPage() {
             prev.map((item, idx) =>
               idx === i
                 ? {
-                    ...item,
-                    status: "error",
-                    error: errorMessage,
-                  }
+                  ...item,
+                  status: "error",
+                  error: errorMessage,
+                }
                 : item,
             ),
           );

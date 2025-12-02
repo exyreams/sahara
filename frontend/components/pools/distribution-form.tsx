@@ -178,10 +178,13 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
     );
   };
 
+  // Batch size for bundled transactions
+  const BATCH_SIZE = 3; // Distribution instructions are larger, so use smaller batch
+
   const onSubmit = async () => {
     if (!program || !wallet.publicKey) return;
 
-    const walletPubkey = wallet.publicKey; // Store in const to satisfy TypeScript
+    const walletPubkey = wallet.publicKey;
 
     const selectedAllocations = allocations.filter((a) => a.selected);
 
@@ -190,18 +193,15 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
       return;
     }
 
-    // Check if there are enough funds
     if (availableFunds <= 0) {
       alert("No funds available in the pool. Please add donations first.");
       return;
     }
 
-    // Warn if distributing to many beneficiaries with limited funds
     const estimatedPerBeneficiary = availableFunds / selectedAllocations.length;
     if (estimatedPerBeneficiary < 0.01) {
       const confirmed = confirm(
-        `Warning: With ${formatAmount(availableFunds)} USDC available and ${
-          selectedAllocations.length
+        `Warning: With ${formatAmount(availableFunds)} USDC available and ${selectedAllocations.length
         } beneficiaries selected, each would receive approximately ${formatAmount(
           estimatedPerBeneficiary,
         )} USDC.\n\nThis may be too small. Do you want to continue?`,
@@ -213,75 +213,103 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
       async () => {
         if (!pool) return "error";
 
-        // Derive pool PDAs
         const [poolPDA] = deriveFundPoolPDA(pool.disasterId, pool.poolId);
         const [disasterPDA] = deriveDisasterPDA(pool.disasterId);
 
-        // Batch distribute to all selected beneficiaries
-        const signatures: string[] = [];
+        // Filter out already distributed
+        const toDistribute: BeneficiaryAllocation[] = [];
         const skipped: string[] = [];
-        const failed: string[] = [];
 
         for (const allocation of selectedAllocations) {
-          const [beneficiaryPDA] = deriveBeneficiaryPDA(
-            allocation.beneficiary.authority,
-            pool.disasterId,
-          );
           const [distributionPDA] = deriveDistributionPDA(
             allocation.beneficiary.authority,
             poolPDA,
           );
 
-          // Check if distribution already exists by trying to fetch account info
           try {
             const accountInfo =
               await program.provider.connection.getAccountInfo(distributionPDA);
             if (accountInfo) {
-              console.log(
-                `Distribution already exists for ${allocation.beneficiary.name}`,
-              );
               skipped.push(allocation.beneficiary.name);
               continue;
             }
           } catch (_err) {
-            // Distribution doesn't exist, continue with creation
+            // Distribution doesn't exist
           }
+          toDistribute.push(allocation);
+        }
 
-          const params = {
-            beneficiaryAuthority: allocation.beneficiary.authority,
-          };
+        if (toDistribute.length === 0) {
+          throw new Error(
+            `All selected beneficiaries already have distributions for this pool.`,
+          );
+        }
 
+        // Split into batches
+        const batches: BeneficiaryAllocation[][] = [];
+        for (let i = 0; i < toDistribute.length; i += BATCH_SIZE) {
+          batches.push(toDistribute.slice(i, i + BATCH_SIZE));
+        }
+
+        const signatures: string[] = [];
+        const failed: string[] = [];
+
+        // Process each batch with bundled transaction
+        for (const batch of batches) {
           try {
-            const tx = await program.methods
-              .distributeFromPool(pool.disasterId, pool.poolId, params)
-              .accounts({
-                pool: poolPDA,
-                distribution: distributionPDA,
-                beneficiary: beneficiaryPDA,
-                disaster: disasterPDA,
-                authority: walletPubkey,
-                systemProgram: SystemProgram.programId,
-              })
-              .rpc();
+            const { Transaction } = await import("@solana/web3.js");
+            const tx = new Transaction();
 
-            signatures.push(tx);
+            for (const allocation of batch) {
+              const [beneficiaryPDA] = deriveBeneficiaryPDA(
+                allocation.beneficiary.authority,
+                pool.disasterId,
+              );
+              const [distributionPDA] = deriveDistributionPDA(
+                allocation.beneficiary.authority,
+                poolPDA,
+              );
+
+              const params = {
+                beneficiaryAuthority: allocation.beneficiary.authority,
+              };
+
+              const instruction = await program.methods
+                .distributeFromPool(pool.disasterId, pool.poolId, params)
+                .accounts({
+                  pool: poolPDA,
+                  distribution: distributionPDA,
+                  beneficiary: beneficiaryPDA,
+                  disaster: disasterPDA,
+                  authority: walletPubkey,
+                  systemProgram: SystemProgram.programId,
+                })
+                .instruction();
+
+              tx.add(instruction);
+            }
+
+            // Send bundled transaction - 1 wallet popup per batch
+            if (!program.provider.sendAndConfirm) {
+              throw new Error("Provider does not support sendAndConfirm");
+            }
+            const sig = await program.provider.sendAndConfirm(tx);
+            signatures.push(sig);
           } catch (err) {
-            console.error(
-              `Failed to create distribution for ${allocation.beneficiary.name}:`,
-              err,
-            );
+            console.error(`Batch distribution failed:`, err);
             const errorMessage =
               err instanceof Error ? err.message : "Unknown error";
-            failed.push(`${allocation.beneficiary.name}: ${errorMessage}`);
+            failed.push(
+              ...batch.map((a) => `${a.beneficiary.name}: ${errorMessage}`),
+            );
           }
         }
 
         // Build result message
         let resultMessage = "";
-        if (signatures.length > 0) {
-          resultMessage += `Created ${signatures.length} new distribution${
-            signatures.length === 1 ? "" : "s"
-          }`;
+        const successCount = toDistribute.length - failed.length;
+        if (successCount > 0) {
+          resultMessage += `Created ${successCount} distribution${successCount === 1 ? "" : "s"} in ${signatures.length} transaction${signatures.length === 1 ? "" : "s"}`;
         }
         if (skipped.length > 0) {
           if (resultMessage) resultMessage += ". ";
@@ -292,24 +320,13 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
           resultMessage += `Failed ${failed.length}`;
         }
 
-        // If everything was skipped or failed, throw error
         if (signatures.length === 0) {
-          if (skipped.length > 0 && failed.length === 0) {
-            throw new Error(
-              `All selected beneficiaries already have distributions for this pool.`,
-            );
-          } else {
-            throw new Error(
-              `Failed to create distributions:\n${failed.join("\n")}`,
-            );
-          }
+          throw new Error(`Failed to create distributions:\n${failed.join("\n")}`);
         }
 
-        // Store result for success message
         // biome-ignore lint/suspicious/noExplicitAny: Using window for temporary storage
         (window as any).__distributionResult = resultMessage;
 
-        // Return first signature
         return signatures[0];
       },
       {
@@ -521,11 +538,10 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
             return (
               <div
                 key={allocation.beneficiary.publicKey.toString()}
-                className={`flex items-center gap-4 p-4 border rounded-lg transition-all ${
-                  isDisabled
+                className={`flex items-center gap-4 p-4 border rounded-lg transition-all ${isDisabled
                     ? "border-theme-border/50 bg-theme-background/30 opacity-60 cursor-not-allowed"
                     : "border-theme-border hover:border-theme-primary/50"
-                }`}
+                  }`}
                 title={
                   isDisabled
                     ? `${allocation.beneficiary.name} has already received funds from this pool`
@@ -551,9 +567,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p
-                      className={`font-medium ${
-                        isDisabled ? "text-muted-foreground" : ""
-                      }`}
+                      className={`font-medium ${isDisabled ? "text-muted-foreground" : ""
+                        }`}
                     >
                       {allocation.beneficiary.name}
                     </p>

@@ -331,19 +331,8 @@ pub mod saharasol_core {
         instructions::admin::remove_blacklist_handler(ctx, ngo_authority, params, action_id)
     }
 
-    pub fn batch_verify_ngos<'info>(
-        ctx: Context<'_, '_, 'info, 'info, BatchVerifyNGOs<'info>>,
-        params: BatchVerifyNGOsParams,
-    ) -> Result<()> {
-        instructions::admin::batch_verify_ngos_handler(ctx, params)
-    }
-
-    pub fn batch_update_ngo_status<'info>(
-        ctx: Context<'_, '_, 'info, 'info, BatchUpdateNGOStatus<'info>>,
-        params: BatchUpdateNGOStatusParams,
-    ) -> Result<()> {
-        instructions::admin::batch_update_ngo_status_handler(ctx, params)
-    }
+    // NOTE: batch_verify_ngos and batch_update_ngo_status removed
+    // Use bundled transactions on frontend instead (up to 5 ops per tx)
 
     pub fn initiate_admin_transfer(
         ctx: Context<InitiateAdminTransfer>,
