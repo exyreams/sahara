@@ -167,3 +167,17 @@ export function derivePoolRegistrationPDA(
     programId
   );
 }
+
+/**
+ * Derive Distribution PDA
+ */
+export function deriveDistributionPDA(
+  beneficiaryAuthority: PublicKey,
+  poolKey: PublicKey,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("distribution"), beneficiaryAuthority.toBuffer(), poolKey.toBuffer()],
+    programId
+  );
+}
