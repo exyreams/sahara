@@ -100,3 +100,21 @@ export function createMockBeneficiaryParams(overrides?: Partial<any>): any {
     specialNeeds: overrides?.specialNeeds ?? "None",
   };
 }
+
+/**
+ * Create mock params for fund pool creation
+ */
+export function createMockFundPoolParams(overrides?: Partial<any>): any {
+  return {
+    name: overrides?.name ?? "Test Fund Pool",
+    distributionType: overrides?.distributionType ?? { equal: {} },
+    timeLockDuration: overrides?.timeLockDuration ?? null,
+    distributionPercentageImmediate: overrides?.distributionPercentageImmediate ?? 100,
+    distributionPercentageLocked: overrides?.distributionPercentageLocked ?? 0,
+    eligibilityCriteria: overrides?.eligibilityCriteria ?? "Verified beneficiaries only",
+    minimumFamilySize: overrides?.minimumFamilySize ?? null,
+    minimumDamageSeverity: overrides?.minimumDamageSeverity ?? null,
+    targetAmount: overrides?.targetAmount ?? null,
+    description: overrides?.description ?? "A test fund pool for disaster relief",
+  };
+}

@@ -125,3 +125,45 @@ export function deriveNationalIdRegistryPDA(
     programId
   );
 }
+
+/**
+ * Derive Fund Pool PDA
+ */
+export function deriveFundPoolPDA(
+  disasterId: string,
+  poolId: string,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("pool"), Buffer.from(disasterId), Buffer.from(poolId)],
+    programId
+  );
+}
+
+/**
+ * Derive Pool Token Account PDA
+ */
+export function derivePoolTokenAccountPDA(
+  disasterId: string,
+  poolId: string,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("pool-token"), Buffer.from(disasterId), Buffer.from(poolId)],
+    programId
+  );
+}
+
+/**
+ * Derive Pool Registration PDA
+ */
+export function derivePoolRegistrationPDA(
+  poolKey: PublicKey,
+  beneficiaryAuthority: PublicKey,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("pool-registration"), poolKey.toBuffer(), beneficiaryAuthority.toBuffer()],
+    programId
+  );
+}
