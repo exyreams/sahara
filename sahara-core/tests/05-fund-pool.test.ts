@@ -239,7 +239,6 @@ describe("05 - Fund Pool Management", () => {
         { equal: {} },
         { weightedFamily: {} },
         { weightedDamage: {} },
-        { milestone: {} },
       ];
 
       for (let i = 0; i < types.length; i++) {

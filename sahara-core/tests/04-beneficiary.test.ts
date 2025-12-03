@@ -519,7 +519,7 @@ describe("04 - Beneficiary Management", () => {
       expect(disasterAfter.totalBeneficiaries).to.equal(totalBefore + 1);
     });
 
-    it.skip("should increment field worker registrations_count (BUG: field_worker not mut in RegisterBeneficiary)", async () => {
+    it("should increment field worker registrations_count", async () => {
       // Use a fresh field worker to avoid count conflicts from previous tests
       const newFieldWorkerAuthority = Keypair.generate();
       await airdropSOL(provider.connection, newFieldWorkerAuthority.publicKey);
