@@ -48,6 +48,7 @@ pub struct RegisterBeneficiary<'info> {
     pub disaster: Box<Account<'info, DisasterEvent>>,
 
     #[account(
+        mut,
         seeds = [b"field-worker", field_worker_authority.key().as_ref()],
         bump = field_worker.bump,
         constraint = field_worker.is_active @ ErrorCode::FieldWorkerNotActive

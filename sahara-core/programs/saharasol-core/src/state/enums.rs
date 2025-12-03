@@ -21,7 +21,6 @@ pub enum DistributionType {
     Equal,
     WeightedFamily,
     WeightedDamage,
-    Milestone,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]

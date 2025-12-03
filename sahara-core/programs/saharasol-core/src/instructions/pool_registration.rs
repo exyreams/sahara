@@ -115,7 +115,6 @@ pub fn register_beneficiary_for_pool_handler(
         DistributionType::Equal => 1,
         DistributionType::WeightedFamily => beneficiary.family_size as u64,
         DistributionType::WeightedDamage => beneficiary.damage_severity as u64,
-        DistributionType::Milestone => 1,
     };
 
     pool_registration.pool = pool.key();
