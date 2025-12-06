@@ -201,7 +201,8 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
     const estimatedPerBeneficiary = availableFunds / selectedAllocations.length;
     if (estimatedPerBeneficiary < 0.01) {
       const confirmed = confirm(
-        `Warning: With ${formatAmount(availableFunds)} USDC available and ${selectedAllocations.length
+        `Warning: With ${formatAmount(availableFunds)} USDC available and ${
+          selectedAllocations.length
         } beneficiaries selected, each would receive approximately ${formatAmount(
           estimatedPerBeneficiary,
         )} USDC.\n\nThis may be too small. Do you want to continue?`,
@@ -321,7 +322,9 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
         }
 
         if (signatures.length === 0) {
-          throw new Error(`Failed to create distributions:\n${failed.join("\n")}`);
+          throw new Error(
+            `Failed to create distributions:\n${failed.join("\n")}`,
+          );
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: Using window for temporary storage
@@ -538,10 +541,11 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
             return (
               <div
                 key={allocation.beneficiary.publicKey.toString()}
-                className={`flex items-center gap-4 p-4 border rounded-lg transition-all ${isDisabled
+                className={`flex items-center gap-4 p-4 border rounded-lg transition-all ${
+                  isDisabled
                     ? "border-theme-border/50 bg-theme-background/30 opacity-60 cursor-not-allowed"
                     : "border-theme-border hover:border-theme-primary/50"
-                  }`}
+                }`}
                 title={
                   isDisabled
                     ? `${allocation.beneficiary.name} has already received funds from this pool`
@@ -567,8 +571,9 @@ export function DistributionForm({ pool, onSuccess }: DistributionFormProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p
-                      className={`font-medium ${isDisabled ? "text-muted-foreground" : ""
-                        }`}
+                      className={`font-medium ${
+                        isDisabled ? "text-muted-foreground" : ""
+                      }`}
                     >
                       {allocation.beneficiary.name}
                     </p>

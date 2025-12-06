@@ -447,7 +447,11 @@ export default function NGOManagementPage() {
 
   // Bundled deactivation - groups NGOs into batches of 5
   const handleSequentialDeactivation = async (ngosToDeactivate: NGO[]) => {
-    if (!program || !program.provider.publicKey || ngosToDeactivate.length === 0) {
+    if (
+      !program ||
+      !program.provider.publicKey ||
+      ngosToDeactivate.length === 0
+    ) {
       return;
     }
 
@@ -513,7 +517,11 @@ export default function NGOManagementPage() {
           );
 
           const instruction = await program.methods
-            .updateNgoStatus(ngo.authority, { isActive: false, reason: "" }, actionId)
+            .updateNgoStatus(
+              ngo.authority,
+              { isActive: false, reason: "" },
+              actionId,
+            )
             .accounts({
               ngo: ngo.publicKey,
               config: configPDA,
@@ -538,13 +546,20 @@ export default function NGOManagementPage() {
           ),
         );
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const isAlreadyProcessed = errorMessage.includes("already been processed");
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const isAlreadyProcessed = errorMessage.includes(
+          "already been processed",
+        );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
             idx >= batchStartIndex && idx < batchStartIndex + batch.length
-              ? { ...item, status: isAlreadyProcessed ? "success" : "error", error: isAlreadyProcessed ? undefined : errorMessage }
+              ? {
+                  ...item,
+                  status: isAlreadyProcessed ? "success" : "error",
+                  error: isAlreadyProcessed ? undefined : errorMessage,
+                }
               : item,
           ),
         );
@@ -562,7 +577,11 @@ export default function NGOManagementPage() {
 
   // Bundled activation - groups NGOs into batches of 5
   const handleSequentialActivation = async (ngosToActivate: NGO[]) => {
-    if (!program || !program.provider.publicKey || ngosToActivate.length === 0) {
+    if (
+      !program ||
+      !program.provider.publicKey ||
+      ngosToActivate.length === 0
+    ) {
       return;
     }
 
@@ -626,7 +645,11 @@ export default function NGOManagementPage() {
           );
 
           const instruction = await program.methods
-            .updateNgoStatus(ngo.authority, { isActive: true, reason: "" }, actionId)
+            .updateNgoStatus(
+              ngo.authority,
+              { isActive: true, reason: "" },
+              actionId,
+            )
             .accounts({
               ngo: ngo.publicKey,
               config: configPDA,
@@ -651,13 +674,20 @@ export default function NGOManagementPage() {
           ),
         );
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const isAlreadyProcessed = errorMessage.includes("already been processed");
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const isAlreadyProcessed = errorMessage.includes(
+          "already been processed",
+        );
 
         setVerificationItems((prev) =>
           prev.map((item, idx) =>
             idx >= batchStartIndex && idx < batchStartIndex + batch.length
-              ? { ...item, status: isAlreadyProcessed ? "success" : "error", error: isAlreadyProcessed ? undefined : errorMessage }
+              ? {
+                  ...item,
+                  status: isAlreadyProcessed ? "success" : "error",
+                  error: isAlreadyProcessed ? undefined : errorMessage,
+                }
               : item,
           ),
         );
@@ -696,7 +726,8 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Blacklisting NGOs");
     setModalDescription(
-      `Processing ${ngosToBlacklist.length} NGO${ngosToBlacklist.length > 1 ? "s" : ""
+      `Processing ${ngosToBlacklist.length} NGO${
+        ngosToBlacklist.length > 1 ? "s" : ""
       } sequentially...`,
     );
     setVerificationItems(items);
@@ -721,10 +752,10 @@ export default function NGOManagementPage() {
           prev.map((item, idx) =>
             idx === i
               ? {
-                ...item,
-                status: "success",
-                error: "Already blacklisted",
-              }
+                  ...item,
+                  status: "success",
+                  error: "Already blacklisted",
+                }
               : item,
           ),
         );
@@ -784,10 +815,10 @@ export default function NGOManagementPage() {
             prev.map((item, idx) =>
               idx === i
                 ? {
-                  ...item,
-                  status: "error",
-                  error: errorMessage,
-                }
+                    ...item,
+                    status: "error",
+                    error: errorMessage,
+                  }
                 : item,
             ),
           );
@@ -830,7 +861,8 @@ export default function NGOManagementPage() {
     }));
     setModalTitle("Removing Blacklist");
     setModalDescription(
-      `Processing ${ngosToRemoveBlacklist.length} NGO${ngosToRemoveBlacklist.length > 1 ? "s" : ""
+      `Processing ${ngosToRemoveBlacklist.length} NGO${
+        ngosToRemoveBlacklist.length > 1 ? "s" : ""
       } sequentially...`,
     );
     setVerificationItems(items);
@@ -855,10 +887,10 @@ export default function NGOManagementPage() {
           prev.map((item, idx) =>
             idx === i
               ? {
-                ...item,
-                status: "success",
-                error: "Not blacklisted",
-              }
+                  ...item,
+                  status: "success",
+                  error: "Not blacklisted",
+                }
               : item,
           ),
         );
@@ -918,10 +950,10 @@ export default function NGOManagementPage() {
             prev.map((item, idx) =>
               idx === i
                 ? {
-                  ...item,
-                  status: "error",
-                  error: errorMessage,
-                }
+                    ...item,
+                    status: "error",
+                    error: errorMessage,
+                  }
                 : item,
             ),
           );
