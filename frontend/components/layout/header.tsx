@@ -20,6 +20,7 @@ const navigation = [
   { name: "Disasters", href: "/disasters" },
   { name: "Beneficiaries", href: "/beneficiaries" },
   { name: "Pools", href: "/pools" },
+  { name: "Directory", href: "/directory" },
   { name: "NGOs", href: "/ngo" },
 ];
 
