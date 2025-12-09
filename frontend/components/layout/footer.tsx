@@ -5,8 +5,12 @@ import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/ui/logo";
+import { usePlatformConfig } from "@/hooks/use-platform-config";
 
 export function Footer() {
+  const { config, loading } = usePlatformConfig();
+  const isInitialized = !loading && config !== null;
+
   return (
     <footer className="relative bg-theme-background">
       {/* Footer Content */}
@@ -58,6 +62,16 @@ export function Footer() {
                     Documentation
                   </Link>
                 </li>
+                {!loading && !isInitialized && (
+                  <li>
+                    <Link
+                      href="/admin/initialize"
+                      className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors font-medium"
+                    >
+                      Initialize Platform
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
 
