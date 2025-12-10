@@ -1,15 +1,18 @@
+use anchor_lang::prelude::*;
+
 use crate::errors::ErrorCode;
 use crate::state::{AdminAction, AdminActionType, PlatformConfig};
-use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitializePlatformParams {
-    pub platform_fee_percentage: u16,
+    pub unverified_ngo_fee_percentage: u16,
+    pub verified_ngo_fee_percentage: u16,
     pub verification_threshold: u8,
     pub max_verifiers: u8,
     pub min_donation_amount: u64,
     pub max_donation_amount: u64,
     pub usdc_mint: Pubkey,
+    pub additional_tokens: Vec<Pubkey>,
     pub platform_name: String,
     pub platform_version: String,
 }
@@ -36,7 +39,12 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
     let clock = Clock::get()?;
 
     require!(
-        params.platform_fee_percentage <= 1000,
+        params.unverified_ngo_fee_percentage <= 1000,
+        ErrorCode::InvalidPlatformFee
+    );
+
+    require!(
+        params.verified_ngo_fee_percentage <= 1000,
         ErrorCode::InvalidPlatformFee
     );
 
@@ -61,7 +69,10 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
     );
 
     config.admin = ctx.accounts.admin.key();
-    config.platform_fee_percentage = params.platform_fee_percentage;
+    config.managers = Vec::new();
+    config.platform_fee_percentage = 0; // Deprecated, kept for backward compatibility
+    config.unverified_ngo_fee_percentage = params.unverified_ngo_fee_percentage;
+    config.verified_ngo_fee_percentage = params.verified_ngo_fee_percentage;
     config.platform_fee_recipient = ctx.accounts.admin.key();
     config.verification_threshold = params.verification_threshold;
     config.max_verifiers = params.max_verifiers;
@@ -69,6 +80,9 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
     config.max_donation_amount = params.max_donation_amount;
     config.verified_ngo_max_donation = params.max_donation_amount * 10;
     config.verified_ngo_pool_limit = 10;
+    config.unverified_ngo_pool_limit = 5;
+    config.verified_ngo_beneficiary_limit = 100;
+    config.unverified_ngo_beneficiary_limit = 50;
     config.is_paused = false;
 
     config.total_disasters = 0;
@@ -79,10 +93,19 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
     config.total_donations = 0;
     config.total_aid_distributed = 0;
     config.total_pools = 0;
+    config.total_fees_collected = 0;
 
     config.usdc_mint = params.usdc_mint;
     config.sol_usd_oracle = None;
-    config.allowed_tokens = vec![params.usdc_mint];
+
+    // Build allowed tokens list: USDC + additional tokens (max 10 total)
+    let mut allowed_tokens = vec![params.usdc_mint];
+    for token in params.additional_tokens {
+        if !allowed_tokens.contains(&token) && allowed_tokens.len() < 10 {
+            allowed_tokens.push(token);
+        }
+    }
+    config.allowed_tokens = allowed_tokens;
     config.emergency_contacts = vec![ctx.accounts.admin.key()];
 
     config.platform_name = params.platform_name;
@@ -383,6 +406,162 @@ pub fn remove_allowed_token_handler(
 
     msg!("Token removed from whitelist: {}", token_mint);
     msg!("Total allowed tokens: {}", config.allowed_tokens.len());
+    msg!("Reason: {}", reason);
+
+    Ok(())
+}
+
+// ============================================================================
+// Manager Management Instructions
+// ============================================================================
+
+#[derive(Accounts)]
+#[instruction(timestamp: i64)]
+pub struct AddManager<'info> {
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.bump,
+        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+    )]
+    pub config: Account<'info, PlatformConfig>,
+
+    #[account(
+        init,
+        payer = admin,
+        space = AdminAction::SPACE,
+        seeds = [
+            b"admin-action",
+            admin.key().as_ref(),
+            &timestamp.to_le_bytes()
+        ],
+        bump
+    )]
+    pub admin_action: Account<'info, AdminAction>,
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn add_manager_handler(
+    ctx: Context<AddManager>,
+    _timestamp: i64,
+    manager: Pubkey,
+    reason: String,
+) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+    let admin_action = &mut ctx.accounts.admin_action;
+    let clock = Clock::get()?;
+
+    require!(
+        reason.len() <= AdminAction::MAX_REASON_LEN,
+        ErrorCode::StringTooLong
+    );
+
+    require!(manager != config.admin, ErrorCode::CannotAddAdminAsManager);
+
+    require!(
+        !config.managers.contains(&manager),
+        ErrorCode::ManagerAlreadyExists
+    );
+
+    require!(
+        config.managers.len() < PlatformConfig::MAX_MANAGERS,
+        ErrorCode::MaxManagersReached
+    );
+
+    config.managers.push(manager);
+    config.updated_at = clock.unix_timestamp;
+
+    admin_action.action_type = AdminActionType::AddManager;
+    admin_action.target = manager;
+    admin_action.admin = ctx.accounts.admin.key();
+    admin_action.reason = reason.clone();
+    admin_action.timestamp = clock.unix_timestamp;
+    admin_action.metadata = format!(
+        "Added manager {}. Total managers: {}",
+        manager,
+        config.managers.len()
+    );
+    admin_action.bump = ctx.bumps.admin_action;
+
+    msg!("Manager added: {}", manager);
+    msg!("Total managers: {}", config.managers.len());
+    msg!("Reason: {}", reason);
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+#[instruction(timestamp: i64)]
+pub struct RemoveManager<'info> {
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.bump,
+        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+    )]
+    pub config: Account<'info, PlatformConfig>,
+
+    #[account(
+        init,
+        payer = admin,
+        space = AdminAction::SPACE,
+        seeds = [
+            b"admin-action",
+            admin.key().as_ref(),
+            &timestamp.to_le_bytes()
+        ],
+        bump
+    )]
+    pub admin_action: Account<'info, AdminAction>,
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn remove_manager_handler(
+    ctx: Context<RemoveManager>,
+    _timestamp: i64,
+    manager: Pubkey,
+    reason: String,
+) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+    let admin_action = &mut ctx.accounts.admin_action;
+    let clock = Clock::get()?;
+
+    require!(
+        reason.len() <= AdminAction::MAX_REASON_LEN,
+        ErrorCode::StringTooLong
+    );
+
+    let manager_index = config
+        .managers
+        .iter()
+        .position(|&m| m == manager)
+        .ok_or(ErrorCode::ManagerNotFound)?;
+
+    config.managers.remove(manager_index);
+    config.updated_at = clock.unix_timestamp;
+
+    admin_action.action_type = AdminActionType::RemoveManager;
+    admin_action.target = manager;
+    admin_action.admin = ctx.accounts.admin.key();
+    admin_action.reason = reason.clone();
+    admin_action.timestamp = clock.unix_timestamp;
+    admin_action.metadata = format!(
+        "Removed manager {}. Total managers: {}",
+        manager,
+        config.managers.len()
+    );
+    admin_action.bump = ctx.bumps.admin_action;
+
+    msg!("Manager removed: {}", manager);
+    msg!("Total managers: {}", config.managers.len());
     msg!("Reason: {}", reason);
 
     Ok(())

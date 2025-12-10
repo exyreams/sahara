@@ -47,6 +47,9 @@ pub enum AdminActionType {
 
     AddAllowedToken,
     RemoveAllowedToken,
+
+    AddManager,
+    RemoveManager,
 }
 
 impl AdminAction {

@@ -166,7 +166,8 @@ export default function TreasuryPage() {
     );
   }
 
-  const feePercentage = config.platformFeePercentage / 100;
+  const unverifiedFeePercentage = config.unverifiedNgoFeePercentage / 100;
+  const verifiedFeePercentage = config.verifiedNgoFeePercentage / 100;
 
   return (
     <>
@@ -234,27 +235,37 @@ export default function TreasuryPage() {
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                Fee Percentage:
+                Unverified NGO Fee:
               </span>
               {isRefreshing ? (
                 <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
               ) : (
-                <Badge variant="default" className="text-base">
-                  {feePercentage}%
+                <Badge variant="secondary" className="text-base">
+                  {unverifiedFeePercentage}%
                 </Badge>
               )}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                Total Collected:
+                Verified NGO Fee:
+              </span>
+              {isRefreshing ? (
+                <div className="h-6 w-16 bg-theme-border rounded animate-pulse" />
+              ) : (
+                <Badge variant="default" className="text-base">
+                  {verifiedFeePercentage}%
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Total Fees Collected:
               </span>
               {isRefreshing ? (
                 <div className="h-5 w-24 bg-theme-border rounded animate-pulse" />
               ) : (
                 <span className="text-sm font-semibold text-theme-text-highlight">
-                  {formatCurrency(
-                    config.totalAidDistributed * (feePercentage / 100),
-                  )}
+                  {formatCurrency(config.totalFeesCollected / 1_000_000)}
                 </span>
               )}
             </div>
@@ -366,15 +377,13 @@ export default function TreasuryPage() {
             </div>
             <div className="p-4 bg-theme-background rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">
-                Estimated Fees Collected
+                Total Fees Collected
               </div>
               {isRefreshing ? (
                 <div className="h-7 w-32 bg-theme-border rounded animate-pulse" />
               ) : (
                 <div className="text-lg font-semibold text-theme-primary">
-                  {formatCurrency(
-                    config.totalAidDistributed * (feePercentage / 100),
-                  )}
+                  {formatCurrency(config.totalFeesCollected / 1_000_000)}
                 </div>
               )}
             </div>

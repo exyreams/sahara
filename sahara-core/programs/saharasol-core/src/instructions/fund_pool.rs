@@ -115,16 +115,14 @@ pub fn handler(
     require!(ngo.is_active, ErrorCode::NGONotActive);
     require!(!ngo.is_blacklisted, ErrorCode::NGOBlacklisted);
 
+    // Check pool creation limits based on verification status
     let max_pools = if ngo.is_verified {
         config.verified_ngo_pool_limit as u32
     } else {
-        3u32
+        config.unverified_ngo_pool_limit as u32
     };
 
-    require!(
-        ngo.pools_created < max_pools,
-        ErrorCode::OperationNotAllowed
-    );
+    require!(ngo.pools_created < max_pools, ErrorCode::PoolLimitReached);
 
     require!(
         pool_id.len() <= FundPool::MAX_POOL_ID_LEN,
@@ -369,8 +367,15 @@ pub fn donate_to_pool_handler<'info>(
         ErrorCode::StringTooLong
     );
 
+    // Use verification-based fee rates
+    let fee_percentage = if ngo.is_verified {
+        config.verified_ngo_fee_percentage
+    } else {
+        config.unverified_ngo_fee_percentage
+    };
+
     let platform_fee = (params.amount as u128)
-        .checked_mul(config.platform_fee_percentage as u128)
+        .checked_mul(fee_percentage as u128)
         .ok_or(ErrorCode::ArithmeticOverflow)?
         .checked_div(10000)
         .ok_or(ErrorCode::DivisionByZero)? as u64;
@@ -400,6 +405,12 @@ pub fn donate_to_pool_handler<'info>(
             },
         );
         token::transfer(fee_transfer_ctx, platform_fee)?;
+
+        // Track total fees collected
+        config.total_fees_collected = config
+            .total_fees_collected
+            .checked_add(platform_fee)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
     }
 
     pool.total_deposited = pool

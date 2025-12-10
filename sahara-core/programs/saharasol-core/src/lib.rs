@@ -1,5 +1,6 @@
 #![allow(deprecated)]
 #![allow(ambiguous_glob_reexports)]
+#![allow(unexpected_cfgs)]
 
 use anchor_lang::prelude::*;
 
@@ -7,12 +8,12 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-#[allow(unused_imports)]
-pub use errors::*;
+// Don't glob re-export errors to avoid conflict with anchor_lang::error::ErrorCode
+pub use errors::ErrorCode;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("26jJKQHuNdAKc71J6fU6oV1UtXt5RDMamp4FpAbWyagJ");
+declare_id!("GWSRZD4X1kNoS8gYQzJizZP9cwyx5QoaJWDHNo5DbTpF");
 
 #[allow(deprecated)]
 #[program]
@@ -24,6 +25,24 @@ pub mod saharasol_core {
         params: InitializePlatformParams,
     ) -> Result<()> {
         instructions::platform::handler(ctx, params)
+    }
+
+    pub fn add_manager(
+        ctx: Context<AddManager>,
+        timestamp: i64,
+        manager: Pubkey,
+        reason: String,
+    ) -> Result<()> {
+        instructions::platform::add_manager_handler(ctx, timestamp, manager, reason)
+    }
+
+    pub fn remove_manager(
+        ctx: Context<RemoveManager>,
+        timestamp: i64,
+        manager: Pubkey,
+        reason: String,
+    ) -> Result<()> {
+        instructions::platform::remove_manager_handler(ctx, timestamp, manager, reason)
     }
 
     pub fn update_platform_config(

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { EmergencyPauseToggle } from "@/components/admin/emergency-pause-toggle";
+import { ManagerManagement } from "@/components/admin/manager-management";
 import { PlatformConfigForm } from "@/components/admin/platform-config-form";
 import { TokenManagement } from "@/components/admin/token-management";
 import {
@@ -144,14 +145,12 @@ export default function AdminSettingsPage() {
     const minutes = Math.floor((seconds % 3600) / 60);
 
     if (days > 0) {
-      return `${days} day${days > 1 ? "s" : ""}, ${hours} hour${
-        hours !== 1 ? "s" : ""
-      }`;
+      return `${days} day${days > 1 ? "s" : ""}, ${hours} hour${hours !== 1 ? "s" : ""
+        }`;
     }
     if (hours > 0) {
-      return `${hours} hour${hours > 1 ? "s" : ""}, ${minutes} minute${
-        minutes !== 1 ? "s" : ""
-      }`;
+      return `${hours} hour${hours > 1 ? "s" : ""}, ${minutes} minute${minutes !== 1 ? "s" : ""
+        }`;
     }
     return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
   };
@@ -473,9 +472,12 @@ export default function AdminSettingsPage() {
         onValueChange={handleTabChange}
         className="space-y-6"
       >
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4">
           <TabsTrigger value="administration" className="cursor-pointer">
             Administration
+          </TabsTrigger>
+          <TabsTrigger value="managers" className="cursor-pointer">
+            Managers
           </TabsTrigger>
           <TabsTrigger value="configuration" className="cursor-pointer">
             Configuration
@@ -737,6 +739,59 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
 
+        {/* Managers Tab */}
+        <TabsContent value="managers" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Manager Role Management</CardTitle>
+              <CardDescription>
+                Add or remove platform managers who can help with NGO
+                verification and management
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ManagerManagement
+                config={config}
+                onSuccess={() => {
+                  refetch();
+                }}
+                isRefreshing={isRefreshing}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Manager Permissions Info */}
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle className="text-sm">Manager Permissions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div>
+                <p className="font-medium text-green-600 dark:text-green-400">
+                  ✓ Managers CAN:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground ml-2 mt-1 space-y-1">
+                  <li>Verify and revoke NGO verification</li>
+                  <li>Update NGO status (activate/deactivate)</li>
+                  <li>Blacklist and remove blacklist from NGOs</li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium text-red-600 dark:text-red-400">
+                  ✗ Managers CANNOT:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground ml-2 mt-1 space-y-1">
+                  <li>Add or remove other managers</li>
+                  <li>Transfer admin privileges</li>
+                  <li>Update platform configuration</li>
+                  <li>Manage allowed tokens</li>
+                  <li>Pause/unpause the platform</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Config Tab */}
         <TabsContent value="configuration" className="space-y-6">
           <PlatformConfigForm
@@ -746,6 +801,145 @@ export default function AdminSettingsPage() {
               refetch();
             }}
           />
+
+          {/* Fee Rates & Usage Limits */}
+          {config && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Fee Rates & Usage Limits</CardTitle>
+                <CardDescription>
+                  Verification-based fee structure and NGO operational limits
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Fee Rates */}
+                <div>
+                  <h3 className="font-semibold mb-3">Donation Fee Rates</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          Unverified NGOs
+                        </span>
+                        <Badge variant="secondary">Standard</Badge>
+                      </div>
+                      <p className="text-2xl font-bold text-theme-primary">
+                        {(config.unverifiedNgoFeePercentage / 100).toFixed(2)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {config.unverifiedNgoFeePercentage} basis points
+                      </p>
+                    </div>
+                    <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          Verified NGOs
+                        </span>
+                        <Badge variant="default" className="bg-green-600">
+                          Verified
+                        </Badge>
+                      </div>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {(config.verifiedNgoFeePercentage / 100).toFixed(2)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {config.verifiedNgoFeePercentage} basis points
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    Verified NGOs receive a lower fee rate to incentivize
+                    verification and transparency
+                  </p>
+                </div>
+
+                {/* Usage Limits */}
+                <div>
+                  <h3 className="font-semibold mb-3">NGO Usage Limits</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          Unverified NGOs
+                        </span>
+                        <Badge variant="secondary">Standard</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Max Pools:
+                          </span>
+                          <span className="font-medium">
+                            {config.unverifiedNgoPoolLimit}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Max Beneficiaries:
+                          </span>
+                          <span className="font-medium">
+                            {config.unverifiedNgoBeneficiaryLimit}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          Verified NGOs
+                        </span>
+                        <Badge variant="default" className="bg-green-600">
+                          Verified
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Max Pools:
+                          </span>
+                          <span className="font-medium text-green-600 dark:text-green-400">
+                            {config.verifiedNgoPoolLimit}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Max Beneficiaries:
+                          </span>
+                          <span className="font-medium text-green-600 dark:text-green-400">
+                            {config.verifiedNgoBeneficiaryLimit}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    Verified NGOs can create more pools and register more
+                    beneficiaries
+                  </p>
+                </div>
+
+                {/* Total Fees Collected */}
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">
+                      Total Platform Fees Collected
+                    </span>
+                    <span className="text-lg font-bold text-theme-primary">
+                      $
+                      {(config.totalFeesCollected / 1_000_000).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}{" "}
+                      USDC
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Debug: Current Config Values */}
           {config && (
@@ -770,11 +964,20 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-theme-text/60 font-medium">
-                      Platform Fee:
+                      Unverified NGO Fee:
                     </span>
                     <span className="text-theme-text">
-                      {(config.platformFeePercentage / 100).toFixed(2)}% (
-                      {config.platformFeePercentage} bps)
+                      {(config.unverifiedNgoFeePercentage / 100).toFixed(2)}% (
+                      {config.unverifiedNgoFeePercentage} bps)
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-theme-text/60 font-medium">
+                      Verified NGO Fee:
+                    </span>
+                    <span className="text-theme-text">
+                      {(config.verifiedNgoFeePercentage / 100).toFixed(2)}% (
+                      {config.verifiedNgoFeePercentage} bps)
                     </span>
                   </div>
                   <div className="flex justify-between">

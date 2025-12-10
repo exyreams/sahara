@@ -50,7 +50,10 @@ export interface Location {
 export interface PlatformConfig {
   publicKey: PublicKey;
   admin: PublicKey;
-  platformFeePercentage: number;
+  managers: PublicKey[];
+  platformFeePercentage: number; // Deprecated, kept for backward compatibility
+  unverifiedNgoFeePercentage: number;
+  verifiedNgoFeePercentage: number;
   platformFeeRecipient: PublicKey;
   verificationThreshold: number;
   maxVerifiers: number;
@@ -65,6 +68,7 @@ export interface PlatformConfig {
   totalDonations: number;
   totalAidDistributed: number;
   totalPools: number;
+  totalFeesCollected: number;
   usdcMint: PublicKey;
   solUsdOracle: PublicKey | null;
   allowedTokens: PublicKey[];
@@ -78,9 +82,12 @@ export interface PlatformConfig {
   pendingAdmin: PublicKey | null;
   adminTransferInitiatedAt: number | null;
   adminTransferTimeout: number;
-  // Verified NGO privilege fields
+  // Usage limits fields
   verifiedNgoMaxDonation: number;
   verifiedNgoPoolLimit: number;
+  unverifiedNgoPoolLimit: number;
+  verifiedNgoBeneficiaryLimit: number;
+  unverifiedNgoBeneficiaryLimit: number;
 }
 
 // Disaster Event

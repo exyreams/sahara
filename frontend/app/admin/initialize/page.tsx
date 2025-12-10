@@ -29,8 +29,10 @@ export default function InitializePlatformPage() {
   const [alreadyInitialized, setAlreadyInitialized] = useState(false);
 
   // Default values
-  const [platformFeePercentage, setPlatformFeePercentage] = useState(100); // 1%
+  const [unverifiedNgoFeePercentage, setUnverifiedNgoFeePercentage] = useState(300); // 3%
+  const [verifiedNgoFeePercentage, setVerifiedNgoFeePercentage] = useState(150); // 1.5%
   const [verificationThreshold, setVerificationThreshold] = useState(3);
+  const [additionalTokens, setAdditionalTokens] = useState<string[]>([]);
   const [maxVerifiers, setMaxVerifiers] = useState(5);
   const [minDonationAmount, setMinDonationAmount] = useState(0.01);
   const [maxDonationAmount, setMaxDonationAmount] = useState(1000000);
@@ -70,10 +72,22 @@ export default function InitializePlatformPage() {
         if (!wallet.publicKey) throw new Error("Wallet not connected");
 
         // Call the initialize_platform instruction
+        // Filter out empty tokens and convert to PublicKey
+        const validAdditionalTokens = additionalTokens
+          .filter(token => token.trim().length > 0)
+          .map(token => {
+            try {
+              return new PublicKey(token.trim());
+            } catch {
+              throw new Error(`Invalid token address: ${token}`);
+            }
+          });
+
         // biome-ignore lint/suspicious/noExplicitAny: Anchor IDL types may not include all methods
         const tx = await (program.methods as any)
           .initializePlatform({
-            platformFeePercentage,
+            unverifiedNgoFeePercentage,
+            verifiedNgoFeePercentage,
             verificationThreshold,
             maxVerifiers,
             minDonationAmount: new BN(
@@ -83,6 +97,7 @@ export default function InitializePlatformPage() {
               Math.floor(maxDonationAmount * 1_000_000),
             ),
             usdcMint: new PublicKey(usdcMint),
+            additionalTokens: validAdditionalTokens,
             platformName,
             platformVersion,
           })
@@ -263,20 +278,42 @@ export default function InitializePlatformPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="platformFee" className="text-theme-text">
-                        Platform Fee (Basis Points)
+                      <Label htmlFor="unverifiedFee" className="text-theme-text">
+                        Unverified NGO Fee (Basis Points)
                       </Label>
                       <Input
-                        id="platformFee"
+                        id="unverifiedFee"
                         type="number"
-                        value={platformFeePercentage}
+                        min="0"
+                        max="1000"
+                        value={unverifiedNgoFeePercentage}
                         onChange={(e) =>
-                          setPlatformFeePercentage(Number(e.target.value))
+                          setUnverifiedNgoFeePercentage(Number(e.target.value))
                         }
                         className="bg-theme-background border-theme-border text-theme-text"
                       />
                       <p className="text-xs text-theme-text/60">
-                        100 = 1%, 1000 = 10% (max)
+                        {(unverifiedNgoFeePercentage / 100).toFixed(2)}% - Fee for unverified NGOs
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="verifiedFee" className="text-theme-text">
+                        Verified NGO Fee (Basis Points)
+                      </Label>
+                      <Input
+                        id="verifiedFee"
+                        type="number"
+                        min="0"
+                        max="1000"
+                        value={verifiedNgoFeePercentage}
+                        onChange={(e) =>
+                          setVerifiedNgoFeePercentage(Number(e.target.value))
+                        }
+                        className="bg-theme-background border-theme-border text-theme-text"
+                      />
+                      <p className="text-xs text-theme-text/60">
+                        {(verifiedNgoFeePercentage / 100).toFixed(2)}% - Lower fee for verified NGOs
                       </p>
                     </div>
 
@@ -390,6 +427,97 @@ export default function InitializePlatformPage() {
                       <p className="text-xs text-theme-text/60">
                         SPL Token mint address for USDC - use quick buttons or
                         enter custom address
+                      </p>
+                    </div>
+
+                    {/* Additional Tokens Section */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-theme-text">
+                        Additional Allowed Tokens (Optional)
+                      </Label>
+                      <div className="space-y-3">
+                        {additionalTokens.map((token, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="Enter SPL token mint address..."
+                              value={token}
+                              onChange={(e) => {
+                                const newTokens = [...additionalTokens];
+                                newTokens[index] = e.target.value;
+                                setAdditionalTokens(newTokens);
+                              }}
+                              className="font-mono text-sm bg-theme-background border-theme-border text-theme-text"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newTokens = additionalTokens.filter((_, i) => i !== index);
+                                setAdditionalTokens(newTokens);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+
+                        {additionalTokens.length < 9 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAdditionalTokens([...additionalTokens, ""])}
+                          >
+                            + Add Token
+                          </Button>
+                        )}
+
+                        {/* Quick Add Popular Tokens */}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (!additionalTokens.includes("So11111111111111111111111111111111111111112")) {
+                                setAdditionalTokens([...additionalTokens, "So11111111111111111111111111111111111111112"]);
+                              }
+                            }}
+                            disabled={additionalTokens.length >= 9}
+                          >
+                            Add SOL
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (!additionalTokens.includes("mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So")) {
+                                setAdditionalTokens([...additionalTokens, "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So"]);
+                              }
+                            }}
+                            disabled={additionalTokens.length >= 9}
+                          >
+                            Add mSOL
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (!additionalTokens.includes("7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj")) {
+                                setAdditionalTokens([...additionalTokens, "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj"]);
+                              }
+                            }}
+                            disabled={additionalTokens.length >= 9}
+                          >
+                            Add stSOL
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-theme-text/60">
+                        Additional SPL tokens to whitelist for donations. USDC is automatically included. Max 10 tokens total.
                       </p>
                     </div>
                   </div>

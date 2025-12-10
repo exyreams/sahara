@@ -337,4 +337,28 @@ pub enum ErrorCode {
 
     #[msg("Distribution has been partially claimed, cannot reclaim")]
     DistributionPartiallyClaimed,
+
+    #[msg("Manager already exists in the list")]
+    ManagerAlreadyExists,
+
+    #[msg("Manager not found in the list")]
+    ManagerNotFound,
+
+    #[msg("Maximum number of managers reached")]
+    MaxManagersReached,
+
+    #[msg("Cannot add admin as manager")]
+    CannotAddAdminAsManager,
+
+    #[msg("Only admin or manager can perform this action")]
+    UnauthorizedAdminOrManager,
+
+    #[msg("Only admin can perform this action (managers not allowed)")]
+    AdminOnlyAction,
+
+    #[msg("NGO has reached pool creation limit")]
+    PoolLimitReached,
+
+    #[msg("NGO has reached beneficiary registration limit")]
+    BeneficiaryLimitReached,
 }

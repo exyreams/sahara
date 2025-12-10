@@ -139,6 +139,7 @@ pub fn handler<'info>(
     national_id_registry.registered_at = clock.unix_timestamp;
     national_id_registry.bump = ctx.bumps.national_id_registry;
 
+    // Check NGO beneficiary limits
     if let Some(ngo_key) = field_worker.ngo {
         let ngo_account = ctx
             .remaining_accounts
@@ -147,10 +148,29 @@ pub fn handler<'info>(
 
         require!(ngo_account.key() == ngo_key, ErrorCode::InvalidAccountOwner);
 
-        let ngo: Account<crate::state::NGO> = Account::try_from(ngo_account)?;
+        let mut ngo: Account<crate::state::NGO> = Account::try_from(ngo_account)?;
 
         require!(ngo.is_active, ErrorCode::NGONotActive);
         require!(!ngo.is_blacklisted, ErrorCode::NGOBlacklisted);
+
+        // Check beneficiary registration limits based on verification status
+        let max_beneficiaries = if ngo.is_verified {
+            config.verified_ngo_beneficiary_limit as u32
+        } else {
+            config.unverified_ngo_beneficiary_limit as u32
+        };
+
+        require!(
+            ngo.beneficiaries_registered < max_beneficiaries,
+            ErrorCode::BeneficiaryLimitReached
+        );
+
+        // Increment NGO's beneficiary count
+        ngo.beneficiaries_registered = ngo
+            .beneficiaries_registered
+            .checked_add(1)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
+        ngo.last_activity_at = clock.unix_timestamp;
     }
 
     require!(

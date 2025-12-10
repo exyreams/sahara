@@ -20,7 +20,7 @@ pub struct VerifyNGO<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump,
-        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+        constraint = config.is_admin_or_manager(&admin.key()) @ ErrorCode::UnauthorizedAdminOrManager
     )]
     pub config: Account<'info, PlatformConfig>,
 
@@ -98,7 +98,7 @@ pub struct RevokeVerification<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump,
-        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+        constraint = config.is_admin_or_manager(&admin.key()) @ ErrorCode::UnauthorizedAdminOrManager
     )]
     pub config: Account<'info, PlatformConfig>,
 
@@ -175,7 +175,7 @@ pub struct UpdateNGOStatus<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump,
-        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+        constraint = config.is_admin_or_manager(&admin.key()) @ ErrorCode::UnauthorizedAdminOrManager
     )]
     pub config: Account<'info, PlatformConfig>,
 
@@ -259,7 +259,7 @@ pub struct BlacklistNGO<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump,
-        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+        constraint = config.is_admin_or_manager(&admin.key()) @ ErrorCode::UnauthorizedAdminOrManager
     )]
     pub config: Account<'info, PlatformConfig>,
 
@@ -338,7 +338,7 @@ pub struct RemoveBlacklist<'info> {
     #[account(
         seeds = [b"config"],
         bump = config.bump,
-        constraint = config.admin == admin.key() @ ErrorCode::UnauthorizedAdmin
+        constraint = config.is_admin_or_manager(&admin.key()) @ ErrorCode::UnauthorizedAdminOrManager
     )]
     pub config: Account<'info, PlatformConfig>,
 
