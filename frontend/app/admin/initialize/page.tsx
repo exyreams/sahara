@@ -29,7 +29,8 @@ export default function InitializePlatformPage() {
   const [alreadyInitialized, setAlreadyInitialized] = useState(false);
 
   // Default values
-  const [unverifiedNgoFeePercentage, setUnverifiedNgoFeePercentage] = useState(300); // 3%
+  const [unverifiedNgoFeePercentage, setUnverifiedNgoFeePercentage] =
+    useState(300); // 3%
   const [verifiedNgoFeePercentage, setVerifiedNgoFeePercentage] = useState(150); // 1.5%
   const [verificationThreshold, setVerificationThreshold] = useState(3);
   const [additionalTokens, setAdditionalTokens] = useState<string[]>([]);
@@ -74,8 +75,8 @@ export default function InitializePlatformPage() {
         // Call the initialize_platform instruction
         // Filter out empty tokens and convert to PublicKey
         const validAdditionalTokens = additionalTokens
-          .filter(token => token.trim().length > 0)
-          .map(token => {
+          .filter((token) => token.trim().length > 0)
+          .map((token) => {
             try {
               return new PublicKey(token.trim());
             } catch {
@@ -278,7 +279,10 @@ export default function InitializePlatformPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="unverifiedFee" className="text-theme-text">
+                      <Label
+                        htmlFor="unverifiedFee"
+                        className="text-theme-text"
+                      >
                         Unverified NGO Fee (Basis Points)
                       </Label>
                       <Input
@@ -293,7 +297,8 @@ export default function InitializePlatformPage() {
                         className="bg-theme-background border-theme-border text-theme-text"
                       />
                       <p className="text-xs text-theme-text/60">
-                        {(unverifiedNgoFeePercentage / 100).toFixed(2)}% - Fee for unverified NGOs
+                        {(unverifiedNgoFeePercentage / 100).toFixed(2)}% - Fee
+                        for unverified NGOs
                       </p>
                     </div>
 
@@ -313,7 +318,8 @@ export default function InitializePlatformPage() {
                         className="bg-theme-background border-theme-border text-theme-text"
                       />
                       <p className="text-xs text-theme-text/60">
-                        {(verifiedNgoFeePercentage / 100).toFixed(2)}% - Lower fee for verified NGOs
+                        {(verifiedNgoFeePercentage / 100).toFixed(2)}% - Lower
+                        fee for verified NGOs
                       </p>
                     </div>
 
@@ -453,7 +459,9 @@ export default function InitializePlatformPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                const newTokens = additionalTokens.filter((_, i) => i !== index);
+                                const newTokens = additionalTokens.filter(
+                                  (_, i) => i !== index,
+                                );
                                 setAdditionalTokens(newTokens);
                               }}
                             >
@@ -467,7 +475,9 @@ export default function InitializePlatformPage() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setAdditionalTokens([...additionalTokens, ""])}
+                            onClick={() =>
+                              setAdditionalTokens([...additionalTokens, ""])
+                            }
                           >
                             + Add Token
                           </Button>
@@ -480,8 +490,15 @@ export default function InitializePlatformPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (!additionalTokens.includes("So11111111111111111111111111111111111111112")) {
-                                setAdditionalTokens([...additionalTokens, "So11111111111111111111111111111111111111112"]);
+                              if (
+                                !additionalTokens.includes(
+                                  "So11111111111111111111111111111111111111112",
+                                )
+                              ) {
+                                setAdditionalTokens([
+                                  ...additionalTokens,
+                                  "So11111111111111111111111111111111111111112",
+                                ]);
                               }
                             }}
                             disabled={additionalTokens.length >= 9}
@@ -493,8 +510,15 @@ export default function InitializePlatformPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (!additionalTokens.includes("mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So")) {
-                                setAdditionalTokens([...additionalTokens, "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So"]);
+                              if (
+                                !additionalTokens.includes(
+                                  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+                                )
+                              ) {
+                                setAdditionalTokens([
+                                  ...additionalTokens,
+                                  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+                                ]);
                               }
                             }}
                             disabled={additionalTokens.length >= 9}
@@ -506,8 +530,15 @@ export default function InitializePlatformPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (!additionalTokens.includes("7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj")) {
-                                setAdditionalTokens([...additionalTokens, "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj"]);
+                              if (
+                                !additionalTokens.includes(
+                                  "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj",
+                                )
+                              ) {
+                                setAdditionalTokens([
+                                  ...additionalTokens,
+                                  "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj",
+                                ]);
                               }
                             }}
                             disabled={additionalTokens.length >= 9}
@@ -517,7 +548,8 @@ export default function InitializePlatformPage() {
                         </div>
                       </div>
                       <p className="text-xs text-theme-text/60">
-                        Additional SPL tokens to whitelist for donations. USDC is automatically included. Max 10 tokens total.
+                        Additional SPL tokens to whitelist for donations. USDC
+                        is automatically included. Max 10 tokens total.
                       </p>
                     </div>
                   </div>

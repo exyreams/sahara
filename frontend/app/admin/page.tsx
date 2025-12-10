@@ -472,8 +472,9 @@ export default function AdminDashboardPage() {
                           onClick={() => toggleExpanded(activityKey)}
                         >
                           <ChevronDown
-                            className={`h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${isExpanded ? "rotate-180" : ""
-                              }`}
+                            className={`h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
+                              isExpanded ? "rotate-180" : ""
+                            }`}
                           />
                           <FileText className="h-4 w-4 text-theme-primary shrink-0" />
                           <span className="font-semibold text-theme-text text-sm">
@@ -724,13 +725,17 @@ export default function AdminDashboardPage() {
               <CardContent>
                 <div className="space-y-2 text-sm mb-4">
                   <div>
-                    <span className="text-muted-foreground">Unverified NGO Fee:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Unverified NGO Fee:
+                    </span>{" "}
                     <span className="font-medium">
                       {config.unverifiedNgoFeePercentage / 100}%
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Verified NGO Fee:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Verified NGO Fee:
+                    </span>{" "}
                     <span className="font-medium">
                       {config.verifiedNgoFeePercentage / 100}%
                     </span>

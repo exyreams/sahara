@@ -145,12 +145,14 @@ export default function AdminSettingsPage() {
     const minutes = Math.floor((seconds % 3600) / 60);
 
     if (days > 0) {
-      return `${days} day${days > 1 ? "s" : ""}, ${hours} hour${hours !== 1 ? "s" : ""
-        }`;
+      return `${days} day${days > 1 ? "s" : ""}, ${hours} hour${
+        hours !== 1 ? "s" : ""
+      }`;
     }
     if (hours > 0) {
-      return `${hours} hour${hours > 1 ? "s" : ""}, ${minutes} minute${minutes !== 1 ? "s" : ""
-        }`;
+      return `${hours} hour${hours > 1 ? "s" : ""}, ${minutes} minute${
+        minutes !== 1 ? "s" : ""
+      }`;
     }
     return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
   };

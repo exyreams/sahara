@@ -12,6 +12,7 @@ import { WalletButton } from "@/components/wallet/wallet-button";
 import { useAdmin } from "@/hooks/use-admin";
 import { useBeneficiaryProfile } from "@/hooks/use-beneficiary-profile";
 import { useFieldWorker } from "@/hooks/use-field-worker";
+import { useManager } from "@/hooks/use-manager";
 import { useNGO } from "@/hooks/use-ngo";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAdmin } = useAdmin();
+  const { isManager } = useManager();
   const { ngo } = useNGO();
   const { isFieldWorker } = useFieldWorker();
   const { isBeneficiary } = useBeneficiaryProfile();
@@ -51,6 +53,14 @@ export function Header() {
               <Badge variant="default" className="gap-1">
                 <Shield className="h-3 w-3" />
                 Admin
+              </Badge>
+            </Link>
+          )}
+          {isManager && !isAdmin && (
+            <Link href="/manager">
+              <Badge variant="default" className="gap-1">
+                <Shield className="h-3 w-3" />
+                Manager
               </Badge>
             </Link>
           )}
@@ -117,6 +127,17 @@ export function Header() {
               >
                 <Shield className="h-3 w-3" />
                 Admin
+              </Badge>
+            </Link>
+          )}
+          {isManager && !isAdmin && (
+            <Link href="/manager">
+              <Badge
+                variant="default"
+                className="gap-1 cursor-pointer hover:bg-theme-primary/90"
+              >
+                <Shield className="h-3 w-3" />
+                Manager
               </Badge>
             </Link>
           )}

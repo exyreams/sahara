@@ -33,7 +33,7 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
       // Try to fetch the config account
       const configAccount =
         await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
-          (program.account as any).platformConfig.fetchNullable(configPDA);
+        (program.account as any).platformConfig.fetchNullable(configPDA);
 
       // If account doesn't exist yet (not initialized), return null
       if (!configAccount) {
@@ -82,7 +82,8 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
         verifiedNgoPoolLimit: configAccount.verifiedNgoPoolLimit,
         unverifiedNgoPoolLimit: configAccount.unverifiedNgoPoolLimit,
         verifiedNgoBeneficiaryLimit: configAccount.verifiedNgoBeneficiaryLimit,
-        unverifiedNgoBeneficiaryLimit: configAccount.unverifiedNgoBeneficiaryLimit,
+        unverifiedNgoBeneficiaryLimit:
+          configAccount.unverifiedNgoBeneficiaryLimit,
       };
     },
     enabled: !!program,

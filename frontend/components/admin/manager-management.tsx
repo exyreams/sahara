@@ -69,11 +69,7 @@ export function ManagerManagement({
           );
 
           const tx = await program.methods
-            .addManager(
-              actionId,
-              managerPubkey,
-              "Added via admin settings",
-            )
+            .addManager(actionId, managerPubkey, "Added via admin settings")
             .accounts({
               config: configPDA,
               adminAction: adminActionPDA,
