@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
 import { derivePlatformConfigPDA } from "@/lib/anchor/pdas";
+import { generateActionIds } from "@/lib/utils/generateActionId";
 import type { PlatformConfig } from "@/types/program";
 
 interface ManagerManagementProps {
@@ -55,20 +56,21 @@ export function ManagerManagement({
           const [configPDA] = derivePlatformConfigPDA();
           const timestamp = Math.floor(Date.now() / 1000);
 
+          // Generate unique action ID
+          const [actionId] = generateActionIds(adminPublicKey, 1);
+
           const [adminActionPDA] = PublicKey.findProgramAddressSync(
             [
               Buffer.from("admin-action"),
               adminPublicKey.toBuffer(),
-              Buffer.from(
-                new (await import("bn.js")).default(timestamp).toArray("le", 8),
-              ),
+              actionId.toArrayLike(Buffer, "le", 8),
             ],
             program.programId,
           );
 
           const tx = await program.methods
             .addManager(
-              new (await import("bn.js")).default(timestamp),
+              actionId,
               managerPubkey,
               "Added via admin settings",
             )
@@ -103,22 +105,22 @@ export function ManagerManagement({
     await submit(
       async () => {
         const [configPDA] = derivePlatformConfigPDA();
-        const timestamp = Math.floor(Date.now() / 1000);
+
+        // Generate unique action ID
+        const [actionId] = generateActionIds(adminPublicKey, 1);
 
         const [adminActionPDA] = PublicKey.findProgramAddressSync(
           [
             Buffer.from("admin-action"),
             adminPublicKey.toBuffer(),
-            Buffer.from(
-              new (await import("bn.js")).default(timestamp).toArray("le", 8),
-            ),
+            actionId.toArrayLike(Buffer, "le", 8),
           ],
           program.programId,
         );
 
         const tx = await program.methods
           .removeManager(
-            new (await import("bn.js")).default(timestamp),
+            actionId,
             managerToRemove,
             "Removed via admin settings",
           )
@@ -143,8 +145,9 @@ export function ManagerManagement({
   };
 
   const managers = config?.managers || [];
-  const isManager =
-    wallet.publicKey && managers.some((m) => m.equals(wallet.publicKey));
+  const isManager = wallet.publicKey
+    ? managers.some((m) => m.equals(wallet.publicKey!))
+    : false;
 
   return (
     <div className="space-y-4">

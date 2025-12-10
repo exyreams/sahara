@@ -33,7 +33,7 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
       // Try to fetch the config account
       const configAccount =
         await // biome-ignore lint/suspicious/noExplicitAny: Anchor account types are dynamic
-        (program.account as any).platformConfig.fetchNullable(configPDA);
+          (program.account as any).platformConfig.fetchNullable(configPDA);
 
       // If account doesn't exist yet (not initialized), return null
       if (!configAccount) {
@@ -43,7 +43,10 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
       return {
         publicKey: configPDA,
         admin: configAccount.admin,
+        managers: configAccount.managers || [],
         platformFeePercentage: configAccount.platformFeePercentage,
+        unverifiedNgoFeePercentage: configAccount.unverifiedNgoFeePercentage,
+        verifiedNgoFeePercentage: configAccount.verifiedNgoFeePercentage,
         platformFeeRecipient: configAccount.platformFeeRecipient,
         verificationThreshold: configAccount.verificationThreshold,
         maxVerifiers: configAccount.maxVerifiers,
@@ -58,6 +61,7 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
         totalDonations: configAccount.totalDonations.toNumber(),
         totalAidDistributed: configAccount.totalAidDistributed.toNumber(),
         totalPools: configAccount.totalPools,
+        totalFeesCollected: configAccount.totalFeesCollected.toNumber(),
         usdcMint: configAccount.usdcMint,
         solUsdOracle: configAccount.solUsdOracle || null,
         allowedTokens: configAccount.allowedTokens,
@@ -73,9 +77,12 @@ export function usePlatformConfig(): UsePlatformConfigReturn {
           ? configAccount.adminTransferInitiatedAt.toNumber()
           : null,
         adminTransferTimeout: configAccount.adminTransferTimeout.toNumber(),
-        // Verified NGO privilege fields
+        // Usage limits fields
         verifiedNgoMaxDonation: configAccount.verifiedNgoMaxDonation.toNumber(),
         verifiedNgoPoolLimit: configAccount.verifiedNgoPoolLimit,
+        unverifiedNgoPoolLimit: configAccount.unverifiedNgoPoolLimit,
+        verifiedNgoBeneficiaryLimit: configAccount.verifiedNgoBeneficiaryLimit,
+        unverifiedNgoBeneficiaryLimit: configAccount.unverifiedNgoBeneficiaryLimit,
       };
     },
     enabled: !!program,
