@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { NGOForm } from "@/components/ngo/ngo-form";
 import {
   WideModal,
@@ -23,17 +24,23 @@ export function NGORegistrationModal({
 }: NGORegistrationModalProps) {
   const router = useRouter();
   const { ngo } = useNGO();
+  const queryClient = useQueryClient();
 
   const handleSuccess = () => {
     // Close modal immediately
     onOpenChange(false);
+
+    // Invalidate NGO queries to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ["ngo"] });
+    queryClient.invalidateQueries({ queryKey: ["ngos"] });
+
     if (mode === "create") {
       router.push("/ngo/dashboard");
     } else {
-      // Delay refresh slightly to ensure modal is fully closed
+      // Delay refresh slightly to ensure modal is fully closed and queries are invalidated
       setTimeout(() => {
         router.refresh();
-      }, 100);
+      }, 200);
     }
   };
 

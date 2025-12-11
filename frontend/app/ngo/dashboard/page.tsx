@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ParticleSystem } from "@/components/ui/particle-system";
+import { GridBackground } from "@/components/ui/grid-background";
 import { useActivityLogs } from "@/hooks/use-activity-logs";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
 import { useFieldWorkers } from "@/hooks/use-field-workers";
@@ -133,6 +133,26 @@ export default function NGODashboardPage() {
 
   // Get recent 5 NGO-specific activities
   const recentActivities = allActivities.slice(0, 5);
+
+  // Calculate derived data when ngo exists
+  const ngoFieldWorkers = ngo
+    ? fieldWorkers.filter((fw) => fw.ngo?.equals(ngo.publicKey))
+    : [];
+
+  // Count beneficiaries registered by this NGO's field workers
+  const ngoBeneficiaries = ngo
+    ? beneficiaries.filter((b) =>
+        ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
+      )
+    : [];
+
+  const ngoBeneficiariesCount = ngoBeneficiaries.length;
+
+  // Calculate total aid distributed to this NGO's beneficiaries
+  // Sum up totalReceived from all beneficiaries registered by this NGO's field workers
+  const totalAidDistributed = ngoBeneficiaries.reduce((total, b) => {
+    return total + b.totalReceived;
+  }, 0);
 
   // Format action type for display
   const formatActionType = (actionType: string): string => {
@@ -385,17 +405,15 @@ export default function NGODashboardPage() {
   // Only show "no NGO" screen if we've loaded and there's truly no NGO (not during refresh)
   if (!ngo && hasInitiallyLoaded) {
     return (
-      <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
-        {/* Left Side - Particle Background (40%) */}
-        <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
-          <div className="absolute inset-0">
-            <ParticleSystem text="Ngo" />
-          </div>
+      <div className="flex-1 relative -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
+        {/* Full-screen Grid Background */}
+        <div className="absolute inset-0">
+          <GridBackground />
         </div>
 
-        {/* Right Side - Content (60%) */}
-        <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
-          <div className="max-w-xl w-full space-y-8">
+        {/* Content Overlay */}
+        <div className="relative z-10 flex items-center justify-center px-6 py-16 min-h-full">
+          <div className="max-w-2xl w-full space-y-8">
             {/* Header */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -478,17 +496,15 @@ export default function NGODashboardPage() {
   // This handles edge cases where hasInitiallyLoaded might not be set correctly
   if (!ngo) {
     return (
-      <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
-        {/* Left Side - Particle Background (40%) */}
-        <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
-          <div className="absolute inset-0">
-            <ParticleSystem text="Ngo" />
-          </div>
+      <div className="flex-1 relative -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
+        {/* Full-screen Grid Background */}
+        <div className="absolute inset-0">
+          <GridBackground />
         </div>
 
-        {/* Right Side - Content (60%) */}
-        <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
-          <div className="max-w-xl w-full space-y-8">
+        {/* Content Overlay */}
+        <div className="relative z-10 flex items-center justify-center px-6 py-16 min-h-full">
+          <div className="max-w-2xl w-full space-y-8">
             {/* Header */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -566,22 +582,6 @@ export default function NGODashboardPage() {
       </div>
     );
   }
-
-  const ngoFieldWorkers = fieldWorkers.filter((fw) =>
-    fw.ngo?.equals(ngo.publicKey),
-  );
-
-  // Count beneficiaries registered by this NGO's field workers
-  const ngoBeneficiaries = beneficiaries.filter((b) =>
-    ngoFieldWorkers.some((fw) => fw.authority.equals(b.registeredBy)),
-  );
-  const ngoBeneficiariesCount = ngoBeneficiaries.length;
-
-  // Calculate total aid distributed to this NGO's beneficiaries
-  // Sum up totalReceived from all beneficiaries registered by this NGO's field workers
-  const totalAidDistributed = ngoBeneficiaries.reduce((total, b) => {
-    return total + b.totalReceived;
-  }, 0);
 
   return (
     <>
@@ -763,24 +763,24 @@ export default function NGODashboardPage() {
             {/* Operating Areas - merged into same card */}
             <div className="pt-4 border-t border-theme-border space-y-3">
               <div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Operating Districts ({ngo.operatingDistricts.length})
-                </p>
+                <span className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Operating Districts
+                </span>
                 <div className="flex flex-wrap gap-1">
-                  {ngo.operatingDistricts.map((district) => (
-                    <Badge key={district} variant="log_action">
+                  {ngo.operatingDistricts?.map((district: string) => (
+                    <Badge key={district} variant="outline" className="text-xs">
                       {district}
                     </Badge>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Focus Areas ({ngo.focusAreas.length})
-                </p>
+                <span className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Focus Areas
+                </span>
                 <div className="flex flex-wrap gap-1">
-                  {ngo.focusAreas.map((area) => (
-                    <Badge key={area} variant="log_action">
+                  {ngo.focusAreas?.map((area: string) => (
+                    <Badge key={area} variant="outline" className="text-xs">
                       {area}
                     </Badge>
                   ))}
@@ -790,117 +790,87 @@ export default function NGODashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Team Overview - Field Workers & Beneficiaries */}
+        {/* Team Overview */}
         <Card className="bg-theme-card-bg border-theme-border">
           <CardHeader>
             <CardTitle>Team Overview</CardTitle>
             <CardDescription>
-              Recent field workers and beneficiaries
+              Manage your field workers and track beneficiaries
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Field Workers Section */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-theme-text-highlight">
-                  Field Workers
-                </h3>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                >
-                  <Link href="/ngo/field-workers">
-                    View All
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
+                <span className="text-sm font-medium">Field Workers</span>
+                <Badge variant="secondary">{ngoFieldWorkers.length}</Badge>
               </div>
-              {ngoFieldWorkers.length > 0 ? (
-                <div className="space-y-2">
-                  {ngoFieldWorkers.slice(0, 3).map((worker) => (
-                    <Link
-                      key={worker.publicKey.toBase58()}
-                      href={`/ngo/field-workers/${worker.authority.toBase58()}`}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-theme-primary/5 transition-colors border border-theme-border"
+              <div className="space-y-2">
+                {ngoFieldWorkers.slice(0, 3).map((worker: any) => (
+                  <div
+                    key={worker.publicKey.toBase58()}
+                    className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">{worker.name}</span>
+                    </div>
+                    <Badge
+                      variant={worker.isActive ? "default" : "secondary"}
+                      className="text-xs"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Users className="h-4 w-4 text-theme-primary shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {worker.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {worker.verificationsCount} verifications
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={worker.isActive ? "default" : "secondary"}
-                        className="shrink-0"
-                      >
-                        {worker.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No field workers yet
-                </p>
-              )}
+                      {worker.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                ))}
+                {ngoFieldWorkers.length > 3 && (
+                  <div className="text-center pt-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href="/ngo/field-workers">
+                        View All ({ngoFieldWorkers.length})
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Beneficiaries Section */}
-            <div className="pt-4 border-t border-theme-border">
+            <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-theme-text-highlight">
-                  Beneficiaries
-                </h3>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                >
-                  <Link href="/beneficiaries">
-                    View All
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
+                <span className="text-sm font-medium">Beneficiaries</span>
+                <Badge variant="secondary">{ngoBeneficiaries.length}</Badge>
               </div>
-              {ngoBeneficiaries.length > 0 ? (
-                <div className="space-y-2">
-                  {ngoBeneficiaries.slice(0, 3).map((beneficiary) => (
-                    <Link
-                      key={beneficiary.publicKey.toBase58()}
-                      href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-theme-primary/5 transition-colors border border-theme-border"
+              <div className="space-y-2">
+                {ngoBeneficiaries.slice(0, 3).map((beneficiary: any) => (
+                  <div
+                    key={beneficiary.publicKey.toBase58()}
+                    className="flex items-center justify-between p-2 rounded-lg border border-theme-border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">
+                        {beneficiary.name}
+                      </span>
+                    </div>
+                    <Badge
+                      variant={beneficiary.isVerified ? "default" : "secondary"}
+                      className="text-xs"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Users className="h-4 w-4 text-theme-primary shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {beneficiary.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {beneficiary.location.district}, Ward{" "}
-                            {beneficiary.location.ward}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="shrink-0 text-xs">
-                        {beneficiary.verificationStatus}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No beneficiaries yet
-                </p>
-              )}
+                      {beneficiary.isVerified ? "Verified" : "Pending"}
+                    </Badge>
+                  </div>
+                ))}
+                {ngoBeneficiaries.length > 3 && (
+                  <div className="text-center pt-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href="/beneficiaries">
+                        View All ({ngoBeneficiaries.length})
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -911,301 +881,145 @@ export default function NGODashboardPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent Activity</CardTitle>
-              <CardDescription>Latest NGO-related actions</CardDescription>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>
+                Latest actions performed by your organization
+              </CardDescription>
             </div>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/ngo/activity-log">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/activity">
                 View All
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {logsLoading || isRefreshing ? (
-            <div className="space-y-3">
-              {Array.from(
-                { length: 5 },
-                (_, i) => `activity-log-skeleton-${i}`,
-              ).map((key) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-3 p-3 border border-theme-border rounded-lg animate-pulse"
-                >
-                  <div className="h-10 w-10 bg-theme-border rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-48 bg-theme-border rounded" />
-                    <div className="h-3 w-32 bg-theme-border rounded" />
-                  </div>
-                  <div className="h-4 w-16 bg-theme-border rounded" />
-                </div>
-              ))}
-            </div>
-          ) : recentActivities.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No recent activities</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {recentActivities.map((activity) => {
-                const activityKey = activity.publicKey.toString();
+          <div className="space-y-2">
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No recent activity</p>
+              </div>
+            ) : (
+              recentActivities.map((activity, index) => {
+                const activityKey = `${activity.publicKey.toBase58()}-${index}`;
                 const isExpanded = expandedActivities.has(activityKey);
 
                 return (
                   <div
                     key={activityKey}
-                    className="border border-theme-border rounded-lg overflow-hidden hover:border-theme-primary/50 transition-all duration-200"
+                    className="border border-theme-border rounded-lg overflow-hidden"
                   >
-                    {/* Collapsed View */}
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 p-3 cursor-pointer hover:bg-theme-primary/5 w-full text-left"
+                    <div
+                      className="flex items-center gap-3 p-3 cursor-pointer hover:bg-theme-card-bg/50 transition-colors"
                       onClick={() => toggleExpanded(activityKey)}
                     >
                       <ChevronDown
-                        className={`h-4 w-4 text-theme-text transition-transform duration-200 shrink-0 ${
+                        className={`h-4 w-4 text-muted-foreground transition-transform ${
                           isExpanded ? "rotate-180" : ""
                         }`}
                       />
-                      <FileText className="h-4 w-4 text-theme-primary shrink-0" />
-                      <span className="font-semibold text-theme-text text-sm">
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <Badge variant="outline" className="shrink-0">
                         {formatActionType(activity.actionType)}
-                      </span>
-                      <div className="flex-1" />
-                      <span className="text-xs text-theme-text/60 shrink-0">
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {activity.metadata || "No description"}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {formatRelativeTime(activity.timestamp)}
                       </span>
-                    </button>
+                    </div>
 
-                    {/* Expanded View */}
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                          className="overflow-hidden"
+                          transition={{ duration: 0.2 }}
+                          className="border-t border-theme-border bg-theme-card-bg/30"
                         >
-                          <div className="border-t border-theme-border bg-theme-background/50 p-4 space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-4 text-xs">
                               <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Actor
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-mono text-theme-text break-all">
-                                    {activity.actor.toString()}
-                                  </p>
-                                  <a
-                                    href={getExplorerUrl(
-                                      activity.actor.toString(),
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-theme-primary hover:underline shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
+                                <span className="text-muted-foreground">
+                                  Actor:
+                                </span>
+                                <div className="font-mono break-all">
+                                  {activity.actor.toBase58()}
                                 </div>
                               </div>
                               <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Target
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-mono text-theme-text break-all">
-                                    {activity.target.toString()}
-                                  </p>
-                                  <a
-                                    href={getExplorerUrl(
-                                      activity.target.toString(),
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-theme-primary hover:underline shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
+                                <span className="text-muted-foreground">
+                                  Target:
+                                </span>
+                                <div className="font-mono break-all">
+                                  {activity.target.toBase58()}
                                 </div>
                               </div>
-                              <div>
-                                <p className="text-xs text-theme-text/60 mb-1">
-                                  Date & Time
-                                </p>
-                                <p className="text-sm text-theme-text">
-                                  {new Date(
-                                    activity.timestamp * 1000,
-                                  ).toLocaleString()}
-                                </p>
-                              </div>
-                              {activity.amount !== null && (
-                                <div>
-                                  <p className="text-xs text-theme-text/60 mb-1">
-                                    Amount
-                                  </p>
-                                  <p className="text-sm text-theme-primary font-semibold">
-                                    ${(activity.amount / 1_000_000).toFixed(2)}{" "}
-                                    USDC
-                                  </p>
-                                </div>
-                              )}
                             </div>
-
-                            {/* Parse and display metadata */}
-                            {activity.metadata &&
-                              (() => {
-                                // For field worker registrations, metadata is just the name
-                                if (
-                                  activity.actionType ===
-                                  "fieldWorkerRegistered"
-                                ) {
-                                  return (
-                                    <div className="pt-3 border-t border-theme-border">
-                                      <p className="text-xs text-theme-text/60 mb-1">
-                                        Field Worker Name
-                                      </p>
-                                      <p className="text-sm text-theme-text font-medium">
-                                        {activity.metadata}
-                                      </p>
-                                    </div>
-                                  );
-                                }
-
-                                // Parse metadata for other activities (format: "Key: Value | Key: Value")
-                                const metadataParts =
-                                  activity.metadata.split(" | ");
-                                const parsedData: Record<string, string> = {};
-
-                                metadataParts.forEach((part) => {
-                                  const [key, value] = part.split(": ");
-                                  if (key && value) {
-                                    parsedData[key] = value;
-                                  }
-                                });
-
-                                return (
-                                  <div className="pt-3 border-t border-theme-border">
-                                    <p className="text-xs text-theme-text/60 mb-2">
-                                      Additional Details
-                                    </p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                      {parsedData.Pool && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Pool Name
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            {parsedData.Pool}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Amount && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Donation Amount
-                                          </p>
-                                          <p className="text-sm text-theme-primary font-semibold">
-                                            $
-                                            {(
-                                              Number.parseInt(
-                                                parsedData.Amount,
-                                                10,
-                                              ) / 1_000_000
-                                            ).toFixed(2)}{" "}
-                                            USDC
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Fee && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Platform Fee
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            $
-                                            {(
-                                              Number.parseInt(
-                                                parsedData.Fee,
-                                                10,
-                                              ) / 1_000_000
-                                            ).toFixed(2)}{" "}
-                                            USDC
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Disaster && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Disaster
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            {parsedData.Disaster}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {parsedData.Beneficiary && (
-                                        <div>
-                                          <p className="text-xs text-theme-text/60 mb-1">
-                                            Beneficiary
-                                          </p>
-                                          <p className="text-sm text-theme-text">
-                                            {parsedData.Beneficiary}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {/* Display any other metadata fields */}
-                                      {Object.entries(parsedData).map(
-                                        ([key, value]) => {
-                                          if (
-                                            ![
-                                              "Pool",
-                                              "Amount",
-                                              "Fee",
-                                              "Disaster",
-                                              "Beneficiary",
-                                            ].includes(key)
-                                          ) {
-                                            return (
-                                              <div key={key}>
-                                                <p className="text-xs text-theme-text/60 mb-1">
-                                                  {key}
-                                                </p>
-                                                <p className="text-sm text-theme-text">
-                                                  {value}
-                                                </p>
-                                              </div>
-                                            );
-                                          }
-                                          return null;
-                                        },
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })()}
+                            {activity.amount && (
+                              <div className="text-xs">
+                                <span className="text-muted-foreground">
+                                  Amount:
+                                </span>
+                                <span className="ml-2 font-medium">
+                                  {formatCurrency(activity.amount)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex gap-2 pt-2">
+                              <Button variant="ghost" size="sm" asChild>
+                                <a
+                                  href={getExplorerUrl(
+                                    activity.actor.toBase58(),
+                                  )}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs"
+                                >
+                                  View Actor
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </a>
+                              </Button>
+                              <Button variant="ghost" size="sm" asChild>
+                                <a
+                                  href={getExplorerUrl(
+                                    activity.target.toBase58(),
+                                  )}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs"
+                                >
+                                  View Target
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </a>
+                              </Button>
+                            </div>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
                 );
-              })}
-            </div>
-          )}
+              })
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Edit Modal */}
-      <NGORegistrationModal
-        open={showEditModal}
-        onOpenChange={setShowEditModal}
-        mode="edit"
-      />
+      {/* NGO Registration Modal */}
+      {showEditModal && (
+        <NGORegistrationModal
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          mode="edit"
+        />
+      )}
     </>
   );
 }

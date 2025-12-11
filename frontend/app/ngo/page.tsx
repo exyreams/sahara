@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ParticleSystem } from "@/components/ui/particle-system";
+import { GridBackground } from "@/components/ui/grid-background";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useNGO } from "@/hooks/use-ngo";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
@@ -34,15 +34,26 @@ export default function NGOPage() {
   const { wallet } = useProgram();
   const { ngo, loading } = useNGO();
   const { config } = usePlatformConfig();
-  const [checking, setChecking] = useState(true);
+  const [loadingStage, setLoadingStage] = useState<
+    "checking" | "found-ngo" | "complete"
+  >("checking");
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
-      setChecking(false);
-      if (ngo && wallet.connected) {
-        router.push("/ngo/dashboard");
+    if (!loading && wallet.connected) {
+      if (ngo) {
+        // NGO found - show dashboard skeleton briefly before redirecting
+        setLoadingStage("found-ngo");
+        const timer = setTimeout(() => {
+          router.push("/ngo/dashboard");
+        }, 800); // Show dashboard skeleton for 800ms
+        return () => clearTimeout(timer);
+      } else {
+        // No NGO found - show registration form
+        setLoadingStage("complete");
       }
+    } else if (!loading) {
+      setLoadingStage("complete");
     }
   }, [ngo, loading, wallet.connected, router]);
 
@@ -59,7 +70,7 @@ export default function NGOPage() {
             >
               {/* Particle Background */}
               <div className="absolute inset-0 z-0">
-                <ParticleSystem text="Ngo" />
+                <GridBackground />
               </div>
 
               {/* Content Overlay */}
@@ -317,32 +328,143 @@ export default function NGOPage() {
     );
   }
 
-  // Wallet connected - checking registration
-  if (checking || loading) {
+  // Wallet connected - progressive loading states
+  if ((loadingStage !== "complete" || loading) && wallet.connected) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-theme-background">
-        <LoadingSpinner
-          size="lg"
-          text="Checking NGO registration..."
-          className="py-12"
-        />
+      <div className="min-h-screen flex flex-col bg-theme-background">
+        <main className="flex-1 relative -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+          {/* Full-screen Grid Background */}
+          <div className="absolute inset-0">
+            <GridBackground />
+          </div>
+
+          {/* Progressive Loading Content */}
+          <div className="relative z-10 flex items-center justify-center px-6 py-16 min-h-screen">
+            <div className="max-w-2xl w-full space-y-8">
+              {loadingStage === "checking" && (
+                <>
+                  {/* Initial Loading Spinner */}
+                  <div className="text-center">
+                    <LoadingSpinner
+                      size="lg"
+                      text="Checking NGO registration..."
+                      className="py-12"
+                    />
+                  </div>
+
+                  {/* Registration Form Skeleton */}
+                  <div className="space-y-8 animate-pulse">
+                    {/* Header Skeleton */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-theme-border/50" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-8 bg-theme-border/50 rounded w-3/4" />
+                        <div className="h-4 bg-theme-border/50 rounded w-1/2" />
+                      </div>
+                    </div>
+
+                    {/* Wallet Address Skeleton */}
+                    <div className="p-4 rounded-lg border border-theme-border/50 bg-theme-card-bg/50">
+                      <div className="h-3 bg-theme-border/50 rounded w-24 mb-2" />
+                      <div className="h-4 bg-theme-border/50 rounded w-full" />
+                    </div>
+
+                    {/* Steps Skeleton */}
+                    <div className="space-y-6">
+                      <div className="h-6 bg-theme-border/50 rounded w-48" />
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex gap-4 items-start">
+                            <div className="w-8 h-8 rounded-full bg-theme-border/50 shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="h-4 bg-theme-border/50 rounded w-3/4" />
+                              <div className="h-3 bg-theme-border/50 rounded w-1/2" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Button Skeleton */}
+                    <div className="flex gap-4">
+                      <div className="h-12 bg-theme-border/50 rounded w-40" />
+                      <div className="h-12 bg-theme-border/50 rounded w-32" />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {loadingStage === "found-ngo" && (
+                <>
+                  {/* NGO Found - Dashboard Skeleton */}
+                  <div className="text-center">
+                    <LoadingSpinner
+                      size="lg"
+                      text="Loading NGO dashboard..."
+                      className="py-8"
+                    />
+                  </div>
+
+                  {/* Dashboard Preview Skeleton */}
+                  <div className="space-y-6 animate-pulse">
+                    {/* Dashboard Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded-full bg-theme-border/50" />
+                        <div className="space-y-2">
+                          <div className="h-6 bg-theme-border/50 rounded w-48" />
+                          <div className="h-4 bg-theme-border/50 rounded w-32" />
+                        </div>
+                      </div>
+                      <div className="h-6 w-20 bg-theme-border/50 rounded" />
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="p-6 rounded-lg border border-theme-border/50 bg-theme-card-bg/50"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="h-4 bg-theme-border/50 rounded w-20" />
+                              <div className="w-5 h-5 bg-theme-border/50 rounded" />
+                            </div>
+                            <div className="h-8 bg-theme-border/50 rounded w-16" />
+                            <div className="h-3 bg-theme-border/50 rounded w-24" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-4">
+                      <div className="h-10 bg-theme-border/50 rounded w-32" />
+                      <div className="h-10 bg-theme-border/50 rounded w-28" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
-  // Wallet connected but not registered - Split-screen hero design
+  // Wallet connected but not registered - Full-screen with grid background
   return (
     <div className="min-h-screen flex flex-col bg-theme-background">
-      <main className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
-        {/* Left Side - Particle Background (40%) */}
-        <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
-          <div className="absolute inset-0">
-            <ParticleSystem text="Ngo" />
-          </div>
+      <main className="flex-1 relative -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -mt-20">
+        {/* Full-screen Grid Background */}
+        <div className="absolute inset-0">
+          <GridBackground />
         </div>
-        {/* Right Side - Content (60%) */}
-        <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
-          <div className="max-w-xl w-full space-y-8">
+
+        {/* Content Overlay */}
+        <div className="relative z-10 flex items-center justify-center px-6 py-16 min-h-screen">
+          <div className="max-w-2xl w-full space-y-8">
             {/* Header */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">

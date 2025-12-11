@@ -37,35 +37,35 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
         document.documentElement.getAttribute("data-theme") || "default";
       const isDark = theme !== "light";
 
-      // Theme-aware colors
+      // Theme-aware colors with even lower opacity
       const getThemeColors = () => {
         switch (theme) {
           case "sunset":
             return {
               strokeColor: isDark
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(0, 0, 0, 0.05)",
-              pointColor: "rgba(251, 146, 60, 0.4)", // Orange
-              gradientPrimary: "rgba(251, 146, 60, 0.15)", // Orange
-              gradientSecondary: "rgba(239, 68, 68, 0.15)", // Red
+                ? "rgba(255, 255, 255, 0.02)"
+                : "rgba(0, 0, 0, 0.02)",
+              pointColor: "rgba(251, 146, 60, 0.18)", // Orange - further reduced
+              gradientPrimary: "rgba(251, 146, 60, 0.05)", // Orange - further reduced
+              gradientSecondary: "rgba(239, 68, 68, 0.05)", // Red - further reduced
             };
           case "emerald":
             return {
               strokeColor: isDark
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(0, 0, 0, 0.05)",
-              pointColor: "rgba(16, 185, 129, 0.4)", // Emerald
-              gradientPrimary: "rgba(16, 185, 129, 0.15)", // Emerald
-              gradientSecondary: "rgba(34, 197, 94, 0.15)", // Green
+                ? "rgba(255, 255, 255, 0.02)"
+                : "rgba(0, 0, 0, 0.02)",
+              pointColor: "rgba(16, 185, 129, 0.18)", // Emerald - further reduced
+              gradientPrimary: "rgba(16, 185, 129, 0.05)", // Emerald - further reduced
+              gradientSecondary: "rgba(34, 197, 94, 0.05)", // Green - further reduced
             };
           default:
             return {
               strokeColor: isDark
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(0, 0, 0, 0.05)",
-              pointColor: "rgba(57, 211, 241, 0.4)", // Cyan
-              gradientPrimary: "rgba(57, 211, 241, 0.15)", // Cyan
-              gradientSecondary: "rgba(139, 92, 246, 0.15)", // Purple
+                ? "rgba(255, 255, 255, 0.02)"
+                : "rgba(0, 0, 0, 0.02)",
+              pointColor: "rgba(57, 211, 241, 0.18)", // Cyan - further reduced
+              gradientPrimary: "rgba(57, 211, 241, 0.05)", // Cyan - further reduced
+              gradientSecondary: "rgba(139, 92, 246, 0.05)", // Purple - further reduced
             };
         }
       };
@@ -89,37 +89,62 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
         ctx.stroke();
       }
 
-      // Draw floating points at intersections
-      const timeScale = 0.001;
+      // Draw floating points at intersections with enhanced smooth animation
+      const timeScale = 0.0008; // Slightly slower for smoother motion
       for (let x = 0; x <= canvas.width; x += gridSize) {
         for (let y = 0; y <= canvas.height; y += gridSize) {
-          // Subtle wave effect
+          // Enhanced smooth wave effect
           const dist = Math.sqrt(
             Math.pow(x - mouseRef.current.x, 2) +
               Math.pow(y - mouseRef.current.y, 2),
           );
 
-          const maxDist = 300;
+          const maxDist = 350; // Slightly larger influence area
           const influence = Math.max(0, (maxDist - dist) / maxDist);
 
-          const wave =
-            Math.sin(x * 0.01 + time * timeScale) *
-            Math.cos(y * 0.01 + time * timeScale) *
-            2;
-          const size = (1.5 + wave) * (1 + influence * 2);
+          // Multiple wave layers for smoother animation
+          const wave1 =
+            Math.sin(x * 0.008 + time * timeScale) *
+            Math.cos(y * 0.008 + time * timeScale);
+          const wave2 =
+            Math.sin(x * 0.012 + time * timeScale * 0.7) *
+            Math.cos(y * 0.012 + time * timeScale * 0.7) *
+            0.5;
+          const combinedWave = (wave1 + wave2) * 1.5;
 
-          if (size > 0.5) {
-            ctx.fillStyle = colors.pointColor;
+          // Smoother size calculation with easing
+          const baseSize = 1.2;
+          const waveSize = baseSize + combinedWave;
+          const influenceMultiplier = 1 + influence * influence * 1.8; // Quadratic easing for smoother falloff
+          const size = Math.max(0, waveSize * influenceMultiplier);
+
+          if (size > 0.3) {
+            // Dynamic opacity based on size and distance for smoother appearance
+            const sizeOpacity = Math.min(1, size / 3);
+            const distanceOpacity = 0.3 + influence * 0.7;
+            const finalOpacity = sizeOpacity * distanceOpacity;
+
+            // Extract RGB values and apply dynamic opacity
+            const baseColor = colors.pointColor;
+            const rgbMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (rgbMatch) {
+              const [, r, g, b] = rgbMatch;
+              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity * 0.4})`; // Even further reduced opacity
+            } else {
+              ctx.fillStyle = colors.pointColor;
+            }
+
             ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.arc(x, y, Math.min(size, 2.5), 0, Math.PI * 2); // Cap maximum size
             ctx.fill();
           }
         }
       }
     };
 
-    const animate = () => {
-      time++;
+    const animate = (timestamp: number) => {
+      // Use timestamp for smoother, frame-rate independent animation
+      time = timestamp * 0.001; // Convert to seconds for smoother scaling
       drawGrid(time);
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -162,7 +187,7 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
     window.addEventListener("mousemove", handleMouseMove);
 
     resize();
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener("resize", resize);
@@ -183,11 +208,11 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
             background: `radial-gradient(circle, ${(() => {
               switch (currentTheme) {
                 case "sunset":
-                  return "rgba(251, 146, 60, 0.1)"; // Orange
+                  return "rgba(251, 146, 60, 0.04)"; // Orange - further reduced
                 case "emerald":
-                  return "rgba(16, 185, 129, 0.1)"; // Emerald
+                  return "rgba(16, 185, 129, 0.04)"; // Emerald - further reduced
                 default:
-                  return "rgba(57, 211, 241, 0.1)"; // Cyan
+                  return "rgba(57, 211, 241, 0.04)"; // Cyan - further reduced
               }
             })()} 0%, transparent 70%)`,
           }}
@@ -198,11 +223,11 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
             background: `radial-gradient(circle, ${(() => {
               switch (currentTheme) {
                 case "sunset":
-                  return "rgba(239, 68, 68, 0.1)"; // Red
+                  return "rgba(239, 68, 68, 0.04)"; // Red - further reduced
                 case "emerald":
-                  return "rgba(34, 197, 94, 0.1)"; // Green
+                  return "rgba(34, 197, 94, 0.04)"; // Green - further reduced
                 default:
-                  return "rgba(139, 92, 246, 0.1)"; // Purple
+                  return "rgba(139, 92, 246, 0.04)"; // Purple - further reduced
               }
             })()} 0%, transparent 70%)`,
           }}

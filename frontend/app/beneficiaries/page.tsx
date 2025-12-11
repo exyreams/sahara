@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ParticleSystem } from "@/components/ui/particle-system";
+import { GridBackground } from "@/components/ui/grid-background";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useAdmin } from "@/hooks/use-admin";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
@@ -143,7 +143,7 @@ export default function BeneficiariesPage() {
               style={{ height: "100vh" }}
             >
               <div className="absolute inset-0 z-0">
-                <ParticleSystem text="Beneficiaries" />
+                <GridBackground />
               </div>
 
               <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">

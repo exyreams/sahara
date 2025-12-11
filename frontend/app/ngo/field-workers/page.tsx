@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ParticleSystem } from "@/components/ui/particle-system";
+import { GridBackground } from "@/components/ui/grid-background";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
 import { useFieldWorkers } from "@/hooks/use-field-workers";
 import { useNGO } from "@/hooks/use-ngo";
@@ -151,17 +151,15 @@ export default function FieldWorkersPage() {
 
   if (!ngo) {
     return (
-      <div className="flex-1 flex -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
-        {/* Left Side - Particle Background (40%) */}
-        <div className="hidden lg:flex lg:w-[40%] relative bg-linear-to-br from-theme-background to-theme-card-bg border-r border-theme-border">
-          <div className="absolute inset-0">
-            <ParticleSystem text="Ngo" />
-          </div>
+      <div className="flex-1 relative -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 -my-8">
+        {/* Full-screen Grid Background */}
+        <div className="absolute inset-0">
+          <GridBackground />
         </div>
 
-        {/* Right Side - Content (60%) */}
-        <div className="flex-1 lg:w-[60%] flex items-center justify-center px-6 py-16">
-          <div className="max-w-xl w-full space-y-8">
+        {/* Content Overlay */}
+        <div className="relative z-10 flex items-center justify-center px-6 py-16 min-h-full">
+          <div className="max-w-2xl w-full space-y-8">
             {/* Header */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">

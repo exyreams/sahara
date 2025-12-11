@@ -12,7 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ParticleSystem } from "@/components/ui/particle-system";
+import { GridBackground } from "@/components/ui/grid-background";
 import { useNGO } from "@/hooks/use-ngo";
 import { useProgram } from "@/hooks/use-program";
 import { cn } from "@/lib/utils";
@@ -66,7 +66,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
         {/* Particle System Section - Top */}
         <section className="relative w-full bg-theme-background overflow-hidden h-[30vh] min-h-[250px] mt-8">
           <div className="absolute inset-0 mx-8">
-            <ParticleSystem text={getParticleText()} />
+            <GridBackground />
           </div>
         </section>
 

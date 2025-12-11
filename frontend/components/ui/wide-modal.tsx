@@ -57,9 +57,9 @@ function WideModalContent({
       <WideModalOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] bg-theme-card-bg border-theme-border text-theme-text shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-lg border focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2",
-          // Wide modal specific styles
-          "w-[90vw] max-w-[1000px] h-[85vh] max-h-[800px] p-0",
+          "fixed left-[50%] top-[45%] z-50 translate-x-[-50%] translate-y-[-50%] bg-theme-card-bg border-theme-border text-theme-text shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-lg border focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary focus-visible:ring-offset-2",
+          // Wide modal specific styles - adjusted positioning for better centering with top margin
+          "w-[90vw] max-w-[1000px] h-[85vh] max-h-[800px] p-0 mt-8",
           className,
         )}
         {...props}
