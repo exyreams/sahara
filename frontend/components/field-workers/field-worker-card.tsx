@@ -29,20 +29,23 @@ export function FieldWorkerCard({
   if (viewMode === "list") {
     return (
       <Link href={`/ngo/field-workers/${worker.authority.toBase58()}`}>
-        <Card className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-6">
+        <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-4">
               {/* Left: Name, Organization, Districts */}
-              <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg text-theme-primary transition-colors">
+                  <h3 className="font-semibold text-base text-theme-primary transition-colors">
                     {worker.name}
                   </h3>
-                  <Badge variant={worker.isActive ? "default" : "secondary"}>
+                  <Badge
+                    variant={worker.isActive ? "default" : "secondary"}
+                    className="text-xs px-2 py-0.5"
+                  >
                     {worker.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {worker.organization}
                 </p>
                 {worker.assignedDistricts.length > 0 && (
@@ -67,9 +70,9 @@ export function FieldWorkerCard({
               </div>
 
               {/* Right: Stats */}
-              <div className="flex items-center gap-8 text-sm shrink-0">
+              <div className="flex items-center gap-6 text-xs shrink-0">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-theme-primary">
+                  <div className="text-lg font-bold text-theme-primary">
                     {worker.verificationsCount}
                   </div>
                   <div className="text-xs text-muted-foreground">
@@ -77,7 +80,7 @@ export function FieldWorkerCard({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-theme-primary">
+                  <div className="text-lg font-bold text-theme-primary">
                     {actualRegistrationsCount}
                   </div>
                   <div className="text-xs text-muted-foreground">
@@ -85,16 +88,16 @@ export function FieldWorkerCard({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-theme-primary">
+                  <div className="text-lg font-bold text-theme-primary">
                     {worker.flagsRaised}
                   </div>
                   <div className="text-xs text-muted-foreground">Flags</div>
                 </div>
-                <div className="text-center min-w-[100px]">
+                <div className="text-center min-w-[80px]">
                   <div className="text-xs text-muted-foreground font-medium">
                     Registered
                   </div>
-                  <div className="text-sm">
+                  <div className="text-xs">
                     {formatDate(worker.registeredAt)}
                   </div>
                 </div>
@@ -108,25 +111,27 @@ export function FieldWorkerCard({
 
   return (
     <Link href={`/ngo/field-workers/${worker.authority.toBase58()}`}>
-      <Card className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-2 flex-1 min-w-0">
-              <CardTitle className="text-lg text-theme-primary transition-colors">
+      <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1 flex-1 min-w-0">
+              <CardTitle className="text-base text-theme-primary transition-colors">
                 {worker.name}
               </CardTitle>
-              <CardDescription>{worker.organization}</CardDescription>
+              <CardDescription className="text-xs">
+                {worker.organization}
+              </CardDescription>
             </div>
             <Badge
               variant={worker.isActive ? "default" : "secondary"}
-              className="shrink-0"
+              className="shrink-0 text-xs px-2 py-0.5"
             >
               {worker.isActive ? "Active" : "Inactive"}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
+        <CardContent className="space-y-2 pt-0">
+          <div className="flex items-center justify-between text-xs">
             <div className="text-muted-foreground">
               <span className="font-medium text-theme-text">
                 {worker.verificationsCount}

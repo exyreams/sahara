@@ -1,10 +1,20 @@
 "use client";
 
-import { Grid3x3, List, Plus, RefreshCw, Users } from "lucide-react";
+import {
+  Clock,
+  Grid3x3,
+  List,
+  Plus,
+  RefreshCw,
+  Table,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FieldWorkerCard } from "@/components/field-workers/field-worker-card";
 import { FieldWorkerCreationModal } from "@/components/field-workers/field-worker-creation-modal";
+import { FieldWorkerTable } from "@/components/field-workers/field-worker-table";
+import { FieldWorkerTimeline } from "@/components/field-workers/field-worker-timeline";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
 import { SortDropdown } from "@/components/search/sort-dropdown";
@@ -29,7 +39,9 @@ export default function FieldWorkersPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<
+    "grid" | "list" | "table" | "timeline"
+  >("grid");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "name-asc" | "name-desc"
@@ -109,7 +121,7 @@ export default function FieldWorkersPage() {
         </div>
 
         {/* Cards Skeleton */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {Array.from(
             { length: 6 },
             (_, i) => `field-worker-card-skeleton-${i}`,
@@ -245,10 +257,10 @@ export default function FieldWorkersPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Field Workers</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl font-bold tracking-tight">Field Workers</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
             Manage your organization's field workers
           </p>
         </div>
@@ -258,17 +270,22 @@ export default function FieldWorkersPage() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
+            className="text-xs px-3 py-1.5"
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              className={`h-3.5 w-3.5 mr-1.5 ${
+                isRefreshing ? "animate-spin" : ""
+              }`}
             />
             Refresh
           </Button>
           <Button
             onClick={() => setShowRegisterModal(true)}
             disabled={!ngo.isVerified}
+            size="sm"
+            className="text-xs px-3 py-1.5"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
             Register Field Worker
           </Button>
         </div>
@@ -288,7 +305,7 @@ export default function FieldWorkersPage() {
 
       {/* Search and Filters */}
       <div
-        className={`flex flex-col md:flex-row gap-4 mb-6 transition-opacity duration-200 ${
+        className={`flex flex-col md:flex-row gap-3 mb-4 transition-opacity duration-200 ${
           isRefreshing ? "opacity-50 pointer-events-none" : "opacity-100"
         }`}
       >
@@ -313,30 +330,47 @@ export default function FieldWorkersPage() {
           ]}
           value={sortBy}
           onValueChange={(value) => setSortBy(value as typeof sortBy)}
+          className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
         />
-        <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+        <div className="flex gap-1">
           <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
+            variant={viewMode === "grid" ? "default" : "outline"}
             size="sm"
             onClick={() => setViewMode("grid")}
-            className="px-3"
+            className="gap-1.5 text-xs px-3 py-1.5"
           >
-            <Grid3x3 className="h-4 w-4" />
+            <Grid3x3 className="h-3.5 w-3.5" />
           </Button>
           <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
+            variant={viewMode === "list" ? "default" : "outline"}
             size="sm"
             onClick={() => setViewMode("list")}
-            className="px-3"
+            className="gap-1.5 text-xs px-3 py-1.5"
           >
-            <List className="h-4 w-4" />
+            <List className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("table")}
+            className="gap-1.5 text-xs px-3 py-1.5"
+          >
+            <Table className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={viewMode === "timeline" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("timeline")}
+            className="gap-1.5 text-xs px-3 py-1.5"
+          >
+            <Clock className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       {/* Results Count */}
       <div
-        className={`flex items-center gap-2 mb-4 transition-opacity duration-200 ${
+        className={`flex items-center gap-2 mb-3 transition-opacity duration-200 ${
           isRefreshing ? "opacity-50" : "opacity-100"
         }`}
       >
@@ -352,34 +386,56 @@ export default function FieldWorkersPage() {
         }`}
       >
         {filteredAndSortedWorkers.length > 0 ? (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                : "flex flex-col gap-3"
-            }
-          >
-            {filteredAndSortedWorkers.map((worker) => (
-              <FieldWorkerCard
-                key={worker.publicKey.toBase58()}
-                worker={worker}
-                viewMode={viewMode}
+          <>
+            {viewMode === "grid" && (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAndSortedWorkers.map((worker) => (
+                  <FieldWorkerCard
+                    key={worker.publicKey.toBase58()}
+                    worker={worker}
+                    viewMode="grid"
+                    beneficiaries={beneficiaries}
+                  />
+                ))}
+              </div>
+            )}
+            {viewMode === "list" && (
+              <div className="flex flex-col gap-2">
+                {filteredAndSortedWorkers.map((worker) => (
+                  <FieldWorkerCard
+                    key={worker.publicKey.toBase58()}
+                    worker={worker}
+                    viewMode="list"
+                    beneficiaries={beneficiaries}
+                  />
+                ))}
+              </div>
+            )}
+            {viewMode === "table" && (
+              <FieldWorkerTable
+                workers={filteredAndSortedWorkers}
                 beneficiaries={beneficiaries}
               />
-            ))}
-          </div>
+            )}
+            {viewMode === "timeline" && (
+              <FieldWorkerTimeline
+                workers={filteredAndSortedWorkers}
+                beneficiaries={beneficiaries}
+              />
+            )}
+          </>
         ) : (
           <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader className="text-center py-12">
-              <div className="flex justify-center mb-4">
-                <Users className="h-12 w-12 text-theme-text/40" />
+            <CardHeader className="text-center py-16">
+              <div className="flex justify-center mb-3">
+                <Users className="h-8 w-8 text-theme-text/40" />
               </div>
-              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
+              <CardTitle className="text-base font-semibold mb-2 text-theme-text-highlight">
                 {searchQuery || statusFilters.length > 0
                   ? "No field workers found"
                   : "No Field Workers"}
               </CardTitle>
-              <CardDescription className="text-theme-text/60 mb-4">
+              <CardDescription className="text-sm text-theme-text/60 mb-4">
                 {searchQuery || statusFilters.length > 0
                   ? "Try adjusting your filters"
                   : ngo.isVerified
@@ -388,8 +444,8 @@ export default function FieldWorkersPage() {
               </CardDescription>
               {ngo.isVerified && !searchQuery && statusFilters.length === 0 && (
                 <div className="flex justify-center">
-                  <Button onClick={() => setShowRegisterModal(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
+                  <Button onClick={() => setShowRegisterModal(true)} size="sm">
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
                     Register Field Worker
                   </Button>
                 </div>

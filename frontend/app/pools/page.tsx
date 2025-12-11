@@ -1,10 +1,21 @@
 "use client";
 
-import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Grid3x3,
+  List,
+  Plus,
+  RefreshCw,
+  Table,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { PoolCard } from "@/components/pools/pool-card";
 import { PoolCreationModal } from "@/components/pools/pool-creation-modal";
+import { PoolTable } from "@/components/pools/pool-table";
+import { PoolList } from "@/components/pools/pool-list";
+import { PoolTimeline } from "@/components/pools/pool-timeline";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
 import { SortDropdown } from "@/components/search/sort-dropdown";
@@ -33,7 +44,9 @@ export default function PoolsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<
+    "grid" | "list" | "table" | "timeline"
+  >("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<
@@ -170,20 +183,18 @@ export default function PoolsPage() {
               <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
                 <div className="flex-1" />
 
-                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                <div className="max-w-2xl mx-auto text-center space-y-3 pb-8 pointer-events-auto">
+                  <h1 className="text-xl md:text-3xl font-bold tracking-tight text-theme-text-highlight">
                     Fund Pools
                   </h1>
-                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                  <p className="text-sm md:text-base text-theme-text max-w-xl mx-auto">
                     Transparent disaster relief fund pools on the blockchain.
                     Track donations, distributions, and ensure every dollar
                     reaches those in need.
                   </p>
-                  <div className="flex flex-col items-center gap-4 pt-6">
-                    <div className="scale-110">
-                      <WalletButton />
-                    </div>
-                    <p className="text-sm text-theme-text/80">
+                  <div className="flex flex-col items-center gap-2 pt-3">
+                    <WalletButton />
+                    <p className="text-xs text-theme-text/80">
                       Connect your wallet to take action
                     </p>
                   </div>
@@ -193,24 +204,24 @@ export default function PoolsPage() {
           </div>
 
           {/* Active Pools Section */}
-          <section className="py-16 bg-theme-bg">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-8">
+          <section className="py-8 bg-theme-bg">
+            <div className="container mx-auto px-3">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-3xl font-bold tracking-tight text-theme-text-highlight">
+                  <h2 className="text-xl font-bold tracking-tight text-theme-text-highlight">
                     Active Pools
                   </h2>
-                  <p className="text-theme-text/60 mt-2">
+                  <p className="text-theme-text/60 mt-1 text-xs">
                     View ongoing disaster relief fund pools
                   </p>
                 </div>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
+                <Badge variant="secondary" className="text-xs px-2 py-1">
                   {pools.filter((p) => p.isActive).length} Active
                 </Badge>
               </div>
 
               {/* Search and Filters */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <div className="flex-1">
                   <SearchInput
                     onSearch={setSearchQuery}
@@ -238,29 +249,46 @@ export default function PoolsPage() {
                   ]}
                   value={sortBy}
                   onValueChange={(value) => setSortBy(value as typeof sortBy)}
+                  className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
                 />
-                <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+                <div className="flex gap-1">
                   <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    variant={viewMode === "grid" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("grid")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <Grid3x3 className="h-4 w-4" />
+                    <Grid3x3 className="h-3.5 w-3.5" />
                   </Button>
                   <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
+                    variant={viewMode === "list" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("list")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <List className="h-4 w-4" />
+                    <List className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "table" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Table className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "timeline" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("timeline")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Clock className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
 
               {loading ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 6 }, (_, i) => {
                     const uniqueId = `pool-skeleton-${Date.now()}-${i}`;
                     return (
@@ -312,24 +340,31 @@ export default function PoolsPage() {
                   })}
                 </div>
               ) : publicFilteredAndSortedPools.length > 0 ? (
-                <div
-                  className={
-                    viewMode === "grid"
-                      ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                      : "flex flex-col gap-3"
-                  }
-                >
-                  {publicFilteredAndSortedPools.map((pool) => (
-                    <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
-                  ))}
-                </div>
+                <>
+                  {viewMode === "grid" && (
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      {publicFilteredAndSortedPools.map((pool) => (
+                        <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
+                      ))}
+                    </div>
+                  )}
+                  {viewMode === "list" && (
+                    <PoolList pools={publicFilteredAndSortedPools} />
+                  )}
+                  {viewMode === "table" && (
+                    <PoolTable pools={publicFilteredAndSortedPools} />
+                  )}
+                  {viewMode === "timeline" && (
+                    <PoolTimeline pools={publicFilteredAndSortedPools} />
+                  )}
+                </>
               ) : (
                 <Card className="bg-theme-card-bg border-theme-border h-full">
-                  <CardHeader className="text-center py-12">
-                    <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
+                  <CardHeader className="text-center py-10">
+                    <CardTitle className="text-base font-semibold mb-2 text-theme-text-highlight">
                       No fund pools found
                     </CardTitle>
-                    <CardDescription className="text-theme-text/60">
+                    <CardDescription className="text-theme-text/60 text-sm">
                       {searchQuery || statusFilters.length > 0
                         ? "Try adjusting your filters"
                         : "No pools available yet"}
@@ -348,7 +383,7 @@ export default function PoolsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-theme-bg">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-3 py-6">
         {/* Platform Pause Alert */}
         {config?.isPaused && (
           <Card className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
@@ -380,27 +415,35 @@ export default function PoolsPage() {
           </Card>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Fund Pools</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl font-bold tracking-tight">Fund Pools</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
               Disaster relief fund pools
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
+              className="text-xs px-3 py-1.5"
             >
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 mr-1.5 ${
+                  isRefreshing ? "animate-spin" : ""
+                }`}
               />
               Refresh
             </Button>
             {canCreatePool && (
-              <Button onClick={() => setShowCreateModal(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                size="sm"
+                className="text-xs px-3 py-1.5"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
                 Create Pool
               </Button>
             )}
@@ -417,7 +460,7 @@ export default function PoolsPage() {
         />
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <SearchInput
             placeholder="Search by name, pool ID, or disaster..."
             onSearch={setSearchQuery}
@@ -425,20 +468,20 @@ export default function PoolsPage() {
           />
 
           {(isAdmin || ngo) && (
-            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+            <div className="flex gap-1">
               <Button
-                variant={ownerFilter === "all" ? "default" : "ghost"}
+                variant={ownerFilter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("all")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 All
               </Button>
               <Button
-                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                variant={ownerFilter === "mine" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("mine")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 Mine
               </Button>
@@ -467,30 +510,47 @@ export default function PoolsPage() {
             ]}
             value={sortBy}
             onValueChange={(value) => setSortBy(value as typeof sortBy)}
+            className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
           />
 
-          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+          <div className="flex gap-1">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("grid")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <Grid3x3 className="h-4 w-4" />
+              <Grid3x3 className="h-3.5 w-3.5" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Table className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "timeline" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("timeline")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Clock className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
         {/* Results count */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <Badge variant="secondary">
             {filteredAndSortedPools.length}{" "}
             {filteredAndSortedPools.length === 1 ? "result" : "results"}
@@ -513,7 +573,7 @@ export default function PoolsPage() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => {
               const uniqueId = `pool-skeleton-${Date.now()}-${i}`;
               return (
@@ -574,26 +634,31 @@ export default function PoolsPage() {
             })}
           </div>
         ) : filteredAndSortedPools.length > 0 ? (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                : "flex flex-col gap-3"
-            }
-          >
-            {filteredAndSortedPools.map((pool) => (
-              <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
-            ))}
-          </div>
+          <>
+            {viewMode === "grid" && (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAndSortedPools.map((pool) => (
+                  <PoolCard key={pool.publicKey.toBase58()} pool={pool} />
+                ))}
+              </div>
+            )}
+            {viewMode === "list" && <PoolList pools={filteredAndSortedPools} />}
+            {viewMode === "table" && (
+              <PoolTable pools={filteredAndSortedPools} />
+            )}
+            {viewMode === "timeline" && (
+              <PoolTimeline pools={filteredAndSortedPools} />
+            )}
+          </>
         ) : (
           <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader className="text-center py-32">
-              <CardTitle className="text-2xl font-semibold mb-3 text-theme-text-highlight">
+            <CardHeader className="text-center py-16">
+              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
                 {ownerFilter === "mine"
                   ? "You haven't created any pools"
                   : "No fund pools found"}
               </CardTitle>
-              <CardDescription className="text-lg text-theme-text/60 mb-6">
+              <CardDescription className="text-sm text-theme-text/60 mb-4">
                 {ownerFilter === "mine"
                   ? "Create your first pool to get started"
                   : searchQuery || statusFilters.length > 0
@@ -601,8 +666,8 @@ export default function PoolsPage() {
                     : "Create the first fund pool"}
               </CardDescription>
               {canCreatePool && (
-                <div className="flex justify-center mt-6">
-                  <Button onClick={() => setShowCreateModal(true)} size="lg">
+                <div className="flex justify-center mt-4">
+                  <Button onClick={() => setShowCreateModal(true)} size="sm">
                     Create Pool
                   </Button>
                 </div>

@@ -160,7 +160,7 @@ export default function NGOLayout({ children }: { children: React.ReactNode }) {
         initial={false}
         animate={{ width: sidebarCollapsed ? 64 : 256 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="-mt-2 border-r border-theme-border bg-theme-card-bg flex flex-col"
+        className="-mt-8 border-r border-theme-border bg-theme-card-bg flex flex-col"
       >
         <div className="flex-1 p-4 pt-0 space-y-2">
           {/* Header */}

@@ -291,6 +291,7 @@ export default function DisastersPage() {
                   ]}
                   value={sortBy}
                   onValueChange={(value) => setSortBy(value as typeof sortBy)}
+                  className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
                 />
 
                 <div className="flex gap-1">
@@ -569,6 +570,7 @@ export default function DisastersPage() {
             ]}
             value={sortBy}
             onValueChange={(value) => setSortBy(value as typeof sortBy)}
+            className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
           />
 
           <div className="flex gap-1">

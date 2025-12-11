@@ -2,16 +2,20 @@
 
 import {
   AlertTriangle,
+  Clock,
   Grid3x3,
   List,
   MapPin,
   Plus,
   RefreshCw,
+  Table,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BeneficiaryRegistrationModal } from "@/components/beneficiaries/beneficiary-registration-modal";
+import { BeneficiaryTable } from "@/components/beneficiaries/beneficiary-table";
+import { BeneficiaryTimeline } from "@/components/beneficiaries/beneficiary-timeline";
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
@@ -55,7 +59,9 @@ export default function BeneficiariesPage() {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<
+    "grid" | "list" | "table" | "timeline"
+  >("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [sortBy, setSortBy] = useState<
     | "newest"
@@ -149,20 +155,18 @@ export default function BeneficiariesPage() {
               <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
                 <div className="flex-1" />
 
-                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                <div className="max-w-2xl mx-auto text-center space-y-4 pb-12 pointer-events-auto">
+                  <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-theme-text-highlight">
                     Beneficiaries
                   </h1>
-                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                  <p className="text-base md:text-lg text-theme-text max-w-xl mx-auto">
                     Verified disaster victims receiving direct aid through
                     blockchain transparency. Every beneficiary is verified by
                     field workers to ensure aid reaches those who need it most.
                   </p>
-                  <div className="flex flex-col items-center gap-4 pt-6">
-                    <div className="scale-110">
-                      <WalletButton />
-                    </div>
-                    <p className="text-sm text-theme-text/80">
+                  <div className="flex flex-col items-center gap-3 pt-4">
+                    <WalletButton />
+                    <p className="text-xs text-theme-text/80">
                       Connect your wallet to register or view details
                     </p>
                   </div>
@@ -172,18 +176,18 @@ export default function BeneficiariesPage() {
           </div>
 
           {/* Beneficiaries List Section */}
-          <section className="py-16 bg-theme-bg">
+          <section className="py-12 bg-theme-bg">
             <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold tracking-tight text-theme-text-highlight">
+                  <h2 className="text-2xl font-bold tracking-tight text-theme-text-highlight">
                     Registered Beneficiaries
                   </h2>
-                  <p className="text-theme-text/60 mt-2">
+                  <p className="text-theme-text/60 mt-1 text-sm">
                     View verified disaster victims
                   </p>
                 </div>
-                <Badge variant="secondary" className="text-lg px-4 py-2">
+                <Badge variant="secondary" className="text-sm px-3 py-1">
                   {
                     beneficiaries.filter(
                       (b) => b.verificationStatus === "Verified",
@@ -194,7 +198,7 @@ export default function BeneficiariesPage() {
               </div>
 
               {/* Search and Filters */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex flex-col md:flex-row gap-3 mb-4">
                 <SearchInput
                   placeholder="Search by name, disaster, or location..."
                   onSearch={setSearchQuery}
@@ -221,29 +225,46 @@ export default function BeneficiariesPage() {
                   ]}
                   value={sortBy}
                   onValueChange={(value) => setSortBy(value as typeof sortBy)}
+                  className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
                 />
-                <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+                <div className="flex gap-1">
                   <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    variant={viewMode === "grid" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("grid")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <Grid3x3 className="h-4 w-4" />
+                    <Grid3x3 className="h-3.5 w-3.5" />
                   </Button>
                   <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
+                    variant={viewMode === "list" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("list")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <List className="h-4 w-4" />
+                    <List className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "table" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Table className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "timeline" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("timeline")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Clock className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
 
               {loading && beneficiaries.length === 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 6 }, (_, i) => {
                     const uniqueId = `beneficiary-skeleton-${Date.now()}-${i}`;
                     return (
@@ -266,134 +287,242 @@ export default function BeneficiariesPage() {
                   })}
                 </div>
               ) : filteredAndSortedBeneficiaries.length > 0 ? (
-                <div
-                  className={
-                    viewMode === "grid"
-                      ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                      : "flex flex-col gap-3"
-                  }
-                >
-                  {filteredAndSortedBeneficiaries.map((beneficiary) => (
-                    <Link
-                      key={beneficiary.publicKey.toBase58()}
-                      href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
-                    >
-                      <Card className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
-                        <CardHeader>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <CardTitle className="text-lg text-theme-primary group-hover:text-theme-primary transition-colors">
-                                {beneficiary.name}
-                              </CardTitle>
-                              <CardDescription className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3 shrink-0" />
-                                {beneficiary.location.district}, Ward{" "}
-                                {beneficiary.location.ward}
-                              </CardDescription>
-                            </div>
-                            <Badge
-                              variant={
-                                formatVerificationStatus(
-                                  beneficiary.verificationStatus,
-                                ) === "Verified"
-                                  ? "default"
-                                  : formatVerificationStatus(
-                                        beneficiary.verificationStatus,
-                                      ) === "Flagged"
-                                    ? "outline"
-                                    : formatVerificationStatus(
-                                          beneficiary.verificationStatus,
-                                        ) === "Rejected"
-                                      ? "outline"
-                                      : "pending"
-                              }
-                              className={`shrink-0 ${
-                                formatVerificationStatus(
-                                  beneficiary.verificationStatus,
-                                ) === "Flagged"
-                                  ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                  : formatVerificationStatus(
-                                        beneficiary.verificationStatus,
-                                      ) === "Rejected"
-                                    ? "border-red-500 text-red-500 bg-red-500/10"
-                                    : ""
-                              }`}
-                            >
-                              {formatVerificationStatus(
-                                beneficiary.verificationStatus,
-                              )}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent
-                          className={
-                            viewMode === "grid"
-                              ? "space-y-2"
-                              : "flex items-center gap-6 flex-wrap"
-                          }
+                <>
+                  {viewMode === "grid" && (
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredAndSortedBeneficiaries.map((beneficiary) => (
+                        <Link
+                          key={beneficiary.publicKey.toBase58()}
+                          href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
                         >
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-theme-text/60">
-                              Disaster:
-                            </span>
-                            <span className="font-medium text-theme-text">
-                              {beneficiary.disasterId}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-theme-text/60">
-                              Family Size:
-                            </span>
-                            <span className="font-medium flex items-center gap-1 text-theme-text">
-                              <Users className="h-3 w-3" />
-                              {beneficiary.familySize}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-theme-text/60">
-                              Damage Severity:
-                            </span>
-                            <Badge
-                              variant="outline"
-                              className={
-                                beneficiary.damageSeverity >= 8
-                                  ? "border-red-500 text-red-500 bg-red-500/10"
-                                  : beneficiary.damageSeverity >= 6
-                                    ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                                    : beneficiary.damageSeverity >= 4
+                          <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0 space-y-1">
+                                  <CardTitle className="text-base text-theme-primary group-hover:text-theme-primary transition-colors">
+                                    {beneficiary.name}
+                                  </CardTitle>
+                                  <CardDescription className="flex items-center gap-1 text-xs">
+                                    <MapPin className="h-2.5 w-2.5 shrink-0" />
+                                    {beneficiary.location.district}, Ward{" "}
+                                    {beneficiary.location.ward}
+                                  </CardDescription>
+                                </div>
+                                <Badge
+                                  variant={
+                                    formatVerificationStatus(
+                                      beneficiary.verificationStatus,
+                                    ) === "Verified"
+                                      ? "default"
+                                      : formatVerificationStatus(
+                                            beneficiary.verificationStatus,
+                                          ) === "Flagged"
+                                        ? "outline"
+                                        : formatVerificationStatus(
+                                              beneficiary.verificationStatus,
+                                            ) === "Rejected"
+                                          ? "outline"
+                                          : "pending"
+                                  }
+                                  className={`shrink-0 ${
+                                    formatVerificationStatus(
+                                      beneficiary.verificationStatus,
+                                    ) === "Flagged"
                                       ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                      : "border-green-500 text-green-500 bg-green-500/10"
+                                      : formatVerificationStatus(
+                                            beneficiary.verificationStatus,
+                                          ) === "Rejected"
+                                        ? "border-red-500 text-red-500 bg-red-500/10"
+                                        : ""
+                                  }`}
+                                >
+                                  {formatVerificationStatus(
+                                    beneficiary.verificationStatus,
+                                  )}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent
+                              className={
+                                viewMode === "grid"
+                                  ? "space-y-2"
+                                  : "flex items-center gap-6 flex-wrap"
                               }
                             >
-                              {beneficiary.damageSeverity >= 8
-                                ? "Critical"
-                                : beneficiary.damageSeverity >= 6
-                                  ? "Severe"
-                                  : beneficiary.damageSeverity >= 4
-                                    ? "Moderate"
-                                    : "Minor"}{" "}
-                              ({beneficiary.damageSeverity}/10)
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-theme-text/60">
-                              Approvals:
-                            </span>
-                            <span className="font-medium text-theme-text">
-                              {beneficiary.verifierApprovals.length}/
-                              {verificationThreshold}
-                            </span>
-                          </div>
-                          {viewMode === "grid" && (
-                            <div className="text-xs text-theme-text/60 pt-2 border-t border-theme-border">
-                              Registered {formatDate(beneficiary.registeredAt)}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-theme-text/60">
+                                  Disaster:
+                                </span>
+                                <span className="font-medium text-theme-text">
+                                  {beneficiary.disasterId}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-theme-text/60">
+                                  Family Size:
+                                </span>
+                                <span className="font-medium flex items-center gap-1 text-theme-text">
+                                  <Users className="h-3 w-3" />
+                                  {beneficiary.familySize}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-theme-text/60">
+                                  Damage Severity:
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    beneficiary.damageSeverity >= 8
+                                      ? "border-red-500 text-red-500 bg-red-500/10"
+                                      : beneficiary.damageSeverity >= 6
+                                        ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                        : beneficiary.damageSeverity >= 4
+                                          ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                          : "border-green-500 text-green-500 bg-green-500/10"
+                                  }
+                                >
+                                  {beneficiary.damageSeverity >= 8
+                                    ? "Critical"
+                                    : beneficiary.damageSeverity >= 6
+                                      ? "Severe"
+                                      : beneficiary.damageSeverity >= 4
+                                        ? "Moderate"
+                                        : "Minor"}{" "}
+                                  ({beneficiary.damageSeverity}/10)
+                                </Badge>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-theme-text/60">
+                                  Approvals:
+                                </span>
+                                <span className="font-medium text-theme-text">
+                                  {beneficiary.verifierApprovals.length}/
+                                  {verificationThreshold}
+                                </span>
+                              </div>
+                              {viewMode === "grid" && (
+                                <div className="text-xs text-theme-text/60 pt-2 border-t border-theme-border">
+                                  Registered{" "}
+                                  {formatDate(beneficiary.registeredAt)}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                  {viewMode === "list" && (
+                    <div className="flex flex-col gap-2">
+                      {filteredAndSortedBeneficiaries.map((beneficiary) => (
+                        <Link
+                          key={beneficiary.publicKey.toBase58()}
+                          href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
+                        >
+                          <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer bg-theme-card-bg border-theme-border">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-base font-semibold text-theme-primary group-hover:text-theme-primary transition-colors">
+                                      {beneficiary.name}
+                                    </h3>
+                                    <Badge
+                                      variant={
+                                        formatVerificationStatus(
+                                          beneficiary.verificationStatus,
+                                        ) === "Verified"
+                                          ? "default"
+                                          : formatVerificationStatus(
+                                                beneficiary.verificationStatus,
+                                              ) === "Flagged"
+                                            ? "outline"
+                                            : formatVerificationStatus(
+                                                  beneficiary.verificationStatus,
+                                                ) === "Rejected"
+                                              ? "outline"
+                                              : "pending"
+                                      }
+                                      className={`shrink-0 text-xs px-2 py-0.5 ${
+                                        formatVerificationStatus(
+                                          beneficiary.verificationStatus,
+                                        ) === "Flagged"
+                                          ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                          : formatVerificationStatus(
+                                                beneficiary.verificationStatus,
+                                              ) === "Rejected"
+                                            ? "border-red-500 text-red-500 bg-red-500/10"
+                                            : ""
+                                      }`}
+                                    >
+                                      {formatVerificationStatus(
+                                        beneficiary.verificationStatus,
+                                      )}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-xs text-theme-text/60">
+                                    <MapPin className="h-2.5 w-2.5" />
+                                    {beneficiary.location.district}, Ward{" "}
+                                    {beneficiary.location.ward}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-6 text-xs shrink-0 ml-4">
+                                  <div className="text-center">
+                                    <div className="text-theme-text/60">
+                                      Disaster
+                                    </div>
+                                    <div className="font-semibold text-theme-text">
+                                      {beneficiary.disasterId}
+                                    </div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-theme-text/60">
+                                      Family
+                                    </div>
+                                    <div className="font-semibold text-theme-text flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      {beneficiary.familySize}
+                                    </div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-theme-text/60">
+                                      Approvals
+                                    </div>
+                                    <div className="font-semibold text-theme-text">
+                                      {beneficiary.verifierApprovals.length}/
+                                      {verificationThreshold}
+                                    </div>
+                                  </div>
+                                  <div className="text-center min-w-[80px]">
+                                    <div className="text-theme-text/60">
+                                      Registered
+                                    </div>
+                                    <div className="text-xs">
+                                      {formatDate(beneficiary.registeredAt)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                  {viewMode === "table" && (
+                    <BeneficiaryTable
+                      beneficiaries={filteredAndSortedBeneficiaries}
+                      verificationThreshold={verificationThreshold}
+                    />
+                  )}
+                  {viewMode === "timeline" && (
+                    <BeneficiaryTimeline
+                      beneficiaries={filteredAndSortedBeneficiaries}
+                      verificationThreshold={verificationThreshold}
+                    />
+                  )}
+                </>
               ) : (
                 <Card className="bg-theme-card-bg border-theme-border">
                   <CardHeader className="text-center py-12">
@@ -436,34 +565,42 @@ export default function BeneficiariesPage() {
           </Card>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Beneficiaries</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl font-bold tracking-tight">Beneficiaries</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
               Registered disaster victims
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               onClick={handleRefresh}
               disabled={isRefreshing}
+              size="sm"
+              className="text-xs px-3 py-1.5"
             >
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 mr-1.5 ${
+                  isRefreshing ? "animate-spin" : ""
+                }`}
               />
               Refresh
             </Button>
             {isFieldWorker && (
-              <Button onClick={() => setShowRegisterModal(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                onClick={() => setShowRegisterModal(true)}
+                size="sm"
+                className="text-xs px-3 py-1.5"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
                 Register Beneficiary
               </Button>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <SearchInput
             placeholder="Search by name, disaster, or location..."
             onSearch={setSearchQuery}
@@ -471,20 +608,20 @@ export default function BeneficiariesPage() {
           />
 
           {isFieldWorker && (
-            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+            <div className="flex gap-1">
               <Button
-                variant={ownerFilter === "all" ? "default" : "ghost"}
+                variant={ownerFilter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("all")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 All
               </Button>
               <Button
-                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                variant={ownerFilter === "mine" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("mine")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 Mine
               </Button>
@@ -513,29 +650,46 @@ export default function BeneficiariesPage() {
             ]}
             value={sortBy}
             onValueChange={(value) => setSortBy(value as typeof sortBy)}
+            className="hover:[&_span]:text-black! hover:[&_span]:dark:text-black!"
           />
 
-          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+          <div className="flex gap-1">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("grid")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <Grid3x3 className="h-4 w-4" />
+              <Grid3x3 className="h-3.5 w-3.5" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Table className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "timeline" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("timeline")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Clock className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <Badge variant="secondary">
             {filteredAndSortedBeneficiaries.length}{" "}
             {filteredAndSortedBeneficiaries.length === 1 ? "result" : "results"}
@@ -558,7 +712,7 @@ export default function BeneficiariesPage() {
         </div>
 
         {loading && beneficiaries.length === 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => {
               const uniqueId = `beneficiary-skeleton-${Date.now()}-${i}`;
               return (
@@ -583,131 +737,238 @@ export default function BeneficiariesPage() {
             })}
           </div>
         ) : filteredAndSortedBeneficiaries.length > 0 ? (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                : "flex flex-col gap-3"
-            }
-          >
-            {filteredAndSortedBeneficiaries.map((beneficiary) => (
-              <Link
-                key={beneficiary.publicKey.toBase58()}
-                href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
-              >
-                <Card className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <CardTitle className="text-lg text-theme-primary group-hover:text-theme-primary transition-colors">
-                          {beneficiary.name}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          {beneficiary.location.district}, Ward{" "}
-                          {beneficiary.location.ward}
-                        </CardDescription>
-                      </div>
-                      <Badge
-                        variant={
-                          formatVerificationStatus(
-                            beneficiary.verificationStatus,
-                          ) === "Verified"
-                            ? "default"
-                            : formatVerificationStatus(
-                                  beneficiary.verificationStatus,
-                                ) === "Flagged"
-                              ? "outline"
-                              : formatVerificationStatus(
-                                    beneficiary.verificationStatus,
-                                  ) === "Rejected"
-                                ? "outline"
-                                : "pending"
-                        }
-                        className={`shrink-0 ${
-                          formatVerificationStatus(
-                            beneficiary.verificationStatus,
-                          ) === "Flagged"
-                            ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                            : formatVerificationStatus(
-                                  beneficiary.verificationStatus,
-                                ) === "Rejected"
-                              ? "border-red-500 text-red-500 bg-red-500/10"
-                              : ""
-                        }`}
-                      >
-                        {formatVerificationStatus(
-                          beneficiary.verificationStatus,
-                        )}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Disaster:</span>
-                      <span className="font-medium">
-                        {beneficiary.disasterId}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Family Size:
-                      </span>
-                      <span className="font-medium flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        {beneficiary.familySize}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Damage Severity:
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={
-                          beneficiary.damageSeverity >= 8
-                            ? "border-red-500 text-red-500 bg-red-500/10"
-                            : beneficiary.damageSeverity >= 6
-                              ? "border-orange-500 text-orange-500 bg-orange-500/10"
-                              : beneficiary.damageSeverity >= 4
+          <>
+            {viewMode === "grid" && (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAndSortedBeneficiaries.map((beneficiary) => (
+                  <Link
+                    key={beneficiary.publicKey.toBase58()}
+                    href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
+                  >
+                    <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <CardTitle className="text-base text-theme-primary group-hover:text-theme-primary transition-colors">
+                              {beneficiary.name}
+                            </CardTitle>
+                            <CardDescription className="flex items-center gap-1 text-xs">
+                              <MapPin className="h-2.5 w-2.5 shrink-0" />
+                              {beneficiary.location.district}, Ward{" "}
+                              {beneficiary.location.ward}
+                            </CardDescription>
+                          </div>
+                          <Badge
+                            variant={
+                              formatVerificationStatus(
+                                beneficiary.verificationStatus,
+                              ) === "Verified"
+                                ? "default"
+                                : formatVerificationStatus(
+                                      beneficiary.verificationStatus,
+                                    ) === "Flagged"
+                                  ? "outline"
+                                  : formatVerificationStatus(
+                                        beneficiary.verificationStatus,
+                                      ) === "Rejected"
+                                    ? "outline"
+                                    : "pending"
+                            }
+                            className={`shrink-0 ${
+                              formatVerificationStatus(
+                                beneficiary.verificationStatus,
+                              ) === "Flagged"
                                 ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                                : "border-green-500 text-green-500 bg-green-500/10"
-                        }
-                      >
-                        {beneficiary.damageSeverity >= 8
-                          ? "Critical"
-                          : beneficiary.damageSeverity >= 6
-                            ? "Severe"
-                            : beneficiary.damageSeverity >= 4
-                              ? "Moderate"
-                              : "Minor"}{" "}
-                        ({beneficiary.damageSeverity}/10)
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Approvals:</span>
-                      <span className="font-medium">
-                        {beneficiary.verifierApprovals.length}/
-                        {verificationThreshold}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground pt-2 border-t">
-                      Registered {formatDate(beneficiary.registeredAt)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                                : formatVerificationStatus(
+                                      beneficiary.verificationStatus,
+                                    ) === "Rejected"
+                                  ? "border-red-500 text-red-500 bg-red-500/10"
+                                  : ""
+                            }`}
+                          >
+                            {formatVerificationStatus(
+                              beneficiary.verificationStatus,
+                            )}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-2 pt-0">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Disaster:
+                          </span>
+                          <span className="font-medium">
+                            {beneficiary.disasterId}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Family Size:
+                          </span>
+                          <span className="font-medium flex items-center gap-1">
+                            <Users className="h-2.5 w-2.5" />
+                            {beneficiary.familySize}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Damage Severity:
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={
+                              beneficiary.damageSeverity >= 8
+                                ? "border-red-500 text-red-500 bg-red-500/10"
+                                : beneficiary.damageSeverity >= 6
+                                  ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                                  : beneficiary.damageSeverity >= 4
+                                    ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                    : "border-green-500 text-green-500 bg-green-500/10"
+                            }
+                          >
+                            {beneficiary.damageSeverity >= 8
+                              ? "Critical"
+                              : beneficiary.damageSeverity >= 6
+                                ? "Severe"
+                                : beneficiary.damageSeverity >= 4
+                                  ? "Moderate"
+                                  : "Minor"}{" "}
+                            ({beneficiary.damageSeverity}/10)
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Approvals:
+                          </span>
+                          <span className="font-medium">
+                            {beneficiary.verifierApprovals.length}/
+                            {verificationThreshold}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground pt-2 border-t">
+                          Registered {formatDate(beneficiary.registeredAt)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {viewMode === "list" && (
+              <div className="flex flex-col gap-2">
+                {filteredAndSortedBeneficiaries.map((beneficiary) => (
+                  <Link
+                    key={beneficiary.publicKey.toBase58()}
+                    href={`/beneficiaries/${beneficiary.authority.toBase58()}`}
+                  >
+                    <Card className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer bg-theme-card-bg border-theme-border">
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-base font-semibold text-theme-primary group-hover:text-theme-primary transition-colors">
+                                {beneficiary.name}
+                              </h3>
+                              <Badge
+                                variant={
+                                  formatVerificationStatus(
+                                    beneficiary.verificationStatus,
+                                  ) === "Verified"
+                                    ? "default"
+                                    : formatVerificationStatus(
+                                          beneficiary.verificationStatus,
+                                        ) === "Flagged"
+                                      ? "outline"
+                                      : formatVerificationStatus(
+                                            beneficiary.verificationStatus,
+                                          ) === "Rejected"
+                                        ? "outline"
+                                        : "pending"
+                                }
+                                className={`shrink-0 text-xs px-2 py-0.5 ${
+                                  formatVerificationStatus(
+                                    beneficiary.verificationStatus,
+                                  ) === "Flagged"
+                                    ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                                    : formatVerificationStatus(
+                                          beneficiary.verificationStatus,
+                                        ) === "Rejected"
+                                      ? "border-red-500 text-red-500 bg-red-500/10"
+                                      : ""
+                                }`}
+                              >
+                                {formatVerificationStatus(
+                                  beneficiary.verificationStatus,
+                                )}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-theme-text/60">
+                              <MapPin className="h-2.5 w-2.5" />
+                              {beneficiary.location.district}, Ward{" "}
+                              {beneficiary.location.ward}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-xs shrink-0 ml-4">
+                            <div className="text-center">
+                              <div className="text-theme-text/60">Disaster</div>
+                              <div className="font-semibold text-theme-text">
+                                {beneficiary.disasterId}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-theme-text/60">Family</div>
+                              <div className="font-semibold text-theme-text flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {beneficiary.familySize}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-theme-text/60">
+                                Approvals
+                              </div>
+                              <div className="font-semibold text-theme-text">
+                                {beneficiary.verifierApprovals.length}/
+                                {verificationThreshold}
+                              </div>
+                            </div>
+                            <div className="text-center min-w-[80px]">
+                              <div className="text-theme-text/60">
+                                Registered
+                              </div>
+                              <div className="text-xs">
+                                {formatDate(beneficiary.registeredAt)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {viewMode === "table" && (
+              <BeneficiaryTable
+                beneficiaries={filteredAndSortedBeneficiaries}
+                verificationThreshold={verificationThreshold}
+              />
+            )}
+            {viewMode === "timeline" && (
+              <BeneficiaryTimeline
+                beneficiaries={filteredAndSortedBeneficiaries}
+                verificationThreshold={verificationThreshold}
+              />
+            )}
+          </>
         ) : (
           <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader className="text-center py-24">
-              <CardTitle className="text-xl font-semibold mb-3 text-theme-text-highlight">
+            <CardHeader className="text-center py-16">
+              <CardTitle className="text-base font-semibold mb-2 text-theme-text-highlight">
                 {ownerFilter === "mine"
                   ? "You haven't registered any beneficiaries"
                   : "No beneficiaries found"}
               </CardTitle>
-              <CardDescription className="text-base text-theme-text/60 mb-4">
+              <CardDescription className="text-sm text-theme-text/60 mb-4">
                 {ownerFilter === "mine"
                   ? "Register your first beneficiary to get started"
                   : searchQuery || statusFilters.length > 0
@@ -716,7 +977,7 @@ export default function BeneficiariesPage() {
               </CardDescription>
               {isFieldWorker && (
                 <div className="flex justify-center mt-4">
-                  <Button onClick={() => setShowRegisterModal(true)}>
+                  <Button onClick={() => setShowRegisterModal(true)} size="sm">
                     Register First Beneficiary
                   </Button>
                 </div>

@@ -63,42 +63,42 @@ export function PoolCard({ pool }: PoolCardProps) {
 
   return (
     <Card
-      className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer h-full bg-theme-card-bg border-theme-border"
+      className="group hover:shadow-lg hover:border-theme-primary transition-all duration-300 cursor-pointer h-full bg-theme-card-bg border-theme-border"
       onClick={handleClick}
     >
-      <CardHeader>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0 space-y-2">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <CardTitle className="text-lg text-theme-primary group-hover:text-theme-primary transition-colors">
+              <CardTitle className="text-base text-theme-primary group-hover:text-theme-primary transition-colors">
                 {pool.name}
               </CardTitle>
               <Badge
                 variant={pool.isActive ? "default" : "log_action"}
-                className="shrink-0"
+                className="shrink-0 text-xs px-2 py-0.5"
               >
                 {pool.isActive ? "Active" : "Closed"}
               </Badge>
             </div>
-            <CardDescription className="text-sm text-theme-text/60">
+            <CardDescription className="text-xs text-theme-text/60">
               {pool.disasterId} • {pool.poolId}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 pt-0">
         {/* Description */}
         {pool.description && (
-          <p className="text-sm text-theme-text/70 line-clamp-2">
+          <p className="text-xs text-theme-text/70 line-clamp-2">
             {pool.description}
           </p>
         )}
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <p className="text-xs text-theme-text/60">Total Collected</p>
-            <p className="text-2xl font-semibold text-theme-primary/80">
+            <p className="text-lg font-semibold text-theme-primary/80">
               {tokenMetadata
                 ? formatTokenAmount(
                     pool.totalDeposited,
@@ -113,7 +113,7 @@ export function PoolCard({ pool }: PoolCardProps) {
           </div>
           <div>
             <p className="text-xs text-theme-text/60">Available</p>
-            <p className="text-2xl font-semibold text-theme-primary/80">
+            <p className="text-lg font-semibold text-theme-primary/80">
               {tokenMetadata
                 ? formatTokenAmount(
                     pool.totalDeposited - pool.totalDistributed,
@@ -130,14 +130,14 @@ export function PoolCard({ pool }: PoolCardProps) {
 
         {/* Progress Bar (if target amount is set) */}
         {targetAmount && (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex justify-between text-xs text-theme-text/60">
               <span>Progress</span>
               <span>{progressPercentage.toFixed(0)}%</span>
             </div>
-            <div className="w-full bg-theme-border rounded-full h-2">
+            <div className="w-full bg-theme-border rounded-full h-1.5">
               <div
-                className="bg-theme-primary h-2 rounded-full transition-all duration-300"
+                className="bg-theme-primary h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(progressPercentage, 100)}%` }}
               />
             </div>
@@ -160,8 +160,8 @@ export function PoolCard({ pool }: PoolCardProps) {
         )}
 
         {/* Beneficiaries and Donors */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-3">
             <div>
               <span className="font-semibold text-theme-text">
                 {pool.beneficiaryCount}
@@ -179,7 +179,7 @@ export function PoolCard({ pool }: PoolCardProps) {
 
         {/* Distribution Type and Date */}
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs px-2 py-0.5">
             {formatDistributionType(pool.distributionType)}
           </Badge>
           <span className="text-xs text-theme-text/60">
