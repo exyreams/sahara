@@ -52,16 +52,21 @@ export function DonateModal({ pool, onSuccess }: DonateModalProps) {
         </Button>
 
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Make a Donation
-            <Badge variant="secondary" className="text-xs font-normal">
-              {tokenSymbol}
-            </Badge>
-          </DialogTitle>
+          <DialogTitle>Make a Donation</DialogTitle>
           <DialogDescription>
             Support this relief effort by donating to the fund pool. This pool
             accepts{" "}
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-foreground inline-flex items-center gap-1">
+              {tokenMetadata?.image && (
+                <img
+                  src={tokenMetadata.image}
+                  alt={tokenSymbol}
+                  className="w-4 h-4 rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
               {tokenName} ({tokenSymbol})
             </span>
             . Your donation will be recorded on the blockchain for full

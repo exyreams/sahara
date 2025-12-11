@@ -88,18 +88,27 @@ export function DonationForm({
     },
   });
 
-  // Update form token symbol when allowed tokens load (only once)
+  // Update form token symbol when allowed tokens load or when token metadata is available
   const hasSetToken = useRef(false);
   useEffect(() => {
-    if (hasSetToken.current || allowedTokens.length === 0) return;
+    if (hasSetToken.current) return;
 
-    // Set default token - prefer USDC if available, otherwise first allowed token
-    const hasUSDC = allowedTokens.some((t) => t.symbol === "USDC");
-    if (!hasUSDC && allowedTokens.length > 0) {
-      form.setValue("token", allowedTokens[0].symbol);
+    // For pool donations, use the token from metadata if available
+    if (recipientType === "pool" && tokenMetadata && !isMetadataLoading) {
+      form.setValue("token", tokenMetadata.symbol);
+      hasSetToken.current = true;
+      return;
     }
-    hasSetToken.current = true;
-  }, [allowedTokens, form]);
+
+    // For beneficiary donations, set default token when allowed tokens load
+    if (recipientType === "beneficiary" && allowedTokens.length > 0) {
+      const hasUSDC = allowedTokens.some((t) => t.symbol === "USDC");
+      if (!hasUSDC) {
+        form.setValue("token", allowedTokens[0].symbol);
+      }
+      hasSetToken.current = true;
+    }
+  }, [allowedTokens, tokenMetadata, isMetadataLoading, recipientType, form]);
 
   const onSubmit = async (data: DonationFormData) => {
     if (!program || !wallet.publicKey) return;
@@ -390,6 +399,9 @@ export function DonationForm({
                 // For pool donations, the pool's token is enforced by the smart contract
                 // For beneficiary donations, user can choose any allowed token
                 const isPoolDonation = recipientType === "pool";
+                const selectedToken = allowedTokens.find(
+                  (t) => t.symbol === field.value,
+                );
 
                 return (
                   <FormItem>
@@ -397,37 +409,111 @@ export function DonationForm({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={isAllowedTokensLoading || isPoolDonation}
+                      disabled={isAllowedTokensLoading}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-[180px]">
                           <SelectValue
                             placeholder={
                               isAllowedTokensLoading
                                 ? "Loading..."
                                 : "Select token"
                             }
-                          />
+                          >
+                            {selectedToken && (
+                              <div className="flex items-center gap-2">
+                                {selectedToken.logoURI && (
+                                  <img
+                                    src={selectedToken.logoURI}
+                                    alt={selectedToken.symbol}
+                                    className="w-4 h-4 rounded-full"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                )}
+                                <span>{selectedToken.symbol}</span>
+                              </div>
+                            )}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {allowedTokens.length > 0 ? (
+                      <SelectContent className="[&_[data-state=checked]]:bg-theme-primary/20 [&_[data-highlighted]]:bg-theme-primary/10">
+                        {isPoolDonation && tokenMetadata ? (
+                          // For pool donations, show only the pool's token
+                          <SelectItem
+                            value={tokenMetadata.symbol}
+                            className="data-[highlighted]:bg-theme-primary/10 data-[state=checked]:bg-theme-primary/20"
+                          >
+                            <div className="flex items-center gap-2">
+                              {tokenMetadata.image && (
+                                <img
+                                  src={tokenMetadata.image}
+                                  alt={tokenMetadata.symbol}
+                                  className="w-4 h-4 rounded-full"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              )}
+                              <div className="flex flex-col">
+                                <span className="font-medium text-theme-text">
+                                  {tokenMetadata.symbol}
+                                </span>
+                                <span className="text-xs text-theme-text/70">
+                                  {tokenMetadata.name}
+                                </span>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ) : allowedTokens.length > 0 ? (
+                          // For beneficiary donations, show all allowed tokens
                           allowedTokens.map((token) => (
                             <SelectItem
                               key={token.mintAddress}
                               value={token.symbol}
+                              className="data-[highlighted]:bg-theme-primary/10 data-[state=checked]:bg-theme-primary/20"
                             >
-                              {token.symbol}
+                              <div className="flex items-center gap-2">
+                                {token.logoURI && (
+                                  <img
+                                    src={token.logoURI}
+                                    alt={token.symbol}
+                                    className="w-4 h-4 rounded-full"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                )}
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-theme-text">
+                                    {token.symbol}
+                                  </span>
+                                  <span className="text-xs text-theme-text/70">
+                                    {token.name}
+                                  </span>
+                                </div>
+                              </div>
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="USDC">USDC</SelectItem>
+                          <SelectItem
+                            value="USDC"
+                            className="data-[highlighted]:bg-theme-primary/10 data-[state=checked]:bg-theme-primary/20"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-theme-text">
+                                USDC
+                              </span>
+                            </div>
+                          </SelectItem>
                         )}
                       </SelectContent>
                     </Select>
-                    {isPoolDonation && (
+                    {isPoolDonation && tokenMetadata && (
                       <FormDescription className="text-xs">
-                        This pool only accepts the token it was created with
+                        This pool accepts {tokenMetadata.name} (
+                        {tokenMetadata.symbol})
                       </FormDescription>
                     )}
                     <FormMessage />
@@ -436,17 +522,61 @@ export function DonationForm({
               }}
             />
           </div>
-          <p className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             {(() => {
               const selectedSymbol = form.watch("token");
+
+              // For pool donations, use token metadata
+              if (recipientType === "pool" && tokenMetadata) {
+                return (
+                  <div className="flex items-center gap-2">
+                    {tokenMetadata.image && (
+                      <img
+                        src={tokenMetadata.image}
+                        alt={tokenMetadata.symbol}
+                        className="w-4 h-4 rounded-full"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    )}
+                    <span>
+                      {tokenMetadata.name} • {tokenMetadata.decimals} decimals •{" "}
+                      {tokenMint?.slice(0, 8)}...
+                    </span>
+                  </div>
+                );
+              }
+
+              // For beneficiary donations, use allowed tokens
               const selectedToken = allowedTokens.find(
                 (t) => t.symbol === selectedSymbol,
               );
-              return selectedToken
-                ? `Token: ${selectedToken.name} (${selectedToken.symbol})`
-                : "Minimum: 0.01";
+
+              if (selectedToken) {
+                return (
+                  <div className="flex items-center gap-2">
+                    {selectedToken.logoURI && (
+                      <img
+                        src={selectedToken.logoURI}
+                        alt={selectedToken.symbol}
+                        className="w-4 h-4 rounded-full"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    )}
+                    <span>
+                      {selectedToken.name} • {selectedToken.decimals} decimals •{" "}
+                      {selectedToken.mintAddress.slice(0, 8)}...
+                    </span>
+                  </div>
+                );
+              }
+
+              return "Minimum: 0.01";
             })()}
-          </p>
+          </div>
         </div>
 
         <FormField

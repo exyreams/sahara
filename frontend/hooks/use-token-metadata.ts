@@ -1,114 +1,179 @@
-import { type Connection, PublicKey } from "@solana/web3.js";
+"use client";
+
+import { PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
 import { useProgram } from "./use-program";
 
-const METADATA_PROGRAM_ID = new PublicKey(
-  "metaqbxxUerdq28cj1RbAWkYQm36ScLyft7cb8Kongf",
-);
-
-export interface TokenMetadata {
+interface TokenMetadata {
   name: string;
   symbol: string;
-  uri: string;
   decimals: number;
+  logoURI?: string;
+  image?: string;
 }
 
-async function fetchTokenMetadata(
-  connection: Connection,
-  mint: PublicKey,
-): Promise<TokenMetadata | null> {
-  try {
-    // 1. Fetch Mint Account for decimals
-    const mintInfo = await connection.getParsedAccountInfo(mint);
-    if (!mintInfo.value) return null;
-
-    // @ts-expect-error
-    const decimals = mintInfo.value.data.parsed.info.decimals;
-
-    // 2. Derive Metadata PDA
-    const [metadataPDA] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("metadata"),
-        METADATA_PROGRAM_ID.toBuffer(),
-        mint.toBuffer(),
-      ],
-      METADATA_PROGRAM_ID,
-    );
-
-    // 3. Fetch Metadata Account
-    const accountInfo = await connection.getAccountInfo(metadataPDA);
-    if (!accountInfo) {
-      return {
-        name: "Unknown Token",
-        symbol: "UNKNOWN",
-        uri: "",
-        decimals,
-      };
-    }
-
-    // 4. Manual Deserialization (Simple version to avoid heavy dependencies)
-    // Metadata layout:
-    // key: u8
-    // update_authority: Pubkey
-    // mint: Pubkey
-    // data: Data
-    //   name: String (4 bytes len + chars)
-    //   symbol: String (4 bytes len + chars)
-    //   uri: String (4 bytes len + chars)
-
-    // Skip key (1) + update_auth (32) + mint (32) = 65 bytes
-    let offset = 65;
-
-    const nameLen = accountInfo.data.readUInt32LE(offset);
-    offset += 4;
-    const name = accountInfo.data
-      .slice(offset, offset + nameLen)
-      .toString("utf-8")
-      .replace(/\0/g, "");
-    offset += nameLen;
-
-    const symbolLen = accountInfo.data.readUInt32LE(offset);
-    offset += 4;
-    const symbol = accountInfo.data
-      .slice(offset, offset + symbolLen)
-      .toString("utf-8")
-      .replace(/\0/g, "");
-    offset += symbolLen;
-
-    const uriLen = accountInfo.data.readUInt32LE(offset);
-    offset += 4;
-    const uri = accountInfo.data
-      .slice(offset, offset + uriLen)
-      .toString("utf-8")
-      .replace(/\0/g, "");
-
-    return {
-      name: name.trim(),
-      symbol: symbol.trim(),
-      uri: uri.trim(),
-      decimals,
-    };
-  } catch (error) {
-    console.error("Error fetching token metadata:", error);
-    return null;
-  }
-}
-
-export function useTokenMetadata(mintAddress: string | null | undefined) {
+/**
+ * Hook to fetch token metadata from various sources
+ */
+export function useTokenMetadata(mintAddress: PublicKey | string | null) {
   const { connection } = useProgram();
 
+  // Convert string to PublicKey if needed
+  const publicKey = mintAddress
+    ? typeof mintAddress === "string"
+      ? (() => {
+          try {
+            return new PublicKey(mintAddress);
+          } catch (error) {
+            console.error("Invalid PublicKey string:", mintAddress);
+            return null;
+          }
+        })()
+      : mintAddress
+    : null;
+
   return useQuery({
-    queryKey: ["token-metadata", mintAddress],
-    queryFn: async () => {
-      if (!mintAddress || !connection) return null;
+    queryKey: ["token-metadata", publicKey?.toBase58()],
+    queryFn: async (): Promise<TokenMetadata | null> => {
+      if (!publicKey || !connection) return null;
+
       try {
-        const mint = new PublicKey(mintAddress);
-        return await fetchTokenMetadata(connection, mint);
-      } catch {
+        // First try to get metadata from the mint account
+        const mintInfo = await connection.getParsedAccountInfo(publicKey);
+
+        if (mintInfo.value?.data && "parsed" in mintInfo.value.data) {
+          const parsedData = mintInfo.value.data.parsed;
+          if (parsedData.type === "mint") {
+            const decimals = parsedData.info.decimals;
+
+            // Try to get metadata from Metaplex (if available)
+            try {
+              const metadataPDA = PublicKey.findProgramAddressSync(
+                [
+                  Buffer.from("metadata"),
+                  new PublicKey(
+                    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+                  ).toBuffer(),
+                  publicKey.toBuffer(),
+                ],
+                new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"),
+              )[0];
+
+              const metadataAccount =
+                await connection.getAccountInfo(metadataPDA);
+
+              if (metadataAccount) {
+                // Parse basic metadata (this is a simplified parser)
+                const data = metadataAccount.data;
+
+                // Skip the first 1 byte (key) + 32 bytes (update authority) + 32 bytes (mint)
+                let offset = 65;
+
+                // Read name length (4 bytes)
+                const nameLength = data.readUInt32LE(offset);
+                offset += 4;
+
+                // Read name
+                const name = data
+                  .subarray(offset, offset + nameLength)
+                  .toString("utf8")
+                  .replace(/\0/g, "");
+                offset += nameLength;
+
+                // Read symbol length (4 bytes)
+                const symbolLength = data.readUInt32LE(offset);
+                offset += 4;
+
+                // Read symbol
+                const symbol = data
+                  .subarray(offset, offset + symbolLength)
+                  .toString("utf8")
+                  .replace(/\0/g, "");
+                offset += symbolLength;
+
+                // Read URI length (4 bytes)
+                const uriLength = data.readUInt32LE(offset);
+                offset += 4;
+
+                // Read URI
+                const uri = data
+                  .subarray(offset, offset + uriLength)
+                  .toString("utf8")
+                  .replace(/\0/g, "");
+
+                let logoURI: string | undefined;
+
+                // Try to fetch additional metadata from URI
+                if (uri && uri.startsWith("http")) {
+                  try {
+                    const response = await fetch(uri);
+                    const metadata = await response.json();
+                    logoURI =
+                      metadata.image || metadata.logo || metadata.logoURI;
+                  } catch (error) {
+                    console.log("Could not fetch metadata from URI:", uri);
+                  }
+                }
+
+                return {
+                  name: name || "Unknown Token",
+                  symbol: symbol || "UNK",
+                  decimals,
+                  logoURI,
+                  image: logoURI,
+                };
+              }
+            } catch (metadataError) {
+              console.log("No Metaplex metadata found, using fallback");
+            }
+
+            // Fallback: Check if it's a known token
+            const knownTokens: Record<
+              string,
+              Omit<TokenMetadata, "decimals">
+            > = {
+              // Devnet USDC
+              "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": {
+                name: "USD Coin",
+                symbol: "USDC",
+                logoURI:
+                  "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+              },
+              // Mainnet USDC
+              EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
+                name: "USD Coin",
+                symbol: "USDC",
+                logoURI:
+                  "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+              },
+              // Add more known tokens as needed
+            };
+
+            const knownToken = knownTokens[publicKey.toBase58()];
+            if (knownToken) {
+              return {
+                ...knownToken,
+                decimals,
+              };
+            }
+
+            // Final fallback
+            return {
+              name: "Unknown Token",
+              symbol: "UNK",
+              decimals,
+            };
+          }
+        }
+
+        return null;
+      } catch (error) {
+        console.error("Error fetching token metadata:", error);
         return null;
       }
     },
-    enabled: !!mintAddress && !!connection,
-    staleTime: 1000 * 60 * 60, // 1 hour
+    enabled: !!publicKey && !!connection,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
   });
 }

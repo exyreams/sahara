@@ -9,7 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDate } from "@/lib/formatters";
+import { formatDate, formatTokenAmount } from "@/lib/formatters";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
+import { usePlatformConfig } from "@/hooks/use-platform-config";
 import type { DistributionType, FundPool } from "@/types/program";
 
 interface PoolCardProps {
@@ -34,12 +36,22 @@ function formatDistributionType(type: DistributionType): string {
 
 export function PoolCard({ pool }: PoolCardProps) {
   const router = useRouter();
+  const { config } = usePlatformConfig();
+  const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
 
-  // Convert from microUSDC to USDC
-  const totalCollected = pool.totalDeposited / 1_000_000;
-  const totalDistributed = pool.totalDistributed / 1_000_000;
+  // Use proper token formatting with decimals
+  const totalCollected = tokenMetadata
+    ? pool.totalDeposited / 10 ** tokenMetadata.decimals
+    : pool.totalDeposited / 1_000_000; // fallback to 6 decimals
+  const totalDistributed = tokenMetadata
+    ? pool.totalDistributed / 10 ** tokenMetadata.decimals
+    : pool.totalDistributed / 1_000_000; // fallback to 6 decimals
   const availableFunds = totalCollected - totalDistributed;
-  const targetAmount = pool.targetAmount ? pool.targetAmount / 1_000_000 : null;
+  const targetAmount = pool.targetAmount
+    ? tokenMetadata
+      ? pool.targetAmount / 10 ** tokenMetadata.decimals
+      : pool.targetAmount / 1_000_000 // fallback to 6 decimals
+    : null;
 
   const progressPercentage = targetAmount
     ? Math.min((totalCollected / targetAmount) * 100, 100)
@@ -87,21 +99,31 @@ export function PoolCard({ pool }: PoolCardProps) {
           <div>
             <p className="text-xs text-theme-text/60">Total Collected</p>
             <p className="text-2xl font-semibold text-theme-primary/80">
-              $
-              {totalCollected.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {tokenMetadata
+                ? formatTokenAmount(
+                    pool.totalDeposited,
+                    tokenMetadata.decimals,
+                    tokenMetadata.symbol,
+                  )
+                : `$${totalCollected.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
             </p>
           </div>
           <div>
             <p className="text-xs text-theme-text/60">Available</p>
             <p className="text-2xl font-semibold text-theme-primary/80">
-              $
-              {availableFunds.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {tokenMetadata
+                ? formatTokenAmount(
+                    pool.totalDeposited - pool.totalDistributed,
+                    tokenMetadata.decimals,
+                    tokenMetadata.symbol,
+                  )
+                : `$${availableFunds.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
             </p>
           </div>
         </div>
@@ -120,11 +142,19 @@ export function PoolCard({ pool }: PoolCardProps) {
               />
             </div>
             <p className="text-xs text-theme-text/60">
-              Target: $
-              {targetAmount.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              Target:{" "}
+              {tokenMetadata && pool.targetAmount
+                ? formatTokenAmount(
+                    pool.targetAmount,
+                    tokenMetadata.decimals,
+                    tokenMetadata.symbol,
+                  )
+                : targetAmount
+                  ? `$${targetAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  : "N/A"}
             </p>
           </div>
         )}

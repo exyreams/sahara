@@ -27,7 +27,12 @@ import {
 import { useActivityLogs } from "@/hooks/use-activity-logs";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
 import { useProgram } from "@/hooks/use-program";
-import { formatCurrency, formatNumber } from "@/lib/formatters";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
+import {
+  formatCurrency,
+  formatNumber,
+  formatTokenAmount,
+} from "@/lib/formatters";
 
 export default function AdminDashboardPage() {
   const {
@@ -37,6 +42,7 @@ export default function AdminDashboardPage() {
     refetch: refetchConfig,
   } = usePlatformConfig();
   const { wallet } = useProgram();
+  const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
   const {
     logs,
     loading: logsLoading,
@@ -323,10 +329,25 @@ export default function AdminDashboardPage() {
               ) : (
                 <>
                   <div className="text-2xl font-bold">
-                    {formatCurrency(config.totalAidDistributed)}
+                    {tokenMetadata
+                      ? formatTokenAmount(
+                          config.totalAidDistributed,
+                          tokenMetadata.decimals,
+                          tokenMetadata.symbol,
+                        )
+                      : formatCurrency(config.totalAidDistributed)}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    From ${(config.totalDonations / 1e6).toFixed(2)} USDC
+                    From{" "}
+                    {tokenMetadata
+                      ? formatTokenAmount(
+                          config.totalDonations,
+                          tokenMetadata.decimals,
+                          tokenMetadata.symbol,
+                        )
+                      : `$${(config.totalDonations / 1e6).toFixed(
+                          2,
+                        )} USDC`}{" "}
                     donated
                   </p>
                 </>
@@ -556,11 +577,15 @@ export default function AdminDashboardPage() {
                                         Amount
                                       </p>
                                       <p className="text-sm text-theme-primary font-semibold">
-                                        $
-                                        {(activity.amount / 1_000_000).toFixed(
-                                          2,
-                                        )}{" "}
-                                        USDC
+                                        {tokenMetadata
+                                          ? formatTokenAmount(
+                                              activity.amount,
+                                              tokenMetadata.decimals,
+                                              tokenMetadata.symbol,
+                                            )
+                                          : `$${(
+                                              activity.amount / 1_000_000
+                                            ).toFixed(2)} USDC`}
                                       </p>
                                     </div>
                                   )}
@@ -604,14 +629,21 @@ export default function AdminDashboardPage() {
                                                 Donation Amount
                                               </p>
                                               <p className="text-sm text-theme-primary font-semibold">
-                                                $
-                                                {(
-                                                  Number.parseInt(
-                                                    parsedData.Amount,
-                                                    10,
-                                                  ) / 1_000_000
-                                                ).toFixed(2)}{" "}
-                                                USDC
+                                                {tokenMetadata
+                                                  ? formatTokenAmount(
+                                                      Number.parseInt(
+                                                        parsedData.Amount,
+                                                        10,
+                                                      ),
+                                                      tokenMetadata.decimals,
+                                                      tokenMetadata.symbol,
+                                                    )
+                                                  : `$${(
+                                                      Number.parseInt(
+                                                        parsedData.Amount,
+                                                        10,
+                                                      ) / 1_000_000
+                                                    ).toFixed(2)} USDC`}
                                               </p>
                                             </div>
                                           )}
@@ -621,14 +653,21 @@ export default function AdminDashboardPage() {
                                                 Platform Fee
                                               </p>
                                               <p className="text-sm text-theme-text">
-                                                $
-                                                {(
-                                                  Number.parseInt(
-                                                    parsedData.Fee,
-                                                    10,
-                                                  ) / 1_000_000
-                                                ).toFixed(2)}{" "}
-                                                USDC
+                                                {tokenMetadata
+                                                  ? formatTokenAmount(
+                                                      Number.parseInt(
+                                                        parsedData.Fee,
+                                                        10,
+                                                      ),
+                                                      tokenMetadata.decimals,
+                                                      tokenMetadata.symbol,
+                                                    )
+                                                  : `$${(
+                                                      Number.parseInt(
+                                                        parsedData.Fee,
+                                                        10,
+                                                      ) / 1_000_000
+                                                    ).toFixed(2)} USDC`}
                                               </p>
                                             </div>
                                           )}

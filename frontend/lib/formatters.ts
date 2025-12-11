@@ -77,6 +77,28 @@ export function formatCurrency(amount: number, currency = "USDC"): string {
 }
 
 /**
+ * Format token amount with dynamic decimals and symbol
+ * @param amount - Amount in smallest unit (lamports/wei equivalent)
+ * @param decimals - Token decimals
+ * @param symbol - Token symbol
+ * @param displayDecimals - Number of decimal places to show (default: 2)
+ * @returns Formatted token amount string
+ */
+export function formatTokenAmount(
+  amount: number,
+  decimals: number,
+  symbol: string,
+  displayDecimals = 2,
+): string {
+  const humanAmount = amount / 10 ** decimals;
+  const formatted = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: displayDecimals,
+    maximumFractionDigits: displayDecimals,
+  }).format(humanAmount);
+  return `${formatted} ${symbol}`;
+}
+
+/**
  * Parse USDC amount from human-readable to lamports
  * @param amount - Human-readable amount
  * @returns Amount in smallest unit
@@ -156,7 +178,10 @@ export function formatPhoneNumber(phone: string): string {
 
   // Format as +XX XXX XXX XXXX (Nepal format)
   if (cleaned.length === 12 && cleaned.startsWith("977")) {
-    return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
+    return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(
+      6,
+      9,
+    )} ${cleaned.slice(9)}`;
   }
 
   // Format as XXX XXX XXXX (local format)

@@ -57,7 +57,7 @@ function AllowedTokenRow({
   disabled: boolean;
 }) {
   const mintAddress = mint.toBase58();
-  const { data: metadata, isLoading } = useTokenMetadata(mintAddress);
+  const { data: metadata, isLoading } = useTokenMetadata(mint);
   const isUSDC = mintAddress === usdcMint;
 
   return (
