@@ -72,7 +72,7 @@ export function DonationForm({
 
   // Fetch metadata if a specific token mint is required (for pool donations)
   const { data: tokenMetadata, isLoading: isMetadataLoading } =
-    useTokenMetadata(tokenMint);
+    useTokenMetadata(tokenMint || null);
 
   // Fetch allowed tokens for beneficiary donations
   const { tokens: allowedTokens, isLoading: isAllowedTokensLoading } =
