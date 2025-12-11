@@ -24,17 +24,17 @@ export function DisasterCard({ disaster }: DisasterCardProps) {
   return (
     <Link href={`/disasters/${disaster.eventId}`}>
       <Card className="group hover:shadow-xl hover:border-theme-primary transition-all duration-300 cursor-pointer h-full">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-2 flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-lg text-theme-primary transition-colors">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <CardTitle className="text-base text-theme-primary transition-colors">
                   {disaster.name}
                 </CardTitle>
                 <Badge
                   variant="outline"
                   className={cn(
-                    "shrink-0",
+                    "shrink-0 text-xs px-1.5 py-0.5",
                     severity.color === "red" &&
                       "border-red-500 text-red-500 bg-red-500/10",
                     severity.color === "orange" &&
@@ -48,41 +48,41 @@ export function DisasterCard({ disaster }: DisasterCardProps) {
                   {severity.label}
                 </Badge>
               </div>
-              <CardDescription className="flex items-center gap-1">
+              <CardDescription className="flex items-center gap-1 text-xs">
                 <MapPin className="h-3 w-3 shrink-0" />
                 {disaster.location.district}, Ward {disaster.location.ward}
               </CardDescription>
             </div>
             <Badge
               variant={disaster.isActive ? "default" : "log_action"}
-              className="shrink-0"
+              className="shrink-0 text-xs px-2 py-1"
             >
               {disaster.isActive ? "Active" : "Closed"}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
+        <CardContent className="space-y-2 pt-0">
+          <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1 text-muted-foreground">
-              <Users className="h-4 w-4" />
+              <Users className="h-3.5 w-3.5" />
               <span>
                 {formatNumber(disaster.verifiedBeneficiaries)} /{" "}
                 {formatNumber(disaster.totalBeneficiaries)} verified
               </span>
             </div>
             <div className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5" />
               <span>{formatDate(disaster.declaredAt)}</span>
             </div>
           </div>
 
-          <div className="text-sm">
+          <div className="text-xs">
             <span className="font-medium">Type:</span>{" "}
             <span className="text-muted-foreground">{disaster.eventType}</span>
           </div>
 
           {disaster.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-xs text-muted-foreground line-clamp-2">
               {disaster.description}
             </p>
           )}
@@ -90,12 +90,16 @@ export function DisasterCard({ disaster }: DisasterCardProps) {
           {disaster.affectedAreas.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {disaster.affectedAreas.slice(0, 3).map((area) => (
-                <Badge key={area} variant="outline" className="text-xs">
+                <Badge
+                  key={area}
+                  variant="outline"
+                  className="text-xs px-1.5 py-0.5"
+                >
                   {area}
                 </Badge>
               ))}
               {disaster.affectedAreas.length > 3 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                   +{disaster.affectedAreas.length - 3} more
                 </Badge>
               )}

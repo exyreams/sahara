@@ -36,20 +36,28 @@ export function SortDropdown({
     <div className={className}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <ArrowUpDown className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs px-3 py-1.5"
+          >
+            <ArrowUpDown className="h-3.5 w-3.5" />
             {label}
             {selectedOption && (
-              <span className="text-muted-foreground">
+              <span className="text-black dark:text-white">
                 : {selectedOption.label}
               </span>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuContent align="start" className="w-48">
           <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>
             {options.map((option) => (
-              <DropdownMenuRadioItem key={option.value} value={option.value}>
+              <DropdownMenuRadioItem
+                key={option.value}
+                value={option.value}
+                className="text-xs py-1.5"
+              >
                 {option.label}
               </DropdownMenuRadioItem>
             ))}

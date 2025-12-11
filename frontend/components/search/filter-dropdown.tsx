@@ -58,28 +58,32 @@ export function FilterDropdown({
     <div className={className}>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs px-3 py-1.5"
+          >
+            <Filter className="h-3.5 w-3.5" />
             {label}
             {selectedCount > 0 && (
               <Badge
                 variant="secondary"
-                className="ml-1 rounded-sm px-1 font-normal"
+                className="ml-1 rounded-sm px-1 font-normal text-xs"
               >
                 {selectedCount}
               </Badge>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel className="flex items-center justify-between">
+        <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuLabel className="flex items-center justify-between text-xs">
             <span>{label}</span>
             {selectedCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClearAll}
-                className="h-6 px-2 text-xs"
+                className="h-5 px-2 text-xs"
               >
                 Clear
               </Button>
@@ -91,6 +95,7 @@ export function FilterDropdown({
               key={option.value}
               checked={selectedValues.includes(option.value)}
               onCheckedChange={() => handleToggle(option.value)}
+              className="text-xs py-1.5"
             >
               {option.label}
             </DropdownMenuCheckboxItem>

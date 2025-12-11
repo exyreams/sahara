@@ -1,8 +1,19 @@
 "use client";
 
-import { AlertTriangle, Grid3x3, List, Plus, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  Grid3x3,
+  List,
+  Plus,
+  RefreshCw,
+  Table,
+  Clock,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
+import { DisasterTable } from "@/components/disasters/disaster-table";
+import { DisasterList } from "@/components/disasters/disaster-list";
+import { DisasterTimeline } from "@/components/disasters/disaster-timeline";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
@@ -35,7 +46,9 @@ export default function DisastersPage() {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<
+    "grid" | "list" | "table" | "timeline"
+  >("grid");
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<
@@ -183,19 +196,17 @@ export default function DisastersPage() {
               <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
                 <div className="flex-1" />
 
-                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
-                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
+                <div className="max-w-3xl mx-auto text-center space-y-4 pb-12 pointer-events-auto">
+                  <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-theme-text-highlight">
                     Disaster Relief Platform
                   </h1>
-                  <p className="text-lg md:text-xl text-theme-text max-w-2xl mx-auto">
+                  <p className="text-base md:text-lg text-theme-text max-w-2xl mx-auto">
                     Track disaster events, coordinate relief efforts, and ensure
                     transparent aid distribution on the blockchain.
                   </p>
-                  <div className="flex flex-col items-center gap-4 pt-6">
-                    <div className="scale-110">
-                      <WalletButton />
-                    </div>
-                    <p className="text-sm text-theme-text/80">
+                  <div className="flex flex-col items-center gap-3 pt-4">
+                    <WalletButton />
+                    <p className="text-xs text-theme-text/80">
                       Connect your wallet to take action
                     </p>
                   </div>
@@ -205,7 +216,7 @@ export default function DisastersPage() {
           </div>
 
           {/* Active Disasters Section */}
-          <section className="container mx-auto px-4 py-16">
+          <section className="container mx-auto px-3 py-12">
             {loading ? (
               <div className="space-y-8 animate-pulse">
                 {/* Header skeleton */}
@@ -224,16 +235,16 @@ export default function DisastersPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold tracking-tight text-theme-text-highlight">
+                  <h2 className="text-2xl font-bold tracking-tight text-theme-text-highlight">
                     Active Disasters
                   </h2>
-                  <p className="text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     View ongoing disaster relief efforts
                   </p>
                 </div>
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="text-xs px-2 py-1">
                   {disasters.filter((d) => d.isActive).length} Active
                 </Badge>
               </div>
@@ -241,7 +252,7 @@ export default function DisastersPage() {
 
             {/* Filters */}
             {!loading && (
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex flex-col md:flex-row gap-3 mb-4">
                 <SearchInput
                   placeholder="Search by name, ID, or location..."
                   onSearch={setSearchQuery}
@@ -282,22 +293,38 @@ export default function DisastersPage() {
                   onValueChange={(value) => setSortBy(value as typeof sortBy)}
                 />
 
-                <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+                <div className="flex gap-1">
                   <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    variant={viewMode === "grid" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("grid")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <Grid3x3 className="h-4 w-4" />
+                    <Grid3x3 className="h-3.5 w-3.5" />
                   </Button>
                   <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
+                    variant={viewMode === "list" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setViewMode("list")}
-                    className="px-3"
+                    className="gap-1.5 text-xs px-3 py-1.5"
                   >
-                    <List className="h-4 w-4" />
+                    <List className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "table" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Table className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "timeline" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("timeline")}
+                    className="gap-1.5 text-xs px-3 py-1.5"
+                  >
+                    <Clock className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -305,7 +332,7 @@ export default function DisastersPage() {
 
             {/* Results count */}
             {!loading && (
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-3">
                 <Badge variant="secondary">
                   {publicFilteredAndSortedDisasters.length}{" "}
                   {publicFilteredAndSortedDisasters.length === 1
@@ -332,13 +359,13 @@ export default function DisastersPage() {
 
             {/* Disasters grid */}
             {loading ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }, (_, i) => {
                   const uniqueId = `disaster-skeleton-${Date.now()}-${i}`;
                   return (
                     <div
                       key={uniqueId}
-                      className="h-64 bg-theme-card-bg border border-theme-border rounded-lg p-6 animate-pulse"
+                      className="h-56 bg-theme-card-bg border border-theme-border rounded-lg p-4 animate-pulse"
                     >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between gap-3">
@@ -371,26 +398,35 @@ export default function DisastersPage() {
                 })}
               </div>
             ) : publicFilteredAndSortedDisasters.length > 0 ? (
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                    : "flex flex-col gap-3"
-                }
-              >
-                {publicFilteredAndSortedDisasters.map((disaster) => (
-                  <DisasterCard
-                    key={disaster.publicKey.toBase58()}
-                    disaster={disaster}
+              <>
+                {viewMode === "grid" && (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {publicFilteredAndSortedDisasters.map((disaster) => (
+                      <DisasterCard
+                        key={disaster.publicKey.toBase58()}
+                        disaster={disaster}
+                      />
+                    ))}
+                  </div>
+                )}
+                {viewMode === "list" && (
+                  <DisasterList disasters={publicFilteredAndSortedDisasters} />
+                )}
+                {viewMode === "table" && (
+                  <DisasterTable disasters={publicFilteredAndSortedDisasters} />
+                )}
+                {viewMode === "timeline" && (
+                  <DisasterTimeline
+                    disasters={publicFilteredAndSortedDisasters}
                   />
-                ))}
-              </div>
+                )}
+              </>
             ) : (
-              <div className="flex flex-col items-center justify-center text-center min-h-64 border rounded-lg border-theme-border bg-theme-card-bg">
-                <h3 className="text-lg font-semibold mb-2">
+              <div className="flex flex-col items-center justify-center text-center min-h-48 border rounded-lg border-theme-border bg-theme-card-bg">
+                <h3 className="text-base font-semibold mb-2">
                   No disasters found
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {searchQuery ||
                   statusFilters.length > 0 ||
                   typeFilters.length > 0
@@ -409,7 +445,7 @@ export default function DisastersPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-3 py-6">
         {/* Platform Pause Alert */}
         {config?.isPaused && (
           <Card className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
@@ -426,29 +462,37 @@ export default function DisastersPage() {
           </Card>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight">
               Disaster Events
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-1 text-sm">
               View and manage disaster relief efforts
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
+              className="text-xs px-3 py-1.5"
             >
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 mr-1.5 ${
+                  isRefreshing ? "animate-spin" : ""
+                }`}
               />
               Refresh
             </Button>
             {canCreateDisaster && (
-              <Button onClick={() => setShowCreateModal(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                size="sm"
+                className="text-xs px-3 py-1.5"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
                 Create Disaster
               </Button>
             )}
@@ -465,7 +509,7 @@ export default function DisastersPage() {
         />
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <SearchInput
             placeholder="Search by name, ID, or location..."
             onSearch={setSearchQuery}
@@ -473,20 +517,20 @@ export default function DisastersPage() {
           />
 
           {(isAdmin || ngo) && (
-            <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+            <div className="flex gap-1">
               <Button
-                variant={ownerFilter === "all" ? "default" : "ghost"}
+                variant={ownerFilter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("all")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 All
               </Button>
               <Button
-                variant={ownerFilter === "mine" ? "default" : "ghost"}
+                variant={ownerFilter === "mine" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setOwnerFilter("mine")}
-                className="px-4"
+                className="gap-1.5 text-xs px-3 py-1.5"
               >
                 Mine
               </Button>
@@ -527,28 +571,44 @@ export default function DisastersPage() {
             onValueChange={(value) => setSortBy(value as typeof sortBy)}
           />
 
-          <div className="flex gap-1 border border-theme-border rounded-lg p-1">
+          <div className="flex gap-1">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("grid")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <Grid3x3 className="h-4 w-4" />
+              <Grid3x3 className="h-3.5 w-3.5" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="px-3"
+              className="gap-1.5 text-xs px-3 py-1.5"
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Table className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "timeline" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("timeline")}
+              className="gap-1.5 text-xs px-3 py-1.5"
+            >
+              <Clock className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
         {/* Results count */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <Badge variant="secondary">
             {filteredAndSortedDisasters.length}{" "}
             {filteredAndSortedDisasters.length === 1 ? "result" : "results"}
@@ -574,13 +634,13 @@ export default function DisastersPage() {
 
         {/* Disasters grid */}
         {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => {
               const uniqueId = `disaster-skeleton-${Date.now()}-${i}`;
               return (
                 <div
                   key={uniqueId}
-                  className="h-64 bg-theme-card-bg border border-theme-border rounded-lg p-6 animate-pulse"
+                  className="h-56 bg-theme-card-bg border border-theme-border rounded-lg p-4 animate-pulse"
                 >
                   <div className="space-y-4">
                     {/* Header */}
@@ -621,29 +681,36 @@ export default function DisastersPage() {
             })}
           </div>
         ) : filteredAndSortedDisasters.length > 0 ? (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                : "flex flex-col gap-3"
-            }
-          >
-            {filteredAndSortedDisasters.map((disaster) => (
-              <DisasterCard
-                key={disaster.publicKey.toBase58()}
-                disaster={disaster}
-              />
-            ))}
-          </div>
+          <>
+            {viewMode === "grid" && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAndSortedDisasters.map((disaster) => (
+                  <DisasterCard
+                    key={disaster.publicKey.toBase58()}
+                    disaster={disaster}
+                  />
+                ))}
+              </div>
+            )}
+            {viewMode === "list" && (
+              <DisasterList disasters={filteredAndSortedDisasters} />
+            )}
+            {viewMode === "table" && (
+              <DisasterTable disasters={filteredAndSortedDisasters} />
+            )}
+            {viewMode === "timeline" && (
+              <DisasterTimeline disasters={filteredAndSortedDisasters} />
+            )}
+          </>
         ) : (
           <Card className="bg-theme-card-bg border-theme-border">
-            <CardHeader className="text-center py-20">
-              <CardTitle className="text-xl font-semibold mb-3 text-theme-text-highlight">
+            <CardHeader className="text-center py-16">
+              <CardTitle className="text-lg font-semibold mb-2 text-theme-text-highlight">
                 {ownerFilter === "mine"
                   ? "You haven't created any disasters"
                   : "No disasters found"}
               </CardTitle>
-              <CardDescription className="text-base text-theme-text/60 mb-4">
+              <CardDescription className="text-sm text-theme-text/60 mb-3">
                 {ownerFilter === "mine"
                   ? "Create your first disaster event to get started"
                   : searchQuery ||
@@ -653,8 +720,12 @@ export default function DisastersPage() {
                     : "No disaster events have been created yet"}
               </CardDescription>
               {canCreateDisaster && (
-                <div className="flex justify-center mt-4">
-                  <Button onClick={() => setShowCreateModal(true)}>
+                <div className="flex justify-center mt-3">
+                  <Button
+                    onClick={() => setShowCreateModal(true)}
+                    size="sm"
+                    className="text-xs px-4 py-2"
+                  >
                     Create First Disaster
                   </Button>
                 </div>

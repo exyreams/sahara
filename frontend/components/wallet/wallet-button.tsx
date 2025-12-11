@@ -48,8 +48,13 @@ export function WalletButton() {
   if (!connected || !publicKey) {
     return (
       <>
-        <Button onClick={() => setModalOpen(true)} variant="default">
-          <Wallet className="mr-2 h-4 w-4" />
+        <Button
+          onClick={() => setModalOpen(true)}
+          variant="default"
+          size="sm"
+          className="text-xs px-3 py-1.5"
+        >
+          <Wallet className="mr-1.5 h-3.5 w-3.5" />
           Select Wallet
         </Button>
         <WalletModal open={modalOpen} onClose={() => setModalOpen(false)} />
@@ -60,41 +65,48 @@ export function WalletButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="default" className="gap-2">
-          <Wallet className="h-4 w-4" />
+        <Button
+          variant="default"
+          size="sm"
+          className="gap-1.5 text-xs px-3 py-1.5"
+        >
+          <Wallet className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{truncateAddress(publicKey)}</span>
           {balance !== null && (
-            <Badge variant="secondary" className="hidden md:inline-flex">
-              {isLoadingBalance ? "..." : `${balance.toFixed(4)} SOL`}
+            <Badge
+              variant="secondary"
+              className="hidden md:inline-flex text-xs px-1.5 py-0.5"
+            >
+              {isLoadingBalance ? "..." : `${balance.toFixed(2)} SOL`}
             </Badge>
           )}
-          <ChevronDown className="h-3 w-3 opacity-50" />
+          <ChevronDown className="h-2.5 w-2.5 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 mt-5">
+      <DropdownMenuContent align="end" className="w-56 mt-2">
         {/* Wallet Header with Balance */}
-        <div className="px-2 py-3 space-y-2">
-          <DropdownMenuLabel className="text-theme-text-highlight font-semibold">
+        <div className="px-2 py-2 space-y-1.5">
+          <DropdownMenuLabel className="text-theme-text-highlight font-semibold text-sm">
             My Wallet
           </DropdownMenuLabel>
-          <div className="flex items-center justify-between px-2 py-2 rounded-lg bg-theme-background border border-theme-border">
+          <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-theme-background border border-theme-border">
             <div className="flex flex-col">
               <span className="text-xs text-theme-text/60">Balance</span>
-              <span className="text-lg font-semibold text-theme-primary">
+              <span className="text-base font-semibold text-theme-primary">
                 {isLoadingBalance ? (
-                  <span className="text-sm">Loading...</span>
+                  <span className="text-xs">Loading...</span>
                 ) : balance !== null ? (
-                  `${balance.toFixed(4)} SOL`
+                  `${balance.toFixed(2)} SOL`
                 ) : (
-                  <span className="text-sm">--</span>
+                  <span className="text-xs">--</span>
                 )}
               </span>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs px-1.5 py-0.5">
               {process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}
             </Badge>
           </div>
-          <div className="px-2 py-1.5 rounded bg-theme-primary/5 border border-theme-primary/20">
+          <div className="px-2 py-1 rounded bg-theme-primary/5 border border-theme-primary/20">
             <p className="text-xs text-theme-text/80 font-mono break-all">
               {publicKey?.toBase58()}
             </p>
@@ -105,16 +117,16 @@ export function WalletButton() {
 
         <DropdownMenuItem
           onClick={handleCopyAddress}
-          className="cursor-pointer"
+          className="cursor-pointer text-sm py-1.5"
         >
-          <Copy className="mr-2 h-4 w-4" />
+          <Copy className="mr-2 h-3.5 w-3.5" />
           Copy Address
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleViewExplorer}
-          className="cursor-pointer"
+          className="cursor-pointer text-sm py-1.5"
         >
-          <ExternalLink className="mr-2 h-4 w-4" />
+          <ExternalLink className="mr-2 h-3.5 w-3.5" />
           View in Explorer
         </DropdownMenuItem>
 
@@ -122,9 +134,9 @@ export function WalletButton() {
 
         <DropdownMenuItem
           onClick={handleDisconnect}
-          className="cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive"
+          className="cursor-pointer text-sm py-1.5 text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-3.5 w-3.5" />
           Disconnect
         </DropdownMenuItem>
       </DropdownMenuContent>
