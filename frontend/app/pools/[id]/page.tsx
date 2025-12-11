@@ -52,6 +52,8 @@ import { useProgram } from "@/hooks/use-program";
 import { useTransaction } from "@/hooks/use-transaction";
 import { deriveActivityLogPDA, deriveFundPoolPDA } from "@/lib/anchor/pdas";
 import { formatDate } from "@/lib/formatters";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
+import { usePlatformConfig } from "@/hooks/use-platform-config";
 import type { DistributionType } from "@/types/program";
 
 interface PageProps {
@@ -82,6 +84,8 @@ export default function PoolDetailPage({ params }: PageProps) {
   const { wallet, program } = useProgram();
   const { ngos } = useAllNGOs();
   const { submit, isLoading: isClosing } = useTransaction();
+  const { config } = usePlatformConfig();
+  const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -387,9 +391,23 @@ export default function PoolDetailPage({ params }: PageProps) {
     return null;
   }
 
-  // Convert from microUSDC to USDC
-  const totalCollected = pool.totalDeposited / 1_000_000;
-  const totalDistributed = pool.totalDistributed / 1_000_000;
+  // Get dynamic token decimals and symbol
+  const decimals = tokenMetadata?.decimals ?? 9; // fallback to 9 for your test token
+  const tokenSymbol = tokenMetadata?.symbol || "TOKEN";
+
+  // Helper function to format currency amounts
+  const formatCurrency = (amount: number) => {
+    const formatted = amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    // Remove .00 if it's exactly .00, but keep other decimals like .20
+    return formatted.endsWith(".00") ? formatted.slice(0, -3) : formatted;
+  };
+
+  // Convert from token smallest unit to human readable (dynamic decimals)
+  const totalCollected = pool.totalDeposited / 10 ** decimals;
+  const totalDistributed = pool.totalDistributed / 10 ** decimals;
   const availableFunds = totalCollected - totalDistributed;
   const targetAmount = pool.targetAmount ? pool.targetAmount / 1_000_000 : null;
 
@@ -627,11 +645,7 @@ export default function PoolDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-theme-primary">
-                $
-                {totalCollected.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                ${formatCurrency(totalCollected)}
               </div>
             </CardContent>
           </Card>
@@ -648,11 +662,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                 <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
               ) : (
                 <div className="text-2xl font-bold text-theme-text">
-                  $
-                  {totalDistributed.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  ${formatCurrency(totalDistributed)}
                 </div>
               )}
             </CardContent>
@@ -670,11 +680,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                 <div className="h-8 w-32 bg-theme-border rounded animate-pulse" />
               ) : (
                 <div className="text-2xl font-bold text-theme-text">
-                  $
-                  {availableFunds.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  ${formatCurrency(availableFunds)}
                 </div>
               )}
             </CardContent>
@@ -707,17 +713,8 @@ export default function PoolDetailPage({ params }: PageProps) {
                 Fundraising Progress
               </CardTitle>
               <CardDescription className="text-theme-text/60">
-                $
-                {totalCollected.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                of $
-                {targetAmount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                raised
+                ${formatCurrency(totalCollected)} of $
+                {formatCurrency(targetAmount)} raised
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -928,7 +925,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             b.publicKey.equals(distribution.beneficiary),
                           );
                           const allocated =
-                            distribution.amountAllocated / 1_000_000;
+                            distribution.amountAllocated / 1_000_000_000;
 
                           return (
                             <a
@@ -960,7 +957,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               <div className="flex items-center gap-2">
                                 <div className="text-right">
                                   <p className="text-lg font-bold text-theme-primary">
-                                    ${allocated.toFixed(2)}
+                                    ${formatCurrency(allocated)} {tokenSymbol}
                                   </p>
                                 </div>
                                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -1136,7 +1133,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                     {poolDonations.map((donation) => {
                       const donationKey = donation.publicKey.toString();
                       const isExpanded = expandedDonations.has(donationKey);
-                      const amount = donation.amount / 1_000_000;
+                      const amount = donation.amount / 10 ** decimals;
 
                       return (
                         <div
@@ -1161,7 +1158,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                             </span>
                             <span className="text-theme-text/60">donated</span>
                             <span className="font-semibold text-theme-primary">
-                              ${amount.toFixed(2)} USDC
+                              ${formatCurrency(amount)} {tokenSymbol}
                             </span>
                             <div className="flex-1" />
                             <span className="text-xs text-theme-text/60 shrink-0">
@@ -1200,7 +1197,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                                         Amount
                                       </p>
                                       <p className="text-sm text-theme-text">
-                                        ${amount.toFixed(2)} USDC
+                                        ${formatCurrency(amount)} {tokenSymbol}
                                       </p>
                                     </div>
                                     <div>
@@ -1209,10 +1206,10 @@ export default function PoolDetailPage({ params }: PageProps) {
                                       </p>
                                       <p className="text-sm text-theme-text">
                                         $
-                                        {(
-                                          donation.platformFee / 1_000_000
-                                        ).toFixed(2)}{" "}
-                                        USDC
+                                        {formatCurrency(
+                                          donation.platformFee / 1_000_000_000,
+                                        )}{" "}
+                                        {tokenSymbol}
                                       </p>
                                     </div>
                                     <div>
@@ -1221,10 +1218,10 @@ export default function PoolDetailPage({ params }: PageProps) {
                                       </p>
                                       <p className="text-sm text-theme-primary font-semibold">
                                         $
-                                        {(
-                                          donation.netAmount / 1_000_000
-                                        ).toFixed(2)}{" "}
-                                        USDC
+                                        {formatCurrency(
+                                          donation.netAmount / 1_000_000_000,
+                                        )}{" "}
+                                        {tokenSymbol}
                                       </p>
                                     </div>
                                     <div>
@@ -1308,22 +1305,22 @@ export default function PoolDetailPage({ params }: PageProps) {
                       poolDistributions.reduce(
                         (sum, d) => sum + d.amountAllocated,
                         0,
-                      ) / 1_000_000;
+                      ) / 1_000_000_000;
                     const totalClaimed =
                       poolDistributions.reduce(
                         (sum, d) => sum + d.amountClaimed,
                         0,
-                      ) / 1_000_000;
+                      ) / 1_000_000_000;
                     const totalImmediate =
                       poolDistributions.reduce(
                         (sum, d) => sum + d.amountImmediate,
                         0,
-                      ) / 1_000_000;
+                      ) / 1_000_000_000;
                     const totalLocked =
                       poolDistributions.reduce(
                         (sum, d) => sum + d.amountLocked,
                         0,
-                      ) / 1_000_000;
+                      ) / 1_000_000_000;
                     const fullyClaimed = poolDistributions.filter(
                       (d) => d.isFullyClaimed,
                     ).length;
@@ -1355,7 +1352,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               Total Allocated
                             </p>
                             <p className="text-xl font-bold text-theme-primary">
-                              ${totalAllocated.toFixed(2)}
+                              ${formatCurrency(totalAllocated)} {tokenSymbol}
                             </p>
                           </div>
                           <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
@@ -1363,7 +1360,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               Total Claimed
                             </p>
                             <p className="text-xl font-bold text-green-500">
-                              ${totalClaimed.toFixed(2)}
+                              ${formatCurrency(totalClaimed)} {tokenSymbol}
                             </p>
                           </div>
                           <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
@@ -1371,7 +1368,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               Immediate Funds
                             </p>
                             <p className="text-xl font-bold text-theme-text">
-                              ${totalImmediate.toFixed(2)}
+                              ${formatCurrency(totalImmediate)} {tokenSymbol}
                             </p>
                           </div>
                           <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
@@ -1379,7 +1376,7 @@ export default function PoolDetailPage({ params }: PageProps) {
                               Locked Funds
                             </p>
                             <p className="text-xl font-bold text-yellow-500">
-                              ${totalLocked.toFixed(2)}
+                              ${formatCurrency(totalLocked)} {tokenSymbol}
                             </p>
                           </div>
                         </div>

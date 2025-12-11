@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDate, formatTokenAmount } from "@/lib/formatters";
+import { formatDate } from "@/lib/formatters";
 import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
 import type { DistributionType, FundPool } from "@/types/program";
@@ -39,23 +39,19 @@ export function PoolCard({ pool }: PoolCardProps) {
   const { config } = usePlatformConfig();
   const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
 
-  // Use proper token formatting with decimals
-  const totalCollected = tokenMetadata
-    ? pool.totalDeposited / 10 ** tokenMetadata.decimals
-    : pool.totalDeposited / 1_000_000; // fallback to 6 decimals
-  const totalDistributed = tokenMetadata
-    ? pool.totalDistributed / 10 ** tokenMetadata.decimals
-    : pool.totalDistributed / 1_000_000; // fallback to 6 decimals
-  const availableFunds = totalCollected - totalDistributed;
-  const targetAmount = pool.targetAmount
-    ? tokenMetadata
-      ? pool.targetAmount / 10 ** tokenMetadata.decimals
-      : pool.targetAmount / 1_000_000 // fallback to 6 decimals
-    : null;
+  // Get dynamic token decimals and symbol
+  const decimals = tokenMetadata?.decimals ?? 9; // fallback to 9 for your test token
+  const tokenSymbol = tokenMetadata?.symbol || "TOKEN";
 
-  const progressPercentage = targetAmount
-    ? Math.min((totalCollected / targetAmount) * 100, 100)
-    : 0;
+  // Helper function to format currency amounts
+  const formatCurrency = (amount: number) => {
+    const formatted = amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    // Remove .00 if it's exactly .00, but keep other decimals like .20
+    return formatted.endsWith(".00") ? formatted.slice(0, -3) : formatted;
+  };
 
   const handleClick = () => {
     router.push(`/pools/${pool.publicKey.toString()}`);
@@ -81,7 +77,8 @@ export function PoolCard({ pool }: PoolCardProps) {
               </Badge>
             </div>
             <CardDescription className="text-xs text-theme-text/60">
-              {pool.disasterId} • {pool.poolId}
+              {pool.disasterId} • Pool #
+              {pool.poolId.split("-").pop() || pool.poolId}
             </CardDescription>
           </div>
         </div>
@@ -99,62 +96,47 @@ export function PoolCard({ pool }: PoolCardProps) {
           <div>
             <p className="text-xs text-theme-text/60">Total Collected</p>
             <p className="text-lg font-semibold text-theme-primary/80">
-              {tokenMetadata
-                ? formatTokenAmount(
-                    pool.totalDeposited,
-                    tokenMetadata.decimals,
-                    tokenMetadata.symbol,
-                  )
-                : `$${totalCollected.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
+              {formatCurrency(pool.totalDeposited / 10 ** decimals)}{" "}
+              {tokenSymbol}
             </p>
           </div>
           <div>
             <p className="text-xs text-theme-text/60">Available</p>
-            <p className="text-lg font-semibold text-theme-primary/80">
-              {tokenMetadata
-                ? formatTokenAmount(
-                    pool.totalDeposited - pool.totalDistributed,
-                    tokenMetadata.decimals,
-                    tokenMetadata.symbol,
-                  )
-                : `$${availableFunds.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
+            <p className="text-lg font-semibold text-theme-success">
+              {formatCurrency(
+                (pool.totalDeposited - pool.totalDistributed) / 10 ** decimals,
+              )}{" "}
+              {tokenSymbol}
             </p>
           </div>
         </div>
 
-        {/* Progress Bar (if target amount is set) */}
-        {targetAmount && (
+        {/* Progress Bar (if target amount exists) */}
+        {pool.targetAmount && (
           <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-theme-text/60">
+            <div className="flex justify-between text-xs">
               <span>Progress</span>
-              <span>{progressPercentage.toFixed(0)}%</span>
+              <span>
+                {Math.min(
+                  (pool.totalDeposited / pool.targetAmount) * 100,
+                  100,
+                ).toFixed(1)}
+                %
+              </span>
             </div>
             <div className="w-full bg-theme-border rounded-full h-1.5">
               <div
                 className="bg-theme-primary h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                style={{
+                  width: `${Math.min(
+                    (pool.totalDeposited / pool.targetAmount) * 100,
+                    100,
+                  )}%`,
+                }}
               />
             </div>
             <p className="text-xs text-theme-text/60">
-              Target:{" "}
-              {tokenMetadata && pool.targetAmount
-                ? formatTokenAmount(
-                    pool.targetAmount,
-                    tokenMetadata.decimals,
-                    tokenMetadata.symbol,
-                  )
-                : targetAmount
-                  ? `$${targetAmount.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`
-                  : "N/A"}
+              Target: {formatCurrency(pool.targetAmount / 1000000)} USDC
             </p>
           </div>
         )}
@@ -163,16 +145,16 @@ export function PoolCard({ pool }: PoolCardProps) {
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
             <div>
-              <span className="font-semibold text-theme-text">
+              <span className="font-medium text-theme-text">
                 {pool.beneficiaryCount}
               </span>
-              <span className="text-theme-text/60 ml-1">beneficiaries</span>
+              <span className="text-theme-text/60 ml-1">Beneficiaries</span>
             </div>
             <div>
-              <span className="font-semibold text-theme-text">
+              <span className="font-medium text-theme-text">
                 {pool.donorCount}
               </span>
-              <span className="text-theme-text/60 ml-1">donors</span>
+              <span className="text-theme-text/60 ml-1">Donors</span>
             </div>
           </div>
         </div>
