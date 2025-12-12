@@ -33,6 +33,7 @@ import { useActivityLogs } from "@/hooks/use-activity-logs";
 import { useAdmin } from "@/hooks/use-admin";
 import { useAdminActions } from "@/hooks/use-admin-actions";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { ActivityTypeLabels } from "@/types/activity";
 import { AdminActionType } from "@/types/admin";
 
@@ -62,6 +63,17 @@ export default function AuditLogPage() {
     refetch: refetchLogs,
   } = useActivityLogs();
   const { config } = usePlatformConfig();
+  const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
+
+  // Helper function to format currency amounts
+  const formatCurrency = (amount: number) => {
+    const formatted = amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    // Remove .00 if it's a whole number, but keep meaningful decimals like .20
+    return formatted.replace(/\.00$/, "");
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -269,6 +281,10 @@ export default function AuditLogPage() {
         updatePlatformConfig: "Update Platform Config",
         pausePlatform: "Pause Platform",
         unpausePlatform: "Unpause Platform",
+        addAllowedToken: "Add Allowed Token",
+        removeAllowedToken: "Remove Allowed Token",
+        addManager: "Add Manager",
+        removeManager: "Remove Manager",
       };
 
       // Also handle PascalCase variants (from enum)
@@ -285,6 +301,10 @@ export default function AuditLogPage() {
         UpdatePlatformConfig: "Update Platform Config",
         PausePlatform: "Pause Platform",
         UnpausePlatform: "Unpause Platform",
+        AddAllowedToken: "Add Allowed Token",
+        RemoveAllowedToken: "Remove Allowed Token",
+        AddManager: "Add Manager",
+        RemoveManager: "Remove Manager",
       };
 
       return typeMap[actionType] || pascalMap[actionType] || actionType;
@@ -512,6 +532,10 @@ export default function AuditLogPage() {
                   value: AdminActionType.BlacklistNGO,
                   label: "Blacklist NGO",
                 },
+                { value: "addAllowedToken", label: "Add Allowed Token" },
+                { value: "removeAllowedToken", label: "Remove Allowed Token" },
+                { value: "addManager", label: "Add Manager" },
+                { value: "removeManager", label: "Remove Manager" },
               ]}
               className="w-full md:w-64"
             />
@@ -694,13 +718,20 @@ export default function AuditLogPage() {
                                                 <div className="text-xs text-muted-foreground mb-1">
                                                   Donated Amount:
                                                 </div>
-                                                <div className="text-base font-semibold text-theme-primary">
-                                                  $
-                                                  {(
-                                                    parsed.amount / 1e6
-                                                  ).toFixed(2)}{" "}
-                                                  USDC
-                                                </div>
+                                                {!tokenMetadata ? (
+                                                  <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                                                ) : (
+                                                  <div className="text-base font-semibold text-theme-primary">
+                                                    {formatCurrency(
+                                                      parsed.amount /
+                                                        10 **
+                                                          (tokenMetadata.decimals ??
+                                                            9),
+                                                    )}{" "}
+                                                    {tokenMetadata.symbol ??
+                                                      "TOKEN"}
+                                                  </div>
+                                                )}
                                               </div>
                                             )}
                                             {parsed.fee !== undefined && (
@@ -708,13 +739,20 @@ export default function AuditLogPage() {
                                                 <div className="text-xs text-muted-foreground mb-1">
                                                   Platform Fee:
                                                 </div>
-                                                <div className="text-base font-semibold text-theme-primary">
-                                                  $
-                                                  {(parsed.fee / 1e6).toFixed(
-                                                    2,
-                                                  )}{" "}
-                                                  USDC
-                                                </div>
+                                                {!tokenMetadata ? (
+                                                  <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                                                ) : (
+                                                  <div className="text-base font-semibold text-theme-primary">
+                                                    {formatCurrency(
+                                                      parsed.fee /
+                                                        10 **
+                                                          (tokenMetadata.decimals ??
+                                                            9),
+                                                    )}{" "}
+                                                    {tokenMetadata.symbol ??
+                                                      "TOKEN"}
+                                                  </div>
+                                                )}
                                               </div>
                                             )}
                                           </div>
@@ -738,9 +776,18 @@ export default function AuditLogPage() {
                                       <div className="text-xs text-muted-foreground mb-1.5">
                                         Amount:
                                       </div>
-                                      <div className="text-lg font-semibold text-theme-primary">
-                                        ${(log.amount / 1e6).toFixed(2)} USDC
-                                      </div>
+                                      {!tokenMetadata ? (
+                                        <div className="h-7 w-24 bg-theme-border rounded animate-pulse" />
+                                      ) : (
+                                        <div className="text-lg font-semibold text-theme-primary">
+                                          {formatCurrency(
+                                            log.amount /
+                                              10 **
+                                                (tokenMetadata.decimals ?? 9),
+                                          )}{" "}
+                                          {tokenMetadata.symbol ?? "TOKEN"}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                 {log.reason && (

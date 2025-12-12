@@ -321,7 +321,7 @@ export default function AdminDashboardPage() {
               <Heart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {isRefreshing ? (
+              {isRefreshing || !tokenMetadata ? (
                 <>
                   <div className="h-8 w-32 bg-theme-border rounded animate-pulse mb-2" />
                   <div className="h-3 w-40 bg-theme-border rounded animate-pulse" />
@@ -329,25 +329,19 @@ export default function AdminDashboardPage() {
               ) : (
                 <>
                   <div className="text-2xl font-bold">
-                    {tokenMetadata
-                      ? formatTokenAmount(
-                          config.totalAidDistributed,
-                          tokenMetadata.decimals,
-                          tokenMetadata.symbol,
-                        )
-                      : formatCurrency(config.totalAidDistributed)}
+                    {formatTokenAmount(
+                      config.totalAidDistributed,
+                      tokenMetadata.decimals,
+                      tokenMetadata.symbol,
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     From{" "}
-                    {tokenMetadata
-                      ? formatTokenAmount(
-                          config.totalDonations,
-                          tokenMetadata.decimals,
-                          tokenMetadata.symbol,
-                        )
-                      : `$${(config.totalDonations / 1e6).toFixed(
-                          2,
-                        )} USDC`}{" "}
+                    {formatTokenAmount(
+                      config.totalDonations,
+                      tokenMetadata.decimals,
+                      tokenMetadata.symbol,
+                    )}{" "}
                     donated
                   </p>
                 </>
@@ -577,15 +571,15 @@ export default function AdminDashboardPage() {
                                         Amount
                                       </p>
                                       <p className="text-sm text-theme-primary font-semibold">
-                                        {tokenMetadata
-                                          ? formatTokenAmount(
-                                              activity.amount,
-                                              tokenMetadata.decimals,
-                                              tokenMetadata.symbol,
-                                            )
-                                          : `$${(
-                                              activity.amount / 1_000_000
-                                            ).toFixed(2)} USDC`}
+                                        {!tokenMetadata ? (
+                                          <span className="h-4 w-24 bg-theme-border rounded animate-pulse inline-block" />
+                                        ) : (
+                                          formatTokenAmount(
+                                            activity.amount,
+                                            tokenMetadata.decimals,
+                                            tokenMetadata.symbol,
+                                          )
+                                        )}
                                       </p>
                                     </div>
                                   )}
@@ -629,21 +623,18 @@ export default function AdminDashboardPage() {
                                                 Donation Amount
                                               </p>
                                               <p className="text-sm text-theme-primary font-semibold">
-                                                {tokenMetadata
-                                                  ? formatTokenAmount(
-                                                      Number.parseInt(
-                                                        parsedData.Amount,
-                                                        10,
-                                                      ),
-                                                      tokenMetadata.decimals,
-                                                      tokenMetadata.symbol,
-                                                    )
-                                                  : `$${(
-                                                      Number.parseInt(
-                                                        parsedData.Amount,
-                                                        10,
-                                                      ) / 1_000_000
-                                                    ).toFixed(2)} USDC`}
+                                                {!tokenMetadata ? (
+                                                  <span className="h-4 w-24 bg-theme-border rounded animate-pulse inline-block" />
+                                                ) : (
+                                                  formatTokenAmount(
+                                                    Number.parseInt(
+                                                      parsedData.Amount,
+                                                      10,
+                                                    ),
+                                                    tokenMetadata.decimals,
+                                                    tokenMetadata.symbol,
+                                                  )
+                                                )}
                                               </p>
                                             </div>
                                           )}
@@ -653,21 +644,18 @@ export default function AdminDashboardPage() {
                                                 Platform Fee
                                               </p>
                                               <p className="text-sm text-theme-text">
-                                                {tokenMetadata
-                                                  ? formatTokenAmount(
-                                                      Number.parseInt(
-                                                        parsedData.Fee,
-                                                        10,
-                                                      ),
-                                                      tokenMetadata.decimals,
-                                                      tokenMetadata.symbol,
-                                                    )
-                                                  : `$${(
-                                                      Number.parseInt(
-                                                        parsedData.Fee,
-                                                        10,
-                                                      ) / 1_000_000
-                                                    ).toFixed(2)} USDC`}
+                                                {!tokenMetadata ? (
+                                                  <span className="h-4 w-20 bg-theme-border rounded animate-pulse inline-block" />
+                                                ) : (
+                                                  formatTokenAmount(
+                                                    Number.parseInt(
+                                                      parsedData.Fee,
+                                                      10,
+                                                    ),
+                                                    tokenMetadata.decimals,
+                                                    tokenMetadata.symbol,
+                                                  )
+                                                )}
                                               </p>
                                             </div>
                                           )}
