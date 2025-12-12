@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatDate, formatTokenAmount } from "@/lib/formatters";
-import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
+import { formatDate, formatTokenAmount } from "@/lib/formatters";
 import type { DistributionType, FundPool } from "@/types/program";
 
 interface PoolTimelineProps {

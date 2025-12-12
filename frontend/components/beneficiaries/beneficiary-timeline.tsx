@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Users, Flag } from "lucide-react";
+import { Flag, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

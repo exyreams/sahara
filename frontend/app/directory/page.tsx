@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { VerifiedIcon } from "@/components/icons/verified-icon";
+import { SortDropdown } from "@/components/search/sort-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { SortDropdown } from "@/components/search/sort-dropdown";
 import { useAllNGOs } from "@/hooks/use-all-ngos";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ export default function NGODirectoryPage() {
 
   // Filter and sort NGOs
   const filteredAndSortedNGOs = useMemo(() => {
-    let filtered = ngos.filter((ngo) => {
+    const filtered = ngos.filter((ngo) => {
       // Filter out blacklisted NGOs from public view
       if (ngo.isBlacklisted) return false;
 

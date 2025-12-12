@@ -20,7 +20,7 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
 
     let animationFrameId: number;
     let time = 0;
-    let currentTheme =
+    const currentTheme =
       document.documentElement.getAttribute("data-theme") || "default";
 
     const resize = () => {
@@ -95,8 +95,7 @@ export function GridBackground({ className = "" }: GridBackgroundProps) {
         for (let y = 0; y <= canvas.height; y += gridSize) {
           // Enhanced smooth wave effect
           const dist = Math.sqrt(
-            Math.pow(x - mouseRef.current.x, 2) +
-              Math.pow(y - mouseRef.current.y, 2),
+            (x - mouseRef.current.x) ** 2 + (y - mouseRef.current.y) ** 2,
           );
 
           const maxDist = 350; // Slightly larger influence area

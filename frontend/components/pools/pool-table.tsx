@@ -10,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDate, formatTokenAmount } from "@/lib/formatters";
-import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
+import { formatDate, formatTokenAmount } from "@/lib/formatters";
 import type { DistributionType, FundPool } from "@/types/program";
 
 interface PoolTableProps {

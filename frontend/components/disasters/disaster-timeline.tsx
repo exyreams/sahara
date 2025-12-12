@@ -1,13 +1,13 @@
 "use client";
 
-import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   formatDate,
   formatNumber,
-  formatSeverity,
   formatRelativeTime,
+  formatSeverity,
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { DisasterEvent } from "@/types/program";

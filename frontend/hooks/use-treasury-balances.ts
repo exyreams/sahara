@@ -1,6 +1,6 @@
 "use client";
 
-import { PublicKey } from "@solana/web3.js";
+import type { PublicKey } from "@solana/web3.js";
 import { useQueries } from "@tanstack/react-query";
 import { useAllowedTokens } from "./use-allowed-tokens";
 import { usePlatformConfig } from "./use-platform-config";

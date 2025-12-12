@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, MapPin, Users, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Calendar, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatNumber, formatSeverity } from "@/lib/formatters";

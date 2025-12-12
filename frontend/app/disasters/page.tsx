@@ -2,19 +2,19 @@
 
 import {
   AlertTriangle,
+  Clock,
   Grid3x3,
   List,
   Plus,
   RefreshCw,
   Table,
-  Clock,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
-import { DisasterTable } from "@/components/disasters/disaster-table";
-import { DisasterList } from "@/components/disasters/disaster-list";
-import { DisasterTimeline } from "@/components/disasters/disaster-timeline";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";
+import { DisasterList } from "@/components/disasters/disaster-list";
+import { DisasterTable } from "@/components/disasters/disaster-table";
+import { DisasterTimeline } from "@/components/disasters/disaster-timeline";
 import { Header } from "@/components/layout/header";
 import { FilterDropdown } from "@/components/search/filter-dropdown";
 import { SearchInput } from "@/components/search/search-input";
@@ -200,18 +200,18 @@ export default function DisastersPage() {
                 {/* Main content centered */}
                 <div className="max-w-3xl mx-auto text-center space-y-4 pointer-events-auto">
                   <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-theme-text-highlight">
-                    Disaster Relief Platform
+                    Disaster Response Hub
                   </h1>
                   <p className="text-base md:text-lg text-theme-text max-w-2xl mx-auto">
-                    Track disaster events, coordinate relief efforts, and ensure
-                    transparent aid distribution on the blockchain.
+                    Monitor active disasters, coordinate emergency response, and
+                    track relief operations with full transparency.
                   </p>
 
                   {/* Wallet connection below text */}
                   <div className="flex flex-col items-center gap-3 pt-4">
                     <WalletButton />
                     <p className="text-xs text-theme-text/80">
-                      Connect your wallet to take action
+                      Connect wallet to manage disaster events
                     </p>
                   </div>
                 </div>
@@ -245,10 +245,10 @@ export default function DisastersPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight text-theme-text-highlight">
-                    Active Disasters
+                    Current Disasters
                   </h2>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    View ongoing disaster relief efforts
+                    Browse active emergency situations and relief operations
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-xs px-2 py-1">
@@ -473,10 +473,10 @@ export default function DisastersPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Disaster Events
+              Disaster Management
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              View and manage disaster relief efforts
+              Create, monitor, and coordinate disaster response operations
             </p>
           </div>
           <div className="flex items-center gap-2">

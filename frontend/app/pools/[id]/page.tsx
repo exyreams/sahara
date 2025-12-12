@@ -46,14 +46,14 @@ import { useAllNGOs } from "@/hooks/use-all-ngos";
 import { useBeneficiaries } from "@/hooks/use-beneficiaries";
 import { useDistributions } from "@/hooks/use-distributions";
 import { useDonations } from "@/hooks/use-donations";
+import { usePlatformConfig } from "@/hooks/use-platform-config";
 import { usePoolRegistrations } from "@/hooks/use-pool-registrations";
 import { usePools } from "@/hooks/use-pools";
 import { useProgram } from "@/hooks/use-program";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { useTransaction } from "@/hooks/use-transaction";
 import { deriveActivityLogPDA, deriveFundPoolPDA } from "@/lib/anchor/pdas";
 import { formatDate } from "@/lib/formatters";
-import { useTokenMetadata } from "@/hooks/use-token-metadata";
-import { usePlatformConfig } from "@/hooks/use-platform-config";
 import type { DistributionType } from "@/types/program";
 
 interface PageProps {
