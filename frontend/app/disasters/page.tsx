@@ -193,10 +193,12 @@ export default function DisastersPage() {
                 <GridBackground />
               </div>
 
-              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
+              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col pointer-events-none">
+                {/* Top spacer */}
                 <div className="flex-1" />
 
-                <div className="max-w-3xl mx-auto text-center space-y-4 pb-12 pointer-events-auto">
+                {/* Main content centered */}
+                <div className="max-w-3xl mx-auto text-center space-y-4 pointer-events-auto">
                   <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-theme-text-highlight">
                     Disaster Relief Platform
                   </h1>
@@ -204,6 +206,8 @@ export default function DisastersPage() {
                     Track disaster events, coordinate relief efforts, and ensure
                     transparent aid distribution on the blockchain.
                   </p>
+
+                  {/* Wallet connection below text */}
                   <div className="flex flex-col items-center gap-3 pt-4">
                     <WalletButton />
                     <p className="text-xs text-theme-text/80">
@@ -211,6 +215,9 @@ export default function DisastersPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Bottom spacer */}
+                <div className="flex-1" />
               </div>
             </section>
           </div>

@@ -74,12 +74,12 @@ export default function NGOPage() {
               </div>
 
               {/* Content Overlay */}
-              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pointer-events-none">
-                {/* Spacer to push content below particles */}
+              <div className="relative z-10 container mx-auto px-4 h-full flex flex-col pointer-events-none">
+                {/* Top spacer */}
                 <div className="flex-1" />
 
                 {/* Hero Content */}
-                <div className="max-w-3xl mx-auto text-center space-y-6 pb-16 pointer-events-auto">
+                <div className="max-w-3xl mx-auto text-center space-y-6 pointer-events-auto">
                   <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-theme-text-highlight">
                     NGO Portal
                   </h1>
@@ -88,6 +88,8 @@ export default function NGOPage() {
                     blockchain. Register your organization and manage field
                     workers to verify beneficiaries.
                   </p>
+
+                  {/* Wallet connection below text */}
                   <div className="flex flex-col items-center gap-4 pt-6">
                     <div className="scale-110">
                       <WalletButton />
@@ -97,6 +99,9 @@ export default function NGOPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Bottom spacer */}
+                <div className="flex-1" />
               </div>
             </section>
           </div>
