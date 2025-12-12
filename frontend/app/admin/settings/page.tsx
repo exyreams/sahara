@@ -822,142 +822,159 @@ export default function AdminSettingsPage() {
               <CardHeader>
                 <CardTitle>Fee Rates & Usage Limits</CardTitle>
                 <CardDescription>
-                  Verification-based fee structure and NGO operational limits
+                  Current platform fee structure and NGO usage limits
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Fee Rates */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-theme-text-highlight">
-                    Donation Fee Rates
+                {/* Fee Structure */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-theme-text-highlight">
+                    Platform Fees
                   </h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-4 border rounded-lg bg-theme-card-bg border-theme-border">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-theme-text-highlight">
-                          Unverified NGOs
-                        </span>
-                        <Badge variant="secondary">Standard</Badge>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 border border-theme-border rounded-lg">
+                        <div>
+                          <div className="font-medium">Unverified NGOs</div>
+                          <div className="text-sm text-muted-foreground">
+                            {config.unverifiedNgoFeePercentage} basis points
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-theme-primary">
+                          {(config.unverifiedNgoFeePercentage / 100).toFixed(2)}
+                          %
+                        </div>
                       </div>
-                      <p className="text-2xl font-bold text-theme-primary">
-                        {(config.unverifiedNgoFeePercentage / 100).toFixed(2)}%
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {config.unverifiedNgoFeePercentage} basis points
-                      </p>
                     </div>
-                    <div className="p-4 border rounded-lg bg-green-50/80 dark:bg-green-950/30 border-green-300 dark:border-green-700 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                          Verified NGOs
-                        </span>
-                        <Badge
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-700 text-white border-0"
-                        >
-                          Verified
-                        </Badge>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 border border-theme-border rounded-lg">
+                        <div>
+                          <div className="font-medium">Verified NGOs</div>
+                          <div className="text-sm text-muted-foreground">
+                            {config.verifiedNgoFeePercentage} basis points
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-theme-primary">
+                          {(config.verifiedNgoFeePercentage / 100).toFixed(2)}%
+                        </div>
                       </div>
-                      <p className="text-2xl font-bold text-green-700 dark:text-green-300">
-                        {(config.verifiedNgoFeePercentage / 100).toFixed(2)}%
-                      </p>
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                        {config.verifiedNgoFeePercentage} basis points
-                      </p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-3">
-                    Verified NGOs receive a lower fee rate to incentivize
-                    verification and transparency
-                  </p>
                 </div>
 
                 {/* Usage Limits */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-theme-text-highlight">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-theme-text-highlight">
                     NGO Usage Limits
                   </h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-3 p-4 rounded-lg bg-theme-card-bg border border-theme-border">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-theme-text-highlight">
-                          Unverified NGOs
-                        </span>
-                        <Badge variant="secondary">Standard</Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Max Pools:
-                          </span>
-                          <span className="font-medium text-theme-text-highlight">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-muted-foreground">
+                        Unverified NGOs
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span>Fund Pools</span>
+                          <span className="font-semibold">
                             {config.unverifiedNgoPoolLimit}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Max Beneficiaries:
-                          </span>
-                          <span className="font-medium text-theme-text-highlight">
+                        <div className="flex justify-between items-center">
+                          <span>Beneficiaries</span>
+                          <span className="font-semibold">
                             {config.unverifiedNgoBeneficiaryLimit}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-3 p-4 rounded-lg bg-green-50/80 dark:bg-green-950/30 border border-green-300 dark:border-green-700 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                          Verified NGOs
-                        </span>
-                        <Badge
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-700 text-white border-0"
-                        >
-                          Verified
-                        </Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-green-600 dark:text-green-400">
-                            Max Pools:
-                          </span>
-                          <span className="font-medium text-green-700 dark:text-green-300">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-muted-foreground">
+                        Verified NGOs
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span>Fund Pools</span>
+                          <span className="font-semibold">
                             {config.verifiedNgoPoolLimit}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-green-600 dark:text-green-400">
-                            Max Beneficiaries:
-                          </span>
-                          <span className="font-medium text-green-600 dark:text-green-400">
+                        <div className="flex justify-between items-center">
+                          <span>Beneficiaries</span>
+                          <span className="font-semibold">
                             {config.verifiedNgoBeneficiaryLimit}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-3">
-                    Verified NGOs can create more pools and register more
-                    beneficiaries
-                  </p>
                 </div>
 
-                {/* Total Fees Collected */}
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">
-                      Total Platform Fees Collected
-                    </span>
+                {/* Donation Limits */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-theme-text-highlight">
+                    Donation Limits
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="flex justify-between items-center p-4 border border-theme-border rounded-lg">
+                      <span className="font-medium">Minimum Donation</span>
+                      {!tokenMetadata ? (
+                        <div className="h-6 w-20 bg-theme-border rounded animate-pulse" />
+                      ) : (
+                        <span className="font-bold text-theme-primary">
+                          {formatCurrency(
+                            config.minDonationAmount /
+                              10 ** (tokenMetadata.decimals ?? 9),
+                          )}{" "}
+                          {tokenMetadata.symbol}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center p-4 border border-theme-border rounded-lg">
+                      <span className="font-medium">Maximum Donation</span>
+                      {!tokenMetadata ? (
+                        <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
+                      ) : (
+                        <span className="font-bold text-theme-primary">
+                          {formatCurrency(
+                            config.maxDonationAmount /
+                              10 ** (tokenMetadata.decimals ?? 9),
+                          )}{" "}
+                          {tokenMetadata.symbol}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Platform Revenue */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-theme-text-highlight">
+                    Platform Revenue
+                  </h3>
+                  <div className="flex justify-between items-center p-4 border border-theme-border rounded-lg bg-theme-card-bg/50">
+                    <div>
+                      <div className="font-medium">Total Fees Collected</div>
+                      <div className="text-sm text-muted-foreground">
+                        Lifetime platform revenue
+                      </div>
+                    </div>
                     {!tokenMetadata ? (
-                      <div className="h-7 w-28 bg-theme-border rounded animate-pulse" />
+                      <div className="text-right space-y-1">
+                        <div className="h-6 w-24 bg-theme-border rounded animate-pulse" />
+                        <div className="h-4 w-16 bg-theme-border rounded animate-pulse" />
+                      </div>
                     ) : (
-                      <span className="text-lg font-bold text-theme-primary">
-                        {formatCurrency(
-                          config.totalFeesCollected /
-                            10 ** (tokenMetadata.decimals ?? 9),
-                        )}{" "}
-                        {tokenMetadata.symbol ?? "TOKEN"}
-                      </span>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-theme-primary">
+                          {formatCurrency(
+                            config.totalFeesCollected /
+                              10 ** (tokenMetadata.decimals ?? 9),
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {tokenMetadata.symbol}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
