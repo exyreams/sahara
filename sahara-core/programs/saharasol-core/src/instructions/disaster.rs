@@ -127,6 +127,29 @@ pub fn handler(
         );
     }
 
+    // Validate location fields
+    require!(
+        params.location.country.len() <= Location::MAX_COUNTRY_LEN
+            && !params.location.country.is_empty(),
+        ErrorCode::InvalidLocationData
+    );
+
+    require!(
+        params.location.region.len() <= Location::MAX_REGION_LEN
+            && !params.location.region.is_empty(),
+        ErrorCode::InvalidLocationData
+    );
+
+    require!(
+        params.location.city.len() <= Location::MAX_CITY_LEN && !params.location.city.is_empty(),
+        ErrorCode::InvalidLocationData
+    );
+
+    require!(
+        params.location.area.len() <= Location::MAX_AREA_LEN,
+        ErrorCode::InvalidLocationData
+    );
+
     require!(
         params.location.latitude >= -90.0 && params.location.latitude <= 90.0,
         ErrorCode::InvalidLocationCoordinates

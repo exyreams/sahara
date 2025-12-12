@@ -396,10 +396,6 @@ pub fn remove_blacklist_handler(
     Ok(())
 }
 
-// NOTE: Batch functions removed - use bundled transactions on frontend instead
-// Frontend should bundle up to 5 verifyNgo/updateNgoStatus instructions per transaction
-// This preserves AdminAction audit trail while reducing wallet popups
-
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitiateAdminTransferParams {
     pub new_admin: Pubkey,

@@ -70,7 +70,6 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
 
     config.admin = ctx.accounts.admin.key();
     config.managers = Vec::new();
-    config.platform_fee_percentage = 0; // Deprecated, kept for backward compatibility
     config.unverified_ngo_fee_percentage = params.unverified_ngo_fee_percentage;
     config.verified_ngo_fee_percentage = params.verified_ngo_fee_percentage;
     config.platform_fee_recipient = ctx.accounts.admin.key();
@@ -98,7 +97,6 @@ pub fn handler(ctx: Context<InitializePlatform>, params: InitializePlatformParam
     config.usdc_mint = params.usdc_mint;
     config.sol_usd_oracle = None;
 
-    // Build allowed tokens list: USDC + additional tokens (max 10 total)
     let mut allowed_tokens = vec![params.usdc_mint];
     for token in params.additional_tokens {
         if !allowed_tokens.contains(&token) && allowed_tokens.len() < 10 {
@@ -410,10 +408,6 @@ pub fn remove_allowed_token_handler(
 
     Ok(())
 }
-
-// ============================================================================
-// Manager Management Instructions
-// ============================================================================
 
 #[derive(Accounts)]
 #[instruction(timestamp: i64)]

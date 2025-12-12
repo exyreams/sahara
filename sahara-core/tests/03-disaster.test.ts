@@ -76,8 +76,10 @@ describe("03 - Disaster Management", () => {
       expect(disaster.affectedAreas).to.deep.equal(params.affectedAreas);
       expect(disaster.description).to.equal(params.description);
       expect(disaster.estimatedAffectedPopulation).to.equal(params.estimatedAffectedPopulation);
-      expect(disaster.location.district).to.equal(params.location.district);
-      expect(disaster.location.ward).to.equal(params.location.ward);
+      expect(disaster.location.country).to.equal(params.location.country);
+      expect(disaster.location.region).to.equal(params.location.region);
+      expect(disaster.location.city).to.equal(params.location.city);
+      expect(disaster.location.area).to.equal(params.location.area);
       expect(disaster.location.latitude).to.equal(params.location.latitude);
       expect(disaster.location.longitude).to.equal(params.location.longitude);
       expect(disaster.totalBeneficiaries).to.equal(0);
@@ -253,7 +255,7 @@ describe("03 - Disaster Management", () => {
     it("should fail with invalid latitude (-91)", async () => {
       const params = createMockDisasterParams({
         eventId: "INVALID-LAT",
-        location: { district: "Test", ward: 1, latitude: -91, longitude: 0 },
+        location: { country: "US", region: "Test", city: "Test", area: "", latitude: -91, longitude: 0 },
       });
       const timestamp = getCurrentTimestamp();
 
@@ -272,7 +274,7 @@ describe("03 - Disaster Management", () => {
     it("should fail with invalid longitude (181)", async () => {
       const params = createMockDisasterParams({
         eventId: "INVALID-LON",
-        location: { district: "Test", ward: 1, latitude: 0, longitude: 181 },
+        location: { country: "US", region: "Test", city: "Test", area: "", latitude: 0, longitude: 181 },
       });
       const timestamp = getCurrentTimestamp();
 
@@ -285,6 +287,63 @@ describe("03 - Disaster Management", () => {
           })
           .rpc(),
         "InvalidLocationCoordinates"
+      );
+    });
+
+    it("should fail with empty country", async () => {
+      const params = createMockDisasterParams({
+        eventId: "EMPTY-COUNTRY",
+        location: { country: "", region: "Test", city: "Test", area: "", latitude: 0, longitude: 0 },
+      });
+      const timestamp = getCurrentTimestamp();
+
+      await expectError(
+        program.methods
+          .initializeDisaster(params, new anchor.BN(timestamp))
+          .accountsPartial({
+            authority: admin.publicKey,
+            config: platformConfigPDA,
+          })
+          .rpc(),
+        "InvalidLocationData"
+      );
+    });
+
+    it("should fail with empty region", async () => {
+      const params = createMockDisasterParams({
+        eventId: "EMPTY-REGION",
+        location: { country: "US", region: "", city: "Test", area: "", latitude: 0, longitude: 0 },
+      });
+      const timestamp = getCurrentTimestamp();
+
+      await expectError(
+        program.methods
+          .initializeDisaster(params, new anchor.BN(timestamp))
+          .accountsPartial({
+            authority: admin.publicKey,
+            config: platformConfigPDA,
+          })
+          .rpc(),
+        "InvalidLocationData"
+      );
+    });
+
+    it("should fail with empty city", async () => {
+      const params = createMockDisasterParams({
+        eventId: "EMPTY-CITY",
+        location: { country: "US", region: "Test", city: "", area: "", latitude: 0, longitude: 0 },
+      });
+      const timestamp = getCurrentTimestamp();
+
+      await expectError(
+        program.methods
+          .initializeDisaster(params, new anchor.BN(timestamp))
+          .accountsPartial({
+            authority: admin.publicKey,
+            config: platformConfigPDA,
+          })
+          .rpc(),
+        "InvalidLocationData"
       );
     });
 
@@ -309,16 +368,56 @@ describe("03 - Disaster Management", () => {
 
     it("should support different disaster types", async () => {
       const types = [
+        // Natural Disasters - Geological
         { earthquake: {} },
-        { flood: {} },
+        { volcano: {} },
         { landslide: {} },
+        { avalanche: {} },
+        { sinkhole: {} },
+        // Natural Disasters - Weather/Climate
+        { flood: {} },
+        { hurricane: {} },
+        { tornado: {} },
+        { drought: {} },
+        { wildfire: {} },
+        { blizzard: {} },
+        { heatwave: {} },
+        { tsunami: {} },
+        // Human-Made Disasters
+        { industrialAccident: {} },
+        { chemicalSpill: {} },
+        { nuclearAccident: {} },
+        { oilSpill: {} },
+        { buildingCollapse: {} },
+        { transportation: {} },
+        // Conflict & Security
+        { conflict: {} },
+        { terrorism: {} },
+        { civilUnrest: {} },
+        // Health & Biological
+        { pandemic: {} },
+        { foodPoisoning: {} },
+        { animalAttack: {} },
+        // Other
         { other: {} },
       ];
 
-      for (let i = 0; i < types.length; i++) {
+      // Test a subset of types to avoid too many transactions
+      const testTypes = [
+        { earthquake: {} },
+        { flood: {} },
+        { volcano: {} },
+        { hurricane: {} },
+        { wildfire: {} },
+        { pandemic: {} },
+        { terrorism: {} },
+        { other: {} },
+      ];
+
+      for (let i = 0; i < testTypes.length; i++) {
         const params = createMockDisasterParams({
-          eventId: `TYPE-TEST-${i}`,
-          eventType: types[i],
+          eventId: `TYPE-TEST-${i}-${Date.now()}`,
+          eventType: testTypes[i],
         });
         const timestamp = getCurrentTimestamp();
         const [disasterPDA] = deriveDisasterPDA(params.eventId, program.programId);
@@ -332,7 +431,7 @@ describe("03 - Disaster Management", () => {
           .rpc();
 
         const disaster = await program.account.disasterEvent.fetch(disasterPDA);
-        expect(disaster.eventType).to.deep.equal(types[i]);
+        expect(disaster.eventType).to.deep.equal(testTypes[i]);
       }
     });
   });

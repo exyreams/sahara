@@ -2,9 +2,42 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
 pub enum DisasterType {
+    // Natural Disasters - Geological
     Earthquake,
-    Flood,
+    Volcano,
     Landslide,
+    Avalanche,
+    Sinkhole,
+
+    // Natural Disasters - Weather/Climate
+    Flood,
+    Hurricane,
+    Tornado,
+    Drought,
+    Wildfire,
+    Blizzard,
+    Heatwave,
+    Tsunami,
+
+    // Human-Made Disasters
+    IndustrialAccident,
+    ChemicalSpill,
+    NuclearAccident,
+    OilSpill,
+    BuildingCollapse,
+    Transportation,
+
+    // Conflict & Security
+    Conflict,
+    Terrorism,
+    CivilUnrest,
+
+    // Health & Biological
+    Pandemic,
+    FoodPoisoning,
+    AnimalAttack,
+
+    // Other
     Other,
 }
 

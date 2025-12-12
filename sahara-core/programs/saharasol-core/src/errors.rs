@@ -188,6 +188,9 @@ pub enum ErrorCode {
     #[msg("Invalid location coordinates")]
     InvalidLocationCoordinates,
 
+    #[msg("Invalid location data")]
+    InvalidLocationData,
+
     #[msg("Invalid IPFS hash format")]
     InvalidIpfsHash,
 

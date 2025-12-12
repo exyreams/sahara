@@ -8,7 +8,6 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-// Don't glob re-export errors to avoid conflict with anchor_lang::error::ErrorCode
 pub use errors::ErrorCode;
 pub use instructions::*;
 pub use state::*;
@@ -349,9 +348,6 @@ pub mod saharasol_core {
     ) -> Result<()> {
         instructions::admin::remove_blacklist_handler(ctx, ngo_authority, params, action_id)
     }
-
-    // NOTE: batch_verify_ngos and batch_update_ngo_status removed
-    // Use bundled transactions on frontend instead (up to 5 ops per tx)
 
     pub fn initiate_admin_transfer(
         ctx: Context<InitiateAdminTransfer>,

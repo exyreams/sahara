@@ -115,7 +115,6 @@ pub fn handler(
     require!(ngo.is_active, ErrorCode::NGONotActive);
     require!(!ngo.is_blacklisted, ErrorCode::NGOBlacklisted);
 
-    // Check pool creation limits based on verification status
     let max_pools = if ngo.is_verified {
         config.verified_ngo_pool_limit as u32
     } else {
@@ -367,7 +366,6 @@ pub fn donate_to_pool_handler<'info>(
         ErrorCode::StringTooLong
     );
 
-    // Use verification-based fee rates
     let fee_percentage = if ngo.is_verified {
         config.verified_ngo_fee_percentage
     } else {
@@ -406,7 +404,6 @@ pub fn donate_to_pool_handler<'info>(
         );
         token::transfer(fee_transfer_ctx, platform_fee)?;
 
-        // Track total fees collected
         config.total_fees_collected = config
             .total_fees_collected
             .checked_add(platform_fee)

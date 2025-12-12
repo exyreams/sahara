@@ -49,55 +49,60 @@ impl PlatformConfig {
     pub const MAX_VERSION_LEN: usize = 20;
 
     pub const SPACE: usize = 8
-        + 32 // admin
-        + 4 + (Self::MAX_MANAGERS * 32) // managers
-        + 2 // platform_fee_percentage
-        + 2 // unverified_ngo_fee_percentage
-        + 2 // verified_ngo_fee_percentage
-        + 32 // platform_fee_recipient
-        + 1 // verification_threshold
-        + 1 // max_verifiers
-        + 8 // min_donation_amount
-        + 8 // max_donation_amount
-        + 8 // verified_ngo_max_donation
-        + 1 // verified_ngo_pool_limit
-        + 1 // unverified_ngo_pool_limit
-        + 2 // verified_ngo_beneficiary_limit
-        + 2 // unverified_ngo_beneficiary_limit
-        + 1 // is_paused
-        + 4 // total_disasters
-        + 4 // total_beneficiaries
-        + 4 // total_verified_beneficiaries
-        + 4 // total_field_workers
-        + 4 // total_ngos
-        + 8 // total_donations
-        + 8 // total_aid_distributed
-        + 4 // total_pools
-        + 8 // total_fees_collected
-        + 32 // usdc_mint
-        + 1 + 32 // sol_usd_oracle
-        + 4 + (Self::MAX_ALLOWED_TOKENS * 32) // allowed_tokens
-        + 4 + (Self::MAX_EMERGENCY_CONTACTS * 32) // emergency_contacts
-        + 4 + Self::MAX_PLATFORM_NAME_LEN // platform_name
-        + 4 + Self::MAX_VERSION_LEN // platform_version
-        + 8 // created_at
-        + 8 // updated_at
-        + 1 + 32 // pending_admin
-        + 1 + 8 // admin_transfer_initiated_at
-        + 8 // admin_transfer_timeout
-        + 1; // bump
+        + 32
+        + 4
+        + (Self::MAX_MANAGERS * 32)
+        + 2
+        + 2
+        + 2
+        + 32
+        + 1
+        + 1
+        + 8
+        + 8
+        + 8
+        + 1
+        + 1
+        + 2
+        + 2
+        + 1
+        + 4
+        + 4
+        + 4
+        + 4
+        + 4
+        + 8
+        + 8
+        + 4
+        + 8
+        + 32
+        + 1
+        + 32
+        + 4
+        + (Self::MAX_ALLOWED_TOKENS * 32)
+        + 4
+        + (Self::MAX_EMERGENCY_CONTACTS * 32)
+        + 4
+        + Self::MAX_PLATFORM_NAME_LEN
+        + 4
+        + Self::MAX_VERSION_LEN
+        + 8
+        + 8
+        + 1
+        + 32
+        + 1
+        + 8
+        + 8
+        + 1;
 
-    /// Check if a pubkey is admin or manager
     pub fn is_admin_or_manager(&self, pubkey: &Pubkey) -> bool {
         self.admin == *pubkey || self.managers.contains(pubkey)
     }
 
-    /// Check if a pubkey is admin only
     pub fn is_admin(&self, pubkey: &Pubkey) -> bool {
         self.admin == *pubkey
     }
 
-    /// Check if a pubkey is manager only
     pub fn is_manager(&self, pubkey: &Pubkey) -> bool {
         self.managers.contains(pubkey)
     }

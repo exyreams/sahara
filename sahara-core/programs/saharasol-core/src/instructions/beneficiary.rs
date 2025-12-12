@@ -139,7 +139,6 @@ pub fn handler<'info>(
     national_id_registry.registered_at = clock.unix_timestamp;
     national_id_registry.bump = ctx.bumps.national_id_registry;
 
-    // Check NGO beneficiary limits
     if let Some(ngo_key) = field_worker.ngo {
         let ngo_account = ctx
             .remaining_accounts
@@ -153,7 +152,6 @@ pub fn handler<'info>(
         require!(ngo.is_active, ErrorCode::NGONotActive);
         require!(!ngo.is_blacklisted, ErrorCode::NGOBlacklisted);
 
-        // Check beneficiary registration limits based on verification status
         let max_beneficiaries = if ngo.is_verified {
             config.verified_ngo_beneficiary_limit as u32
         } else {
@@ -165,7 +163,6 @@ pub fn handler<'info>(
             ErrorCode::BeneficiaryLimitReached
         );
 
-        // Increment NGO's beneficiary count
         ngo.beneficiaries_registered = ngo
             .beneficiaries_registered
             .checked_add(1)
