@@ -9,7 +9,7 @@ import {
   Shield,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,7 @@ import { useProgram } from "@/hooks/use-program";
 import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { useTransaction } from "@/hooks/use-transaction";
 import { derivePlatformConfigPDA } from "@/lib/anchor/pdas";
+import { HARDCODED_TOKEN_METADATA } from "@/lib/constants";
 import { generateActionIds } from "@/lib/utils/generateActionId";
 import type { PlatformConfig } from "@/types/program";
 
@@ -57,42 +58,93 @@ function AllowedTokenRow({
   disabled: boolean;
 }) {
   const mintAddress = mint.toBase58();
-  const { data: metadata, isLoading } = useTokenMetadata(mint);
+  const isMountedRef = useRef(true);
+
+  // Use hardcoded metadata for USDC if available, otherwise fetch metadata
+  const hardcodedMetadata =
+    HARDCODED_TOKEN_METADATA[
+      mintAddress as keyof typeof HARDCODED_TOKEN_METADATA
+    ];
+
+  // Only fetch metadata if we don't have hardcoded data and component is mounted
+  const { data: fetchedMetadata, isLoading } = useTokenMetadata(
+    hardcodedMetadata ? null : mint,
+  );
+
   const isUSDC = mintAddress === usdcMint;
+  const metadata = hardcodedMetadata || fetchedMetadata;
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   return (
     <div className="flex items-center justify-between p-4 border border-theme-border rounded-lg hover:bg-theme-primary/5 hover:border-theme-primary/50 transition-colors bg-theme-card-bg">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          {isLoading ? (
-            <div className="h-5 w-24 bg-theme-border rounded animate-pulse" />
-          ) : (
-            <span className="font-semibold text-theme-text-highlight">
-              {metadata?.name || "Unknown Token"}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Token Logo */}
+        <div className="shrink-0">
+          {isLoading && !hardcodedMetadata ? (
+            <div className="h-10 w-10 bg-theme-border rounded-full animate-pulse" />
+          ) : metadata?.image ? (
+            <img
+              src={metadata.image}
+              alt={metadata.name || "Token"}
+              className="h-10 w-10 rounded-full object-cover border border-theme-border"
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }}
+            />
+          ) : null}
+          {/* Fallback placeholder */}
+          <div
+            className={`h-10 w-10 rounded-full bg-gradient-to-br from-theme-primary/20 to-theme-primary/40 flex items-center justify-center border border-theme-border ${
+              metadata?.image ? "hidden" : ""
+            }`}
+          >
+            <span className="text-sm font-semibold text-theme-primary">
+              {metadata?.symbol?.charAt(0) || "?"}
             </span>
-          )}
-          {isUSDC && (
-            <Badge
-              variant="default"
-              className="bg-green-500/20 text-green-500 border-green-500/30"
-            >
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Primary (USDC)
-            </Badge>
-          )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-theme-text/60">
-          <code className="font-mono bg-theme-background px-2 py-0.5 rounded text-xs">
-            {mintAddress}
-          </code>
-          {!isLoading && metadata && (
-            <Badge
-              variant="outline"
-              className="text-xs border-theme-border text-theme-primary"
-            >
-              {metadata.symbol}
-            </Badge>
-          )}
+
+        {/* Token Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {isLoading && !hardcodedMetadata ? (
+              <div className="h-5 w-24 bg-theme-border rounded animate-pulse" />
+            ) : (
+              <span className="font-semibold text-theme-text-highlight">
+                {metadata?.name || "Unknown Token"}
+              </span>
+            )}
+            {metadata && (
+              <Badge
+                variant="outline"
+                className="text-xs border-theme-border text-theme-primary"
+              >
+                {metadata.symbol}
+              </Badge>
+            )}
+            {isUSDC && (
+              <Badge
+                variant="default"
+                className="bg-green-500/20 text-green-500 border-green-500/30"
+              >
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Primary
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-theme-text/60">
+            <code className="font-mono bg-theme-card-bg border border-theme-border px-2 py-0.5 rounded text-xs text-theme-text-highlight">
+              {mintAddress}
+            </code>
+          </div>
         </div>
       </div>
 
@@ -115,6 +167,14 @@ export function TokenManagement({
 }: TokenManagementProps) {
   const { program, wallet } = useProgram();
   const { submit, isLoading } = useTransaction();
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const [newTokenMint, setNewTokenMint] = useState("");
   const [customSymbol, setCustomSymbol] = useState("");
@@ -124,16 +184,66 @@ export function TokenManagement({
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
 
-  // Fetch metadata for the new token being added
-  const { data: newTokenMetadata, isLoading: isNewTokenLoading } =
-    useTokenMetadata(newTokenMint.length >= 32 ? newTokenMint : null);
+  // Debounce the new token mint to prevent excessive API calls
+  const [debouncedNewTokenMint, setDebouncedNewTokenMint] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedNewTokenMint(newTokenMint);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [newTokenMint]);
+
+  // Fetch metadata for the new token being added (only if valid length and component is mounted)
+  const validNewTokenMint =
+    debouncedNewTokenMint.length >= 32 ? debouncedNewTokenMint : null;
+  const { data: fetchedNewTokenMetadata, isLoading: isNewTokenLoading } =
+    useTokenMetadata(validNewTokenMint);
+
+  // Use hardcoded metadata for USDC if available, otherwise use fetched metadata
+  const hardcodedNewTokenMetadata =
+    debouncedNewTokenMint.length >= 32
+      ? HARDCODED_TOKEN_METADATA[
+          debouncedNewTokenMint as keyof typeof HARDCODED_TOKEN_METADATA
+        ]
+      : null;
+  const newTokenMetadata = hardcodedNewTokenMetadata || fetchedNewTokenMetadata;
 
   // Use custom symbol if provided, otherwise use fetched metadata
   const displaySymbol = customSymbol || newTokenMetadata?.symbol || "";
   const displayName = newTokenMetadata?.name || "Unknown Token";
 
-  const allowedTokens = config?.allowedTokens || [];
+  const rawAllowedTokens = config?.allowedTokens || [];
   const usdcMint = config?.usdcMint?.toBase58();
+
+  // Sort tokens: Primary token first, then alphabetically by name
+  const allowedTokens = [...rawAllowedTokens].sort((a, b) => {
+    const aAddress = a.toBase58();
+    const bAddress = b.toBase58();
+
+    // Primary token always comes first
+    const aIsPrimary = aAddress === usdcMint;
+    const bIsPrimary = bAddress === usdcMint;
+
+    if (aIsPrimary && !bIsPrimary) return -1;
+    if (!aIsPrimary && bIsPrimary) return 1;
+
+    // For non-primary tokens, sort alphabetically by name
+    const aHardcoded =
+      HARDCODED_TOKEN_METADATA[
+        aAddress as keyof typeof HARDCODED_TOKEN_METADATA
+      ];
+    const bHardcoded =
+      HARDCODED_TOKEN_METADATA[
+        bAddress as keyof typeof HARDCODED_TOKEN_METADATA
+      ];
+
+    const aName = aHardcoded?.name || "Unknown Token";
+    const bName = bHardcoded?.name || "Unknown Token";
+
+    return aName.localeCompare(bName);
+  });
 
   const handleAddToken = async () => {
     if (!program || !wallet.publicKey || !newTokenMint || !addReason) return;
@@ -169,11 +279,13 @@ export function TokenManagement({
         {
           successMessage: `Token ${displaySymbol || ""}  added to whitelist`,
           onSuccess: () => {
-            onSuccess();
-            setNewTokenMint("");
-            setCustomSymbol("");
-            setAddReason("");
-            setAddDialogOpen(false);
+            if (isMountedRef.current) {
+              onSuccess();
+              setNewTokenMint("");
+              setCustomSymbol("");
+              setAddReason("");
+              setAddDialogOpen(false);
+            }
           },
         },
       );
@@ -216,10 +328,12 @@ export function TokenManagement({
         {
           successMessage: "Token removed from whitelist successfully",
           onSuccess: () => {
-            onSuccess();
-            setRemoveToken(null);
-            setRemoveReason("");
-            setRemoveDialogOpen(false);
+            if (isMountedRef.current) {
+              onSuccess();
+              setRemoveToken(null);
+              setRemoveReason("");
+              setRemoveDialogOpen(false);
+            }
           },
         },
       );
@@ -261,7 +375,7 @@ export function TokenManagement({
                       : ""
                   }
                 />
-                {isNewTokenLoading && (
+                {isNewTokenLoading && !hardcodedNewTokenMetadata && (
                   <div className="absolute right-3 top-2.5">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   </div>
@@ -269,11 +383,38 @@ export function TokenManagement({
               </div>
             )}
             {newTokenMetadata && (
-              <div className="flex items-center gap-2 text-sm text-green-600 mt-1">
-                <CheckCircle className="h-4 w-4" />
-                <span>
-                  Found: {newTokenMetadata.name} ({newTokenMetadata.symbol})
-                </span>
+              <div className="flex items-center gap-3 text-sm text-green-600 mt-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                {newTokenMetadata.image ? (
+                  <img
+                    src={newTokenMetadata.image}
+                    alt={newTokenMetadata.name || "Token"}
+                    className="h-8 w-8 rounded-full object-cover border border-green-300 dark:border-green-700"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.classList.remove(
+                        "hidden",
+                      );
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={`h-8 w-8 rounded-full bg-gradient-to-br from-green-400/20 to-green-600/40 flex items-center justify-center border border-green-300 dark:border-green-700 ${
+                    newTokenMetadata.image ? "hidden" : ""
+                  }`}
+                >
+                  <span className="text-xs font-semibold text-green-600">
+                    {newTokenMetadata.symbol?.charAt(0) || "?"}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-green-700 dark:text-green-300">
+                    {newTokenMetadata.name}
+                  </div>
+                  <div className="text-xs text-green-600 dark:text-green-400">
+                    Symbol: {newTokenMetadata.symbol}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -350,7 +491,10 @@ export function TokenManagement({
                   </span>
                   .
                   <br />
-                  Mint: <code className="text-xs">{newTokenMint}</code>
+                  Mint:{" "}
+                  <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded border">
+                    {newTokenMint}
+                  </code>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -386,10 +530,15 @@ export function TokenManagement({
             </div>
           ) : allowedTokens.length === 0 ? (
             <div className="text-center py-12">
-              <Shield className="h-12 w-12 text-theme-text/30 mx-auto mb-3" />
-              <p className="text-theme-text/60">No tokens whitelisted yet</p>
-              <p className="text-sm text-theme-text/40 mt-1">
-                Add your first token above
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-theme-primary/10 mb-4">
+                <Shield className="h-8 w-8 text-theme-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-theme-text-highlight mb-2">
+                No tokens whitelisted yet
+              </h3>
+              <p className="text-sm text-theme-text/60 max-w-sm mx-auto">
+                Add your first SPL token above to enable donations and fund
+                pools on the platform
               </p>
             </div>
           ) : (
@@ -419,9 +568,8 @@ export function TokenManagement({
                 </p>
                 <p className="text-sm text-theme-text/70">
                   Only whitelisted tokens can be used for donations and fund
-                  pools. The primary USDC token cannot be removed. All
-                  add/remove actions are logged in the audit log with admin
-                  information.
+                  pools. The primary token cannot be removed. All add/remove
+                  actions are logged in the audit log with admin information.
                 </p>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import type { Connection, PublicKey } from "@solana/web3.js";
 import { useQueries } from "@tanstack/react-query";
+import { HARDCODED_TOKEN_METADATA } from "@/lib/constants";
 import { usePlatformConfig } from "./use-platform-config";
 import { useProgram } from "./use-program";
 
@@ -52,21 +53,19 @@ async function fetchTokenMetadataSimple(
     const metadataAccount = await connection.getAccountInfo(metadataPDA);
 
     if (!metadataAccount) {
-      // Check if it's USDC (only hardcode this one)
+      // Check if it's a hardcoded token (like USDC)
       const mintStr = mint.toBase58();
-      if (
-        mintStr === "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" || // Devnet USDC
-        mintStr === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-      ) {
-        // Mainnet USDC
+      const hardcodedToken =
+        HARDCODED_TOKEN_METADATA[
+          mintStr as keyof typeof HARDCODED_TOKEN_METADATA
+        ];
+      if (hardcodedToken) {
         return {
-          name: "USD Coin",
-          symbol: "USDC",
-          decimals,
-          logoURI:
-            "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
-          image:
-            "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+          name: hardcodedToken.name,
+          symbol: hardcodedToken.symbol,
+          decimals: hardcodedToken.decimals,
+          logoURI: hardcodedToken.image,
+          image: hardcodedToken.image,
         };
       }
 

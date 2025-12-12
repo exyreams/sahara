@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/hooks/use-admin";
 import { usePlatformConfig } from "@/hooks/use-platform-config";
 import { useProgram } from "@/hooks/use-program";
+import { useTokenMetadata } from "@/hooks/use-token-metadata";
 import { useTransaction } from "@/hooks/use-transaction";
 import { derivePlatformConfigPDA } from "@/lib/anchor/pdas";
 import { generateActionIds } from "@/lib/utils/generateActionId";
@@ -46,6 +47,17 @@ export default function AdminSettingsPage() {
   const { config, loading: configLoading, refetch } = usePlatformConfig();
   const { program, wallet } = useProgram();
   const { submit, isLoading: txLoading } = useTransaction();
+  const { data: tokenMetadata } = useTokenMetadata(config?.usdcMint || null);
+
+  // Helper function to format currency amounts
+  const formatCurrency = (amount: number) => {
+    const formatted = amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    // Remove .00 if it's a whole number, but keep meaningful decimals like .20
+    return formatted.replace(/\.00$/, "");
+  };
 
   // Get tab from URL or default to "administration"
   const tabParam = searchParams.get("tab") || "administration";
@@ -816,11 +828,13 @@ export default function AdminSettingsPage() {
               <CardContent className="space-y-6">
                 {/* Fee Rates */}
                 <div>
-                  <h3 className="font-semibold mb-3">Donation Fee Rates</h3>
+                  <h3 className="font-semibold mb-3 text-theme-text-highlight">
+                    Donation Fee Rates
+                  </h3>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-4 border rounded-lg bg-theme-card-bg border-theme-border">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-theme-text-highlight">
                           Unverified NGOs
                         </span>
                         <Badge variant="secondary">Standard</Badge>
@@ -832,19 +846,22 @@ export default function AdminSettingsPage() {
                         {config.unverifiedNgoFeePercentage} basis points
                       </p>
                     </div>
-                    <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                    <div className="p-4 border rounded-lg bg-green-50/80 dark:bg-green-950/30 border-green-300 dark:border-green-700 shadow-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
                           Verified NGOs
                         </span>
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge
+                          variant="default"
+                          className="bg-green-600 hover:bg-green-700 text-white border-0"
+                        >
                           Verified
                         </Badge>
                       </div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                         {(config.verifiedNgoFeePercentage / 100).toFixed(2)}%
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                         {config.verifiedNgoFeePercentage} basis points
                       </p>
                     </div>
@@ -857,11 +874,13 @@ export default function AdminSettingsPage() {
 
                 {/* Usage Limits */}
                 <div>
-                  <h3 className="font-semibold mb-3">NGO Usage Limits</h3>
+                  <h3 className="font-semibold mb-3 text-theme-text-highlight">
+                    NGO Usage Limits
+                  </h3>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-3">
+                    <div className="space-y-3 p-4 rounded-lg bg-theme-card-bg border border-theme-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-theme-text-highlight">
                           Unverified NGOs
                         </span>
                         <Badge variant="secondary">Standard</Badge>
@@ -871,7 +890,7 @@ export default function AdminSettingsPage() {
                           <span className="text-muted-foreground">
                             Max Pools:
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium text-theme-text-highlight">
                             {config.unverifiedNgoPoolLimit}
                           </span>
                         </div>
@@ -879,32 +898,35 @@ export default function AdminSettingsPage() {
                           <span className="text-muted-foreground">
                             Max Beneficiaries:
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium text-theme-text-highlight">
                             {config.unverifiedNgoBeneficiaryLimit}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                    <div className="space-y-3 p-4 rounded-lg bg-green-50/80 dark:bg-green-950/30 border border-green-300 dark:border-green-700 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
                           Verified NGOs
                         </span>
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge
+                          variant="default"
+                          className="bg-green-600 hover:bg-green-700 text-white border-0"
+                        >
                           Verified
                         </Badge>
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
+                          <span className="text-green-600 dark:text-green-400">
                             Max Pools:
                           </span>
-                          <span className="font-medium text-green-600 dark:text-green-400">
+                          <span className="font-medium text-green-700 dark:text-green-300">
                             {config.verifiedNgoPoolLimit}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
+                          <span className="text-green-600 dark:text-green-400">
                             Max Beneficiaries:
                           </span>
                           <span className="font-medium text-green-600 dark:text-green-400">
@@ -926,17 +948,17 @@ export default function AdminSettingsPage() {
                     <span className="text-sm font-medium">
                       Total Platform Fees Collected
                     </span>
-                    <span className="text-lg font-bold text-theme-primary">
-                      $
-                      {(config.totalFeesCollected / 1_000_000).toLocaleString(
-                        undefined,
-                        {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        },
-                      )}{" "}
-                      USDC
-                    </span>
+                    {!tokenMetadata ? (
+                      <div className="h-7 w-28 bg-theme-border rounded animate-pulse" />
+                    ) : (
+                      <span className="text-lg font-bold text-theme-primary">
+                        {formatCurrency(
+                          config.totalFeesCollected /
+                            10 ** (tokenMetadata.decimals ?? 9),
+                        )}{" "}
+                        {tokenMetadata.symbol ?? "TOKEN"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -958,7 +980,11 @@ export default function AdminSettingsPage() {
                 <div className="grid gap-3 text-xs">
                   <div className="flex justify-between items-start">
                     <span className="text-theme-text/60 font-medium">
-                      USDC Mint:
+                      {!tokenMetadata ? (
+                        <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
+                      ) : (
+                        `${tokenMetadata.symbol ?? "TOKEN"} Mint:`
+                      )}
                     </span>
                     <code className="text-theme-primary font-mono text-right break-all max-w-[70%]">
                       {config.usdcMint.toBase58()}
@@ -994,17 +1020,33 @@ export default function AdminSettingsPage() {
                     <span className="text-theme-text/60 font-medium">
                       Min Donation:
                     </span>
-                    <span className="text-theme-text">
-                      ${(config.minDonationAmount / 1_000_000).toFixed(2)}
-                    </span>
+                    {!tokenMetadata ? (
+                      <div className="h-4 w-16 bg-theme-border rounded animate-pulse" />
+                    ) : (
+                      <span className="text-theme-text">
+                        {formatCurrency(
+                          config.minDonationAmount /
+                            10 ** (tokenMetadata.decimals ?? 9),
+                        )}{" "}
+                        {tokenMetadata.symbol ?? "TOKEN"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-theme-text/60 font-medium">
                       Max Donation:
                     </span>
-                    <span className="text-theme-text">
-                      ${(config.maxDonationAmount / 1_000_000).toLocaleString()}
-                    </span>
+                    {!tokenMetadata ? (
+                      <div className="h-4 w-20 bg-theme-border rounded animate-pulse" />
+                    ) : (
+                      <span className="text-theme-text">
+                        {formatCurrency(
+                          config.maxDonationAmount /
+                            10 ** (tokenMetadata.decimals ?? 9),
+                        )}{" "}
+                        {tokenMetadata.symbol ?? "TOKEN"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-theme-text/60 font-medium">
@@ -1023,6 +1065,7 @@ export default function AdminSettingsPage() {
         {/* Tokens Tab */}
         <TabsContent value="tokens" className="space-y-6">
           <TokenManagement
+            key="token-management"
             config={config}
             isRefreshing={isRefreshing}
             onSuccess={() => {

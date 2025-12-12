@@ -205,3 +205,23 @@ export const DEFAULT_MAP_ZOOM = 7;
 // Multi-sig Verification
 export const VERIFICATION_THRESHOLD = 3;
 export const MAX_VERIFIERS = 5;
+
+// Hardcoded Token Metadata
+export const HARDCODED_TOKEN_METADATA = {
+  // USDC Devnet
+  "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": {
+    name: "USD Coin",
+    symbol: "USDC",
+    image:
+      "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+    decimals: 6,
+  },
+  // USDC Mainnet
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
+    name: "USD Coin",
+    symbol: "USDC",
+    image:
+      "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+    decimals: 6,
+  },
+} as const;

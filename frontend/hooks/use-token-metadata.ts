@@ -2,6 +2,7 @@
 
 import { PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
+import { HARDCODED_TOKEN_METADATA } from "@/lib/constants";
 import { useProgram } from "./use-program";
 
 interface TokenMetadata {
@@ -31,6 +32,28 @@ export function useTokenMetadata(mintAddress: PublicKey | string | null) {
         })()
       : mintAddress
     : null;
+
+  // Check if we have hardcoded metadata first
+  const hardcodedToken = publicKey
+    ? HARDCODED_TOKEN_METADATA[
+        publicKey.toBase58() as keyof typeof HARDCODED_TOKEN_METADATA
+      ]
+    : null;
+
+  // If we have hardcoded metadata, return it immediately without making network calls
+  if (hardcodedToken) {
+    return {
+      data: {
+        name: hardcodedToken.name,
+        symbol: hardcodedToken.symbol,
+        decimals: hardcodedToken.decimals,
+        logoURI: hardcodedToken.image,
+        image: hardcodedToken.image,
+      },
+      isLoading: false,
+      error: null,
+    };
+  }
 
   return useQuery({
     queryKey: ["token-metadata", publicKey?.toBase58()],
@@ -127,35 +150,7 @@ export function useTokenMetadata(mintAddress: PublicKey | string | null) {
               console.log("No Metaplex metadata found, using fallback");
             }
 
-            // Fallback: Check if it's a known token
-            const knownTokens: Record<
-              string,
-              Omit<TokenMetadata, "decimals">
-            > = {
-              // Devnet USDC
-              "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": {
-                name: "USD Coin",
-                symbol: "USDC",
-                logoURI:
-                  "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
-              },
-              // Mainnet USDC
-              EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
-                name: "USD Coin",
-                symbol: "USDC",
-                logoURI:
-                  "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
-              },
-              // Add more known tokens as needed
-            };
-
-            const knownToken = knownTokens[publicKey.toBase58()];
-            if (knownToken) {
-              return {
-                ...knownToken,
-                decimals,
-              };
-            }
+            // This fallback is now handled above, so we skip it here
 
             // Final fallback
             return {
@@ -175,5 +170,8 @@ export function useTokenMetadata(mintAddress: PublicKey | string | null) {
     enabled: !!publicKey && !!connection,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 }
