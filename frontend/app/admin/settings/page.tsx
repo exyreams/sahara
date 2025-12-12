@@ -782,7 +782,7 @@ export default function AdminSettingsPage() {
             <CardContent className="space-y-3 text-sm">
               <div>
                 <p className="font-medium text-green-600 dark:text-green-400">
-                  ✓ Managers CAN:
+                  Managers CAN:
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground ml-2 mt-1 space-y-1">
                   <li>Verify and revoke NGO verification</li>
@@ -792,7 +792,7 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <p className="font-medium text-red-600 dark:text-red-400">
-                  ✗ Managers CANNOT:
+                  Managers CANNOT:
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground ml-2 mt-1 space-y-1">
                   <li>Add or remove other managers</li>
