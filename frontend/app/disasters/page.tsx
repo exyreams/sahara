@@ -9,7 +9,8 @@ import {
   RefreshCw,
   Table,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
 import { DisasterCard } from "@/components/disasters/disaster-card";
 import { DisasterCreationModal } from "@/components/disasters/disaster-creation-modal";
 import { DisasterList } from "@/components/disasters/disaster-list";
@@ -37,6 +38,8 @@ import { useProgram } from "@/hooks/use-program";
 import { DISASTER_TYPES } from "@/lib/constants";
 
 export default function DisastersPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { wallet } = useProgram();
   const { isAdmin } = useAdmin();
   const { ngo } = useNGO();
@@ -59,6 +62,33 @@ export default function DisastersPage() {
     | "severity-high"
     | "severity-low"
   >("newest");
+
+  // Initialize view mode from URL params and set default
+  useEffect(() => {
+    const viewParam = searchParams.get("view");
+    if (
+      viewParam &&
+      ["grid", "list", "table", "timeline"].includes(viewParam)
+    ) {
+      setViewMode(viewParam as "grid" | "list" | "table" | "timeline");
+    } else {
+      // If no view parameter, silently add grid to URL without redirect
+      setViewMode("grid");
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", "grid");
+      window.history.replaceState({}, "", `/disasters?${params.toString()}`);
+    }
+  }, [searchParams]);
+
+  // Update URL when view mode changes
+  const updateViewMode = (
+    newViewMode: "grid" | "list" | "table" | "timeline",
+  ) => {
+    setViewMode(newViewMode);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", newViewMode);
+    router.push(`/disasters?${params.toString()}`, { scroll: false });
+  };
 
   // Check if user can create disasters (admin or verified NGO)
   const canCreateDisaster =
@@ -317,7 +347,7 @@ export default function DisastersPage() {
                   <Button
                     variant={viewMode === "grid" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setViewMode("grid")}
+                    onClick={() => updateViewMode("grid")}
                     className="gap-1.5 text-xs px-3 py-1.5"
                   >
                     <Grid3x3 className="h-3.5 w-3.5" />
@@ -325,7 +355,7 @@ export default function DisastersPage() {
                   <Button
                     variant={viewMode === "list" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setViewMode("list")}
+                    onClick={() => updateViewMode("list")}
                     className="gap-1.5 text-xs px-3 py-1.5"
                   >
                     <List className="h-3.5 w-3.5" />
@@ -333,7 +363,7 @@ export default function DisastersPage() {
                   <Button
                     variant={viewMode === "table" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setViewMode("table")}
+                    onClick={() => updateViewMode("table")}
                     className="gap-1.5 text-xs px-3 py-1.5"
                   >
                     <Table className="h-3.5 w-3.5" />
@@ -341,7 +371,7 @@ export default function DisastersPage() {
                   <Button
                     variant={viewMode === "timeline" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setViewMode("timeline")}
+                    onClick={() => updateViewMode("timeline")}
                     className="gap-1.5 text-xs px-3 py-1.5"
                   >
                     <Clock className="h-3.5 w-3.5" />
@@ -596,7 +626,7 @@ export default function DisastersPage() {
             <Button
               variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("grid")}
+              onClick={() => updateViewMode("grid")}
               className="gap-1.5 text-xs px-3 py-1.5"
             >
               <Grid3x3 className="h-3.5 w-3.5" />
@@ -604,7 +634,7 @@ export default function DisastersPage() {
             <Button
               variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("list")}
+              onClick={() => updateViewMode("list")}
               className="gap-1.5 text-xs px-3 py-1.5"
             >
               <List className="h-3.5 w-3.5" />
@@ -612,7 +642,7 @@ export default function DisastersPage() {
             <Button
               variant={viewMode === "table" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("table")}
+              onClick={() => updateViewMode("table")}
               className="gap-1.5 text-xs px-3 py-1.5"
             >
               <Table className="h-3.5 w-3.5" />
@@ -620,7 +650,7 @@ export default function DisastersPage() {
             <Button
               variant={viewMode === "timeline" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("timeline")}
+              onClick={() => updateViewMode("timeline")}
               className="gap-1.5 text-xs px-3 py-1.5"
             >
               <Clock className="h-3.5 w-3.5" />
