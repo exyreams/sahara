@@ -79,6 +79,9 @@ export interface Location {
   area: string; // Specific area/ward/neighborhood
   latitude: number;
   longitude: number;
+  // Legacy properties for backward compatibility
+  district?: string; // @deprecated - use region instead
+  ward?: string; // @deprecated - use area instead
 }
 
 // Platform Config

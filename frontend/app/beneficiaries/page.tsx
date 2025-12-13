@@ -89,8 +89,8 @@ export default function BeneficiariesPage() {
         beneficiary.disasterId
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        beneficiary.location.district
-          .toLowerCase()
+        (beneficiary.location.district || beneficiary.location.region)
+          ?.toLowerCase()
           .includes(searchQuery.toLowerCase());
 
       const matchesStatus =
@@ -311,8 +311,11 @@ export default function BeneficiariesPage() {
                                   </CardTitle>
                                   <CardDescription className="flex items-center gap-1 text-xs">
                                     <MapPin className="h-2.5 w-2.5 shrink-0" />
-                                    {beneficiary.location.district}, Ward{" "}
-                                    {beneficiary.location.ward}
+                                    {beneficiary.location.district ||
+                                      beneficiary.location.region}
+                                    ,{" "}
+                                    {beneficiary.location.ward ||
+                                      beneficiary.location.area}
                                   </CardDescription>
                                 </div>
                                 <Badge
@@ -470,8 +473,11 @@ export default function BeneficiariesPage() {
                                   </div>
                                   <div className="flex items-center gap-1 text-xs text-theme-text/60">
                                     <MapPin className="h-2.5 w-2.5" />
-                                    {beneficiary.location.district}, Ward{" "}
-                                    {beneficiary.location.ward}
+                                    {beneficiary.location.district ||
+                                      beneficiary.location.region}
+                                    ,{" "}
+                                    {beneficiary.location.ward ||
+                                      beneficiary.location.area}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-6 text-xs shrink-0 ml-4">
@@ -761,8 +767,11 @@ export default function BeneficiariesPage() {
                             </CardTitle>
                             <CardDescription className="flex items-center gap-1 text-xs">
                               <MapPin className="h-2.5 w-2.5 shrink-0" />
-                              {beneficiary.location.district}, Ward{" "}
-                              {beneficiary.location.ward}
+                              {beneficiary.location.district ||
+                                beneficiary.location.region}
+                              ,{" "}
+                              {beneficiary.location.ward ||
+                                beneficiary.location.area}
                             </CardDescription>
                           </div>
                           <Badge
@@ -911,8 +920,11 @@ export default function BeneficiariesPage() {
                             </div>
                             <div className="flex items-center gap-1 text-xs text-theme-text/60">
                               <MapPin className="h-2.5 w-2.5" />
-                              {beneficiary.location.district}, Ward{" "}
-                              {beneficiary.location.ward}
+                              {beneficiary.location.district ||
+                                beneficiary.location.region}
+                              ,{" "}
+                              {beneficiary.location.ward ||
+                                beneficiary.location.area}
                             </div>
                           </div>
                           <div className="flex items-center gap-6 text-xs shrink-0 ml-4">

@@ -132,9 +132,13 @@ export const beneficiaryFormSchema = z.object({
     ),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
-  district: z.string().min(1, "District is required").max(50),
-  ward: z.number().min(1).max(50),
-  address: z.string().min(1, "Address is required").max(200),
+  country: z
+    .string()
+    .min(1, "Country is required")
+    .length(2, "Country must be a valid 2-letter ISO code"),
+  region: z.string().min(1, "Region is required").max(100),
+  city: z.string().min(1, "City is required").max(100),
+  area: z.string().max(200).default(""),
   familySize: z.number().min(1, "Family size must be at least 1").max(50),
   damageSeverity: z
     .number()

@@ -530,8 +530,8 @@ export default function AdminReviewPage() {
                           {isFlagged ? (
                             <>
                               <p className="text-sm text-muted-foreground mb-2">
-                                {(item.data as Beneficiary).location.district},
-                                Ward {(item.data as Beneficiary).location.ward}
+                                {(item.data as Beneficiary).location.region},
+                                {(item.data as Beneficiary).location.area}
                               </p>
                               <div className="flex gap-4 text-sm text-muted-foreground mb-3">
                                 <span>

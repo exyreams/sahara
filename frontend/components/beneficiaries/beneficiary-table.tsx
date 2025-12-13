@@ -73,8 +73,13 @@ export function BeneficiaryTable({
                 <div className="flex items-center gap-1 text-xs">
                   <MapPin className="h-2.5 w-2.5 text-theme-text/60" />
                   <span className="text-theme-text">
-                    {beneficiary.location.district}, Ward{" "}
-                    {beneficiary.location.ward}
+                    {beneficiary.location.city ||
+                      beneficiary.location.region ||
+                      beneficiary.location.district}
+                    ,{" "}
+                    {beneficiary.location.area ||
+                      beneficiary.location.ward ||
+                      ""}
                   </span>
                 </div>
               </TableCell>

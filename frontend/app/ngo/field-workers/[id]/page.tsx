@@ -159,8 +159,13 @@ function VerificationActivity({
                           {beneficiary.name}
                         </p>
                         <p className="text-sm text-muted-foreground truncate">
-                          {beneficiary.location.district}, Ward{" "}
-                          {beneficiary.location.ward}
+                          {beneficiary.location.city ||
+                            beneficiary.location.region ||
+                            beneficiary.location.district}
+                          ,{" "}
+                          {beneficiary.location.area ||
+                            beneficiary.location.ward ||
+                            ""}
                         </p>
                       </div>
                       <div className="text-xs text-muted-foreground shrink-0">
@@ -274,7 +279,7 @@ function BeneficiariesList({
   // Get unique districts
   const districts = useMemo(() => {
     const uniqueDistricts = new Set(
-      beneficiaries.map((b) => b.location.district),
+      beneficiaries.map((b) => b.location.district || b.location.region),
     );
     return Array.from(uniqueDistricts).sort();
   }, [beneficiaries]);
@@ -296,7 +301,8 @@ function BeneficiariesList({
 
       const matchesDistrict =
         districtFilter === "all" ||
-        beneficiary.location.district === districtFilter;
+        (beneficiary.location.district || beneficiary.location.region) ===
+          districtFilter;
 
       return matchesSearch && matchesStatus && matchesDistrict;
     });
@@ -406,8 +412,13 @@ function BeneficiariesList({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{beneficiary.name}</p>
                       <p className="text-sm text-muted-foreground truncate">
-                        {beneficiary.location.district}, Ward{" "}
-                        {beneficiary.location.ward}
+                        {beneficiary.location.city ||
+                          beneficiary.location.region ||
+                          beneficiary.location.district}
+                        ,{" "}
+                        {beneficiary.location.area ||
+                          beneficiary.location.ward ||
+                          ""}
                       </p>
                     </div>
                   </div>
@@ -1051,8 +1062,13 @@ export default function FieldWorkerDetailPage() {
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                {beneficiary.location.district}, Ward{" "}
-                                {beneficiary.location.ward}
+                                {beneficiary.location.city ||
+                                  beneficiary.location.region ||
+                                  beneficiary.location.district}
+                                ,{" "}
+                                {beneficiary.location.area ||
+                                  beneficiary.location.ward ||
+                                  ""}
                               </p>
                               {beneficiary.flaggedReason && (
                                 <p className="text-sm text-yellow-600 mt-2">

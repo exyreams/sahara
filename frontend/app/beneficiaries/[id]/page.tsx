@@ -644,8 +644,10 @@ export default function BeneficiaryProfilePage({
                       </div>
                       <CardDescription className="flex items-center gap-2 text-base">
                         <MapPin className="h-4 w-4 shrink-0" />
-                        {beneficiary.location.district}, Ward{" "}
-                        {beneficiary.location.ward}
+                        {beneficiary.location.district ||
+                          beneficiary.location.region}
+                        ,{" "}
+                        {beneficiary.location.ward || beneficiary.location.area}
                       </CardDescription>
                     </div>
                   </div>
@@ -1061,8 +1063,11 @@ export default function BeneficiaryProfilePage({
                                   {disaster.name}
                                 </p>
                                 <p className="text-xs text-theme-text/60">
-                                  {disaster.location.district}, Ward{" "}
-                                  {disaster.location.ward}
+                                  {disaster.location.district ||
+                                    disaster.location.region}
+                                  ,{" "}
+                                  {disaster.location.ward ||
+                                    disaster.location.area}
                                 </p>
                               </div>
                               <div className="space-y-1">

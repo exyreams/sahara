@@ -395,7 +395,10 @@ export default function WalletProfilePage() {
           <div className="flex items-center gap-2 text-muted-foreground mb-3">
             <MapPin className="h-4 w-4" />
             <span className="text-sm">
-              {beneficiary.location.district}, Ward {beneficiary.location.ward}
+              {beneficiary.location.city ||
+                beneficiary.location.region ||
+                beneficiary.location.district}
+              , {beneficiary.location.area || beneficiary.location.ward || ""}
             </span>
             <span>•</span>
             <Calendar className="h-4 w-4" />
@@ -550,7 +553,11 @@ export default function WalletProfilePage() {
                               </span>
                             </div>
                             <p
-                              className={`text-lg font-semibold ${immediateUnclaimed > 0 ? "text-green-500" : "text-theme-text/40"}`}
+                              className={`text-lg font-semibold ${
+                                immediateUnclaimed > 0
+                                  ? "text-green-500"
+                                  : "text-theme-text/40"
+                              }`}
                             >
                               ${immediateUnclaimed.toFixed(2)}
                               {immediateClaimed && (
@@ -561,14 +568,22 @@ export default function WalletProfilePage() {
                           <div className="p-3 rounded-lg bg-theme-background border border-theme-border">
                             <div className="flex items-center gap-2 mb-1">
                               <div
-                                className={`w-2 h-2 rounded-full ${isLocked ? "bg-yellow-500" : "bg-green-500"}`}
+                                className={`w-2 h-2 rounded-full ${
+                                  isLocked ? "bg-yellow-500" : "bg-green-500"
+                                }`}
                               />
                               <span className="text-xs text-theme-text/60">
                                 {isLocked ? "Locked" : "Unlocked"}
                               </span>
                             </div>
                             <p
-                              className={`text-lg font-semibold ${lockedUnclaimed > 0 ? (isLocked ? "text-yellow-500" : "text-green-500") : "text-theme-text/40"}`}
+                              className={`text-lg font-semibold ${
+                                lockedUnclaimed > 0
+                                  ? isLocked
+                                    ? "text-yellow-500"
+                                    : "text-green-500"
+                                  : "text-theme-text/40"
+                              }`}
                             >
                               ${lockedUnclaimed.toFixed(2)}
                               {lockedClaimed && (

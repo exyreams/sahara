@@ -200,8 +200,13 @@ export default function Home() {
                         </Badge>
                       </div>
                       <p className="text-sm text-theme-text/70">
-                        {beneficiary.location.district}, Ward{" "}
-                        {beneficiary.location.ward}
+                        {beneficiary.location.city ||
+                          beneficiary.location.region ||
+                          beneficiary.location.district}
+                        ,{" "}
+                        {beneficiary.location.area ||
+                          beneficiary.location.ward ||
+                          ""}
                       </p>
                     </CardHeader>
                     <CardContent className="space-y-2">

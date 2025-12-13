@@ -105,9 +105,13 @@ export function BeneficiaryForm({
             phone: beneficiary.phoneNumber,
             latitude: beneficiary.location.latitude,
             longitude: beneficiary.location.longitude,
-            district: beneficiary.location.district,
-            ward: beneficiary.location.ward,
-            address: "",
+            country: beneficiary.location.country || "NP",
+            region:
+              beneficiary.location.region ||
+              beneficiary.location.district ||
+              "",
+            city: beneficiary.location.city || "",
+            area: beneficiary.location.area || beneficiary.location.ward || "",
             familySize: beneficiary.familySize,
             damageSeverity: beneficiary.damageSeverity,
             nationalId: beneficiary.nationalId,
@@ -124,9 +128,10 @@ export function BeneficiaryForm({
             phone: "",
             latitude: 27.7172,
             longitude: 85.324,
-            district: "Kathmandu",
-            ward: 1,
-            address: "",
+            country: "NP",
+            region: "Kathmandu",
+            city: "Kathmandu",
+            area: "",
             familySize: 1,
             damageSeverity: 5,
             nationalId: "",
@@ -151,11 +156,17 @@ export function BeneficiaryForm({
             phoneNumber:
               data.phone !== beneficiary.phoneNumber ? data.phone : null,
             location:
-              data.district !== beneficiary.location.district ||
-              data.ward !== beneficiary.location.ward
+              data.country !== beneficiary.location.country ||
+              data.region !== beneficiary.location.region ||
+              data.city !== beneficiary.location.city ||
+              data.area !== beneficiary.location.area ||
+              data.latitude !== beneficiary.location.latitude ||
+              data.longitude !== beneficiary.location.longitude
                 ? {
-                    district: data.district,
-                    ward: data.ward,
+                    country: data.country,
+                    region: data.region,
+                    city: data.city,
+                    area: data.area,
                     latitude: data.latitude,
                     longitude: data.longitude,
                   }
@@ -397,8 +408,10 @@ export function BeneficiaryForm({
           name: data.name,
           phoneNumber: data.phone,
           location: {
-            district: data.district,
-            ward: data.ward,
+            country: data.country,
+            region: data.region,
+            city: data.city,
+            area: data.area,
             latitude: data.latitude,
             longitude: data.longitude,
           },
@@ -627,13 +640,13 @@ export function BeneficiaryForm({
           />
         </div>
 
-        {/* National ID, District, Ward, Age */}
-        <div className="grid gap-4 md:grid-cols-12">
+        {/* National ID and Age */}
+        <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="nationalId"
             render={({ field }) => (
-              <FormItem className="md:col-span-4">
+              <FormItem>
                 <FormLabel>National ID</FormLabel>
                 <FormControl>
                   <Input placeholder="ID Number" {...field} />
@@ -645,17 +658,55 @@ export function BeneficiaryForm({
 
           <FormField
             control={form.control}
-            name="district"
+            name="age"
             render={({ field }) => (
-              <FormItem className="md:col-span-4">
-                <FormLabel>District</FormLabel>
+              <FormItem>
+                <FormLabel>Age</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={150}
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Location Fields */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <FormControl>
+                  <Input placeholder="NP" maxLength={2} {...field} />
+                </FormControl>
+                <FormDescription>2-letter ISO code</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="region"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Region/District</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select district" />
+                      <SelectValue placeholder="Select region" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -673,18 +724,12 @@ export function BeneficiaryForm({
 
           <FormField
             control={form.control}
-            name="ward"
+            name="city"
             render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Ward</FormLabel>
+              <FormItem>
+                <FormLabel>City/Municipality</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={50}
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
+                  <Input placeholder="Kathmandu" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -693,18 +738,12 @@ export function BeneficiaryForm({
 
           <FormField
             control={form.control}
-            name="age"
+            name="area"
             render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Age</FormLabel>
+              <FormItem>
+                <FormLabel>Area/Ward (Optional)</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={150}
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
+                  <Input placeholder="Ward 1, Thamel, etc." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -784,36 +823,13 @@ export function BeneficiaryForm({
           />
         </div>
 
-        {/* Address, Latitude, Longitude */}
-        <div className="grid gap-4 md:grid-cols-12">
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem className="md:col-span-6">
-                <FormLabel>
-                  Address{" "}
-                  <span className="text-xs text-muted-foreground">
-                    ({field.value?.length || 0}/200)
-                  </span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Specific location details"
-                    maxLength={200}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+        {/* Coordinates */}
+        <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="latitude"
             render={({ field }) => (
-              <FormItem className="md:col-span-3">
+              <FormItem>
                 <FormLabel>Latitude</FormLabel>
                 <FormControl>
                   <Input
@@ -832,7 +848,7 @@ export function BeneficiaryForm({
             control={form.control}
             name="longitude"
             render={({ field }) => (
-              <FormItem className="md:col-span-3">
+              <FormItem>
                 <FormLabel>Longitude</FormLabel>
                 <FormControl>
                   <Input

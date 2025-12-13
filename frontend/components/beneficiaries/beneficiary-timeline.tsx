@@ -105,8 +105,13 @@ export function BeneficiaryTimeline({
                           </div>
                           <div className="flex items-center gap-1 text-xs text-theme-text/60 mb-3">
                             <MapPin className="h-2.5 w-2.5" />
-                            {beneficiary.location.district}, Ward{" "}
-                            {beneficiary.location.ward}
+                            {beneficiary.location.city ||
+                              beneficiary.location.region ||
+                              beneficiary.location.district}
+                            ,{" "}
+                            {beneficiary.location.area ||
+                              beneficiary.location.ward ||
+                              ""}
                           </div>
 
                           <div className="flex items-center gap-6 text-xs mb-3">

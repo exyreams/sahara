@@ -440,7 +440,10 @@ export default function DisasterDetailPage({
               <div className="flex items-center gap-2 text-muted-foreground mb-3">
                 <MapPin className="h-4 w-4" />
                 <span>
-                  {disaster.location.district}, Ward {disaster.location.ward}
+                  {disaster.location.city ||
+                    disaster.location.region ||
+                    disaster.location.district}
+                  , {disaster.location.area || disaster.location.ward || ""}
                 </span>
                 <span>•</span>
                 <Calendar className="h-4 w-4" />
@@ -555,7 +558,11 @@ export default function DisasterDetailPage({
               : "Reopening this disaster will allow new beneficiary registrations and donations again."
           }
           itemTitle={disaster.name}
-          itemDescription={`${disaster.location.district}, Ward ${disaster.location.ward}`}
+          itemDescription={`${
+            disaster.location.city ||
+            disaster.location.region ||
+            disaster.location.district
+          }, ${disaster.location.area || disaster.location.ward || ""}`}
           confirmText={disaster.isActive ? "Close Disaster" : "Reopen Disaster"}
           type={disaster.isActive ? "warning" : "info"}
           isLoading={isUpdating}
@@ -724,8 +731,13 @@ export default function DisasterDetailPage({
                             {beneficiary.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {beneficiary.location.district}, Ward{" "}
-                            {beneficiary.location.ward}
+                            {beneficiary.location.city ||
+                              beneficiary.location.region ||
+                              beneficiary.location.district}
+                            ,{" "}
+                            {beneficiary.location.area ||
+                              beneficiary.location.ward ||
+                              ""}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
