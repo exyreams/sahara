@@ -311,11 +311,12 @@ export default function BeneficiariesPage() {
                                   </CardTitle>
                                   <CardDescription className="flex items-center gap-1 text-xs">
                                     <MapPin className="h-2.5 w-2.5 shrink-0" />
-                                    {beneficiary.location.district ||
-                                      beneficiary.location.region}
+                                    {beneficiary.location.city ||
+                                      beneficiary.location.region ||
+                                      beneficiary.location.district}
                                     ,{" "}
-                                    {beneficiary.location.ward ||
-                                      beneficiary.location.area}
+                                    {beneficiary.location.area ||
+                                      beneficiary.location.ward}
                                   </CardDescription>
                                 </div>
                                 <Badge
