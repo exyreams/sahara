@@ -33,7 +33,8 @@ import {
   deriveNGOPDA,
   derivePlatformConfigPDA,
 } from "@/lib/anchor/pdas";
-import { DISASTER_TYPES, NEPAL_DISTRICTS } from "@/lib/constants";
+import { DISASTER_TYPES, COUNTRIES } from "@/lib/constants";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { type DisasterFormData, disasterFormSchema } from "@/types/forms";
 
 import type { DisasterEvent } from "@/types/program";
@@ -70,9 +71,10 @@ export function DisasterForm({
           severity: disaster.severity,
           latitude: disaster.location.latitude,
           longitude: disaster.location.longitude,
-          district: disaster.location.district,
-          ward: disaster.location.ward,
-          address: "",
+          country: disaster.location.country || "US",
+          region: disaster.location.region || disaster.location.district || "",
+          city: disaster.location.city || "",
+          area: disaster.location.area || "",
           affectedAreas: disaster.affectedAreas,
           description: disaster.description,
           estimatedAffectedPopulation: disaster.estimatedAffectedPopulation,
@@ -80,16 +82,17 @@ export function DisasterForm({
       : {
           eventId: "",
           name: "",
-          eventType: "Earthquake",
+          eventType: "", // Empty default to force selection
           severity: 5,
-          latitude: 27.7172,
-          longitude: 85.324,
-          district: "Kathmandu",
-          ward: 1,
-          address: "",
+          latitude: 40.7128, // New York coordinates as default
+          longitude: -74.006,
+          country: "",
+          region: "",
+          city: "",
+          area: "",
           affectedAreas: [],
           description: "",
-          estimatedAffectedPopulation: 0,
+          estimatedAffectedPopulation: 1, // Set to 1 instead of 0
         },
   });
 
@@ -189,8 +192,10 @@ export function DisasterForm({
               name: data.name,
               eventType: { [data.eventType.toLowerCase()]: {} },
               location: {
-                district: data.district,
-                ward: data.ward,
+                country: data.country,
+                region: data.region,
+                city: data.city,
+                area: data.area,
                 latitude: data.latitude,
                 longitude: data.longitude,
               },
@@ -243,22 +248,20 @@ export function DisasterForm({
                 <FormLabel>
                   Event ID{" "}
                   <span className="text-xs text-muted-foreground">
-                    ({field.value?.length || 0}/32)
+                    ({field.value?.length || 0}/50)
                   </span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="earthquake-2025-01"
-                    maxLength={32}
+                    maxLength={50}
                     {...field}
                     disabled={isEditMode}
                   />
                 </FormControl>
-                <FormDescription>
-                  {isEditMode
-                    ? "Event ID cannot be changed"
-                    : "Unique identifier for this disaster"}
-                </FormDescription>
+                {isEditMode && (
+                  <FormDescription>Event ID cannot be changed</FormDescription>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -279,7 +282,7 @@ export function DisasterForm({
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
-                <FormDescription>1 = Low, 10 = Critical</FormDescription>
+
                 <FormMessage />
               </FormItem>
             )}
@@ -320,7 +323,8 @@ export function DisasterForm({
                 <FormControl>
                   <Input
                     type="number"
-                    min={0}
+                    min={1}
+                    max={4294967295}
                     placeholder="Number of people affected"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
@@ -332,112 +336,129 @@ export function DisasterForm({
           />
         </div>
 
-        {/* Both Dropdowns - Side by Side */}
+        {/* Country & Disaster Type - Side by Side */}
         <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <FormControl>
+                  <AutocompleteInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={COUNTRIES.map((country) => ({
+                      value: country.code,
+                      label: country.name,
+                    }))}
+                    placeholder="Type or select country..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="eventType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Disaster Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {DISASTER_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="district"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>District</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select district" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {NEPAL_DISTRICTS.map((district) => (
-                      <SelectItem key={district} value={district}>
-                        {district}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <AutocompleteInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={DISASTER_TYPES.map((type) => ({
+                      value: type.value,
+                      label: type.label,
+                    }))}
+                    placeholder="Select a disaster type..."
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        {/* Specific Address & Ward Number - Side by Side */}
+        {/* Region/State & Specific Area - Side by Side */}
         <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="address"
+            name="region"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Specific Address{" "}
+                  Region/State{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., California, Maharashtra, Kathmandu"
+                    maxLength={100}
+                    {...field}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="area"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Specific Area (Optional){" "}
                   <span className="text-xs text-muted-foreground">
                     ({field.value?.length || 0}/200)
                   </span>
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Specific location details"
+                    placeholder="Neighborhood, Ward, District area"
                     maxLength={200}
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <FormField
-            control={form.control}
-            name="ward"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ward Number</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={50}
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* City/Municipality & Coordinates - Side by Side */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  City/Municipality{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({field.value?.length || 0}/100)
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., New York, Mumbai, Kathmandu"
+                    maxLength={100}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="latitude"
@@ -448,6 +469,7 @@ export function DisasterForm({
                   <Input
                     type="number"
                     step="0.000001"
+                    placeholder="e.g., 40.7128"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -467,6 +489,7 @@ export function DisasterForm({
                   <Input
                     type="number"
                     step="0.000001"
+                    placeholder="e.g., -74.0060"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -525,15 +548,13 @@ export function DisasterForm({
                     const areas = value
                       .split(",")
                       .map((area) => area.trim())
-                      .filter((area) => area.length > 0);
+                      .filter((area) => area.length > 0)
+                      .slice(0, 20); // Enforce max 20 areas
                     field.onChange(areas);
                   }}
                 />
               </FormControl>
-              <FormDescription>
-                List specific areas, villages, or regions affected by this
-                disaster
-              </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}

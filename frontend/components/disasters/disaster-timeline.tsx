@@ -108,8 +108,7 @@ export function DisasterTimeline({ disasters }: DisasterTimelineProps) {
                           <MapPin className="h-3 w-3 text-theme-text/60" />
                           <span className="text-theme-text/60">Location: </span>
                           <span className="font-semibold text-theme-text">
-                            {disaster.location.district}, Ward{" "}
-                            {disaster.location.ward}
+                            {disaster.location.city}, {disaster.location.region}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { formatDate, formatNumber, formatSeverity } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { COUNTRIES } from "@/lib/constants";
 import type { DisasterEvent } from "@/types/program";
 
 interface DisasterCardProps {
@@ -50,7 +51,9 @@ export function DisasterCard({ disaster }: DisasterCardProps) {
               </div>
               <CardDescription className="flex items-center gap-1 text-xs">
                 <MapPin className="h-3 w-3 shrink-0" />
-                {disaster.location.district}, Ward {disaster.location.ward}
+                {disaster.location.city}, {disaster.location.region},{" "}
+                {COUNTRIES.find((c) => c.code === disaster.location.country)
+                  ?.name || disaster.location.country}
               </CardDescription>
             </div>
             <Badge

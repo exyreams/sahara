@@ -56,7 +56,7 @@ export function DisasterList({ disasters }: DisasterListProps) {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {disaster.location.district}, Ward {disaster.location.ward}
+                    {disaster.location.city}, {disaster.location.region}
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-3 w-3" />

@@ -53,7 +53,7 @@ export function DisasterTable({ disasters }: DisasterTableProps) {
                 <TableCell className="py-2">
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <MapPin className="h-3 w-3" />
-                    {disaster.location.district}, Ward {disaster.location.ward}
+                    {disaster.location.city}, {disaster.location.region}
                   </div>
                 </TableCell>
                 <TableCell className="py-2">

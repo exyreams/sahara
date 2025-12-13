@@ -1,26 +1,110 @@
 import { PublicKey } from "@solana/web3.js";
 import { z } from "zod";
 
-// Disaster Form Schema
+// Disaster Form Schema - Global Support (matches contract constraints exactly)
 export const disasterFormSchema = z.object({
   eventId: z
     .string()
     .min(1, "Event ID is required")
-    .max(32, "Event ID too long"),
-  name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  eventType: z.enum(["Earthquake", "Flood", "Landslide", "Other"]),
+    .max(50, "Event ID must be 50 characters or less") // Contract: MAX_EVENT_ID_LEN = 50
+    .regex(
+      /^[a-zA-Z0-9-_]+$/,
+      "Event ID can only contain letters, numbers, hyphens, and underscores",
+    ),
+  name: z
+    .string()
+    .min(1, "Disaster name is required")
+    .max(100, "Name must be 100 characters or less"), // Contract: MAX_NAME_LEN = 100
+  eventType: z
+    .string()
+    .min(1, "Please select a disaster type")
+    .refine(
+      (val) =>
+        [
+          // Natural Disasters - Geological
+          "Earthquake",
+          "Volcano",
+          "Landslide",
+          "Avalanche",
+          "Sinkhole",
+          // Natural Disasters - Weather/Climate
+          "Flood",
+          "Hurricane",
+          "Tornado",
+          "Drought",
+          "Wildfire",
+          "Blizzard",
+          "Heatwave",
+          "Tsunami",
+          // Human-Made Disasters
+          "IndustrialAccident",
+          "ChemicalSpill",
+          "NuclearAccident",
+          "OilSpill",
+          "BuildingCollapse",
+          "Transportation",
+          // Conflict & Security
+          "Conflict",
+          "Terrorism",
+          "CivilUnrest",
+          // Health & Biological
+          "Pandemic",
+          "FoodPoisoning",
+          "AnimalAttack",
+          // Other
+          "Other",
+        ].includes(val),
+      { message: "Please select a valid disaster type" },
+    ),
   severity: z
     .number()
     .min(1, "Severity must be at least 1")
-    .max(10, "Severity cannot exceed 10"),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  district: z.string().min(1, "District is required").max(50),
-  ward: z.number().min(1).max(50),
-  address: z.string().min(1, "Address is required").max(200),
-  affectedAreas: z.array(z.string()).default([]),
-  description: z.string().max(500).default(""),
-  estimatedAffectedPopulation: z.number().min(0).default(0),
+    .max(10, "Severity cannot exceed 10")
+    .int("Severity must be a whole number"),
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90"),
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180"),
+  country: z
+    .string()
+    .min(1, "Country is required")
+    .length(2, "Country must be a valid 2-letter ISO code"), // Contract: MAX_COUNTRY_LEN = 2
+  region: z
+    .string()
+    .min(1, "Region/State is required")
+    .max(100, "Region must be 100 characters or less"), // Contract: MAX_REGION_LEN = 100
+  city: z
+    .string()
+    .min(1, "City is required")
+    .max(100, "City must be 100 characters or less"), // Contract: MAX_CITY_LEN = 100
+  area: z
+    .string()
+    .max(200, "Area must be 200 characters or less") // Contract: MAX_AREA_LEN = 200
+    .optional()
+    .default(""),
+  affectedAreas: z
+    .array(
+      z
+        .string()
+        .min(1, "Area name cannot be empty")
+        .max(50, "Area name must be 50 characters or less"), // Contract: MAX_AREA_NAME_LEN = 50
+    )
+    .max(20, "Maximum 20 affected areas allowed") // Contract: MAX_AFFECTED_AREAS = 20
+    .default([]),
+  description: z
+    .string()
+    .max(500, "Description must be 500 characters or less") // Contract: MAX_DESCRIPTION_LEN = 500
+    .optional()
+    .default(""),
+  estimatedAffectedPopulation: z
+    .number()
+    .min(1, "Estimated affected population must be at least 1")
+    .max(4294967295, "Population number too large (maximum: 4,294,967,295)") // u32 max value
+    .int("Population must be a whole number"),
 });
 
 export type DisasterFormData = z.infer<typeof disasterFormSchema>;

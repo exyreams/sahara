@@ -2,9 +2,42 @@ import type { PublicKey } from "@solana/web3.js";
 
 // Enums
 export enum DisasterType {
+  // Natural Disasters - Geological
   Earthquake = "Earthquake",
-  Flood = "Flood",
+  Volcano = "Volcano",
   Landslide = "Landslide",
+  Avalanche = "Avalanche",
+  Sinkhole = "Sinkhole",
+
+  // Natural Disasters - Weather/Climate
+  Flood = "Flood",
+  Hurricane = "Hurricane",
+  Tornado = "Tornado",
+  Drought = "Drought",
+  Wildfire = "Wildfire",
+  Blizzard = "Blizzard",
+  Heatwave = "Heatwave",
+  Tsunami = "Tsunami",
+
+  // Human-Made Disasters
+  IndustrialAccident = "IndustrialAccident",
+  ChemicalSpill = "ChemicalSpill",
+  NuclearAccident = "NuclearAccident",
+  OilSpill = "OilSpill",
+  BuildingCollapse = "BuildingCollapse",
+  Transportation = "Transportation",
+
+  // Conflict & Security
+  Conflict = "Conflict",
+  Terrorism = "Terrorism",
+  CivilUnrest = "CivilUnrest",
+
+  // Health & Biological
+  Pandemic = "Pandemic",
+  FoodPoisoning = "FoodPoisoning",
+  AnimalAttack = "AnimalAttack",
+
+  // Other
   Other = "Other",
 }
 
@@ -38,10 +71,12 @@ export enum DonationType {
   Anonymous = "Anonymous",
 }
 
-// Location
+// Location - Global Support
 export interface Location {
-  district: string;
-  ward: number;
+  country: string; // ISO country code (e.g., "US", "NP", "IN")
+  region: string; // State/Province/District (e.g., "California", "Kathmandu", "Maharashtra")
+  city: string; // City/Municipality
+  area: string; // Specific area/ward/neighborhood
   latitude: number;
   longitude: number;
 }

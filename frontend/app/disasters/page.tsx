@@ -80,7 +80,13 @@ export default function DisastersPage() {
         !searchQuery ||
         disaster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         disaster.eventId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        disaster.location.district
+        disaster.location.city
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        disaster.location.region
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        disaster.location.country
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
@@ -125,7 +131,13 @@ export default function DisastersPage() {
         !searchQuery ||
         disaster.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         disaster.eventId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        disaster.location.district
+        disaster.location.city
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        disaster.location.region
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        disaster.location.country
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
